@@ -1,15 +1,28 @@
 import mongoose from "mongoose";
+import type { Db, MongoClient } from "mongodb";
 import { env } from "./env.js";
 
-/**
- * Connects to the MongoDB database using the URI configured in the environment.
- * If the connection fails, it throws an error to be handled by the startup handler.
- */
-export const connectDB = async (): Promise<void> => {
-  try {
-    const conn = await mongoose.connect(env.MONGODB_URI);
-    console.log(`MongoDB connected successfully: ${conn.connection.host}`);
-  } catch (error) {
-    throw error;
+export async function connectDB(): Promise<void> {
+  const conn = await mongoose.connect(env.MONGODB_URI);
+  console.log(`MongoDB connected successfully: ${conn.connection.host}`);
+}
+
+export function getMongoClient(): MongoClient {
+  const client = mongoose.connection.getClient();
+
+  if (!client) {
+    throw new Error("MongoDB not connected. Call connectDB() before using auth.");
   }
-};
+
+  return client;
+}
+
+export function getAuthDb(): Db {
+  const db = mongoose.connection.db;
+
+  if (!db) {
+    throw new Error("MongoDB not connected. Call connectDB() before using auth.");
+  }
+
+  return db;
+}
