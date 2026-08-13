@@ -26,25 +26,6 @@ async function sendAuthEmail({
 }
 
 export const emailService = {
-  async sendVerificationEmail({
-    user,
-    url,
-  }: {
-    user: AuthEmailUser;
-    url: string;
-  }) {
-    await sendAuthEmail({
-      to: user.email,
-      subject: "Verify your LivePoll email",
-      html: `
-        <p>Hi ${user.name},</p>
-        <p>Verify your email to start using LivePoll.</p>
-        <p><a href="${url}">Verify email</a></p>
-        <p>If you did not create an account, you can ignore this email.</p>
-      `,
-    });
-  },
-
   async sendResetPassword({
     user,
     url,

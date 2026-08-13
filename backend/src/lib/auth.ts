@@ -3,8 +3,8 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { APIError } from "better-auth/api";
 import { getAuthDb, getMongoClient } from "@/config/db.js";
 import { env } from "@/config/env.js";
-import { emailService } from "./services/email.service.js";
-import { isUserRole } from "./types.js";
+import { emailService } from "@/modules/auth/services/email.service.js";
+import { isUserRole } from "@/modules/auth/types.js";
 
 export const auth = betterAuth({
   appName: "LivePoll",
@@ -31,18 +31,9 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
     minPasswordLength: 8,
     sendResetPassword: async ({ user, url }) => {
       await emailService.sendResetPassword({ user, url });
-    },
-  },
-
-  emailVerification: {
-    sendOnSignUp: true,
-    autoSignInAfterVerification: true,
-    sendVerificationEmail: async ({ user, url }) => {
-      await emailService.sendVerificationEmail({ user, url });
     },
   },
 

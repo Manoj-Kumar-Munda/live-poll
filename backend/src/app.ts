@@ -1,7 +1,7 @@
 import cors from "cors";
 import express from "express";
 import { toNodeHandler } from "better-auth/node";
-import { auth } from "@/modules/auth/auth.js";
+import { auth } from "@/lib/auth.js";
 import { env } from "@/config/env.js";
 import userRouter from "@/modules/auth/routes/user.route.js";
 import { notFoundHandler } from "@/middlewares/notFoundHandler.js";

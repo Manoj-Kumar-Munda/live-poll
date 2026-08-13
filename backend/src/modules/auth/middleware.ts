@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { fromNodeHeaders } from "better-auth/node";
-import { auth } from "./auth.js";
+import { auth } from "@/lib/auth.js";
 import { ApiError } from "@/shared/utils/api-error.js";
 import { asyncHandler } from "@/shared/utils/async-handler.js";
 import type { UserRole } from "./types.js";

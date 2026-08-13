@@ -3,7 +3,7 @@ import { ApiResponse } from "@/shared/utils/api-response.js";
 import { ApiError } from "@/shared/utils/api-error.js";
 import { asyncHandler } from "@/shared/utils/async-handler.js";
 import { updateProfileSchema } from "../schemas/user.schema.js";
-import { auth } from "../auth.js";
+import { auth } from "@/lib/auth.js";
 import { getSessionFromRequest } from "../middleware.js";
 
 const getUser = asyncHandler(async (req, res) => {
