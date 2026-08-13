@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { ButtonLink } from "@/shared/components/ui/button-link";
 import { LivePreview } from "./live-preview";
 
@@ -23,17 +24,7 @@ export function Hero() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <ButtonLink href="/auth/register">
               Create a quiz
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
-              >
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
+              <ArrowRight size={16} aria-hidden />
             </ButtonLink>
             <ButtonLink href="/join" variant="secondary">
               Join with room code

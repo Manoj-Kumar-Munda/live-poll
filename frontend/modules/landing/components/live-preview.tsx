@@ -1,3 +1,5 @@
+import { Users } from "lucide-react";
+
 const options = [
   { label: "Photosynthesis", barClass: "bar-a", pct: "68%", highlight: true },
   { label: "Respiration", barClass: "bar-b", pct: "22%" },
@@ -20,20 +22,7 @@ export function LivePreview() {
           <span className="font-mono text-xs text-text-muted">Room AB7K2M</span>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-text-secondary">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            aria-hidden="true"
-          >
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-          </svg>
+          <Users size={14} aria-hidden />
           <span className="font-mono tabular-nums">142</span>
         </div>
       </div>

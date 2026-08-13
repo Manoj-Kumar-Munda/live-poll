@@ -1,22 +1,25 @@
-const features = [
+import {
+  BarChart3,
+  Clock,
+  ClipboardCheck,
+  MessageSquare,
+  RefreshCw,
+  Trophy,
+  type LucideIcon,
+} from "lucide-react";
+
+const features: {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  accent: string;
+  accentBg: string;
+}[] = [
   {
     title: "Scored MCQs",
     description:
       "Multiple choice with one correct answer. Points update on the leaderboard after each question.",
-    icon: (
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        aria-hidden="true"
-      >
-        <path d="M9 11l3 3L22 4" />
-        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-      </svg>
-    ),
+    icon: ClipboardCheck,
     accent: "text-signal",
     accentBg: "bg-signal/10",
   },
@@ -24,21 +27,7 @@ const features = [
     title: "Yes / No polls",
     description:
       "Quick engagement checks with instant percentage breakdowns. No scoring — pure signal.",
-    icon: (
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        aria-hidden="true"
-      >
-        <path d="M18 20V10" />
-        <path d="M12 20V4" />
-        <path d="M6 20v-6" />
-      </svg>
-    ),
+    icon: BarChart3,
     accent: "text-electric",
     accentBg: "bg-electric/10",
   },
@@ -46,19 +35,7 @@ const features = [
     title: "Open-text word clouds",
     description:
       "Collect free-text responses and reveal a live word cloud when the timer ends.",
-    icon: (
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        aria-hidden="true"
-      >
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-    ),
+    icon: MessageSquare,
     accent: "text-spotlight",
     accentBg: "bg-spotlight/10",
   },
@@ -66,24 +43,7 @@ const features = [
     title: "Live leaderboard",
     description:
       "Scores batch-update when each question ends. Rankings stay consistent even on reconnect.",
-    icon: (
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        aria-hidden="true"
-      >
-        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-        <path d="M4 22h16" />
-        <path d="M10 14.66V17c0 .55-.47.98-.97 1h-4.06c-.54 0-.97-.45-.97-1v-2.34" />
-        <path d="M14 9.34V17c0 .55.47.98.97 1h4.06c.54 0 .97-.45.97-1V9.34" />
-        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-      </svg>
-    ),
+    icon: Trophy,
     accent: "text-electric",
     accentBg: "bg-electric/10",
   },
@@ -91,20 +51,7 @@ const features = [
     title: "Server-synced timers",
     description:
       "Countdowns use server timestamps so every participant sees the same remaining time.",
-    icon: (
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        aria-hidden="true"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <polyline points="12 6 12 12 16 14" />
-      </svg>
-    ),
+    icon: Clock,
     accent: "text-spotlight",
     accentBg: "bg-spotlight/10",
   },
@@ -112,20 +59,7 @@ const features = [
     title: "Reconnect support",
     description:
       "Refresh or drop connection — resume from current state and submit if time remains.",
-    icon: (
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        aria-hidden="true"
-      >
-        <path d="M21 12a9 9 0 1 1-3-6.7" />
-        <polyline points="21 3 21 9 15 9" />
-      </svg>
-    ),
+    icon: RefreshCw,
     accent: "text-signal",
     accentBg: "bg-signal/10",
   },
@@ -160,7 +94,7 @@ export function Features() {
               <div
                 className={`mb-4 flex h-10 w-10 items-center justify-center rounded-lg ${feature.accentBg} ${feature.accent}`}
               >
-                {feature.icon}
+                <feature.icon size={22} strokeWidth={1.75} aria-hidden />
               </div>
               <h3 className="font-display text-base font-semibold text-text-primary">
                 {feature.title}
