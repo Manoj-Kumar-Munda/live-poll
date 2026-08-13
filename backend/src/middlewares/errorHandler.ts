@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
 import { env } from '@/config/env.js';
-import { ApiError } from '@/utils/api-error.js';
-import { ApiResponse } from '@/utils/api-response.js';
+import { ApiError } from "@/shared/utils/api-error.js";
+import { ApiResponse } from "@/shared/utils/api-response.js";
 
 export const errorHandler: ErrorRequestHandler = (
   err: unknown,

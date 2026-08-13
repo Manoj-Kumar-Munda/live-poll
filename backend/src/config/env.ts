@@ -25,6 +25,9 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
   CLIENT_URL: z.url("CLIENT_URL must be a valid URL"),
   CORS_ORIGIN: z.string().optional(),
+  RESEND_FROM_EMAIL: z
+    .email("RESEND_FROM_EMAIL must be a valid email")
+    .default("onboarding@resend.dev"),
 });
 
 const result = envSchema.safeParse(process.env);

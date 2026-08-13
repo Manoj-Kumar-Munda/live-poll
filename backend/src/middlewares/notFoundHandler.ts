@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ApiResponse } from '@/utils/api-response.js';
+import { ApiResponse } from "@/shared/utils/api-response.js";
 
 export const notFoundHandler = (
   req: Request,
