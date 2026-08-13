@@ -11,7 +11,6 @@ export function LivePreview() {
       className="relative w-full max-w-md rounded-2xl border border-border bg-surface p-5 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.5)] sm:p-6"
       aria-hidden="true"
     >
-      {/* Header row */}
       <div className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="live-badge inline-flex items-center gap-1.5 rounded-full bg-signal/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-signal">
@@ -39,7 +38,6 @@ export function LivePreview() {
         </div>
       </div>
 
-      {/* Timer */}
       <div className="mb-4 flex items-center gap-3">
         <div
           className="flex h-10 w-10 items-center justify-center rounded-lg bg-spotlight/15 font-mono text-sm font-semibold tabular-nums text-spotlight"
@@ -54,12 +52,10 @@ export function LivePreview() {
         </div>
       </div>
 
-      {/* Question */}
       <p className="mb-5 font-display text-base font-semibold leading-snug text-text-primary sm:text-lg">
         Which process converts light energy into chemical energy?
       </p>
 
-      {/* Answer bars */}
       <div className="space-y-2.5">
         {options.map((opt) => (
           <div key={opt.label} className="group">
@@ -94,7 +90,6 @@ export function LivePreview() {
         ))}
       </div>
 
-      {/* Decorative corner glow */}
       <div
         className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-electric/10 blur-2xl"
         aria-hidden="true"

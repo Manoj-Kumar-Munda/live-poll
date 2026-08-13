@@ -133,7 +133,10 @@ const features = [
 
 export function Features() {
   return (
-    <section className="border-t border-border/60 py-16 sm:py-24" aria-labelledby="features-heading">
+    <section
+      className="border-t border-border/60 py-16 sm:py-24"
+      aria-labelledby="features-heading"
+    >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <div className="mb-12 max-w-2xl">
           <h2

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ButtonLink } from "@/components/ui/button-link";
+import { ButtonLink } from "@/shared/components/ui/button-link";
 
 export function LandingNav() {
   return (
@@ -34,7 +34,7 @@ export function LandingNav() {
           >
             Log in
           </Link>
-          <ButtonLink href="/auth/register" className="!px-4 !py-2">
+          <ButtonLink href="/auth/register" className="px-4 py-2">
             Sign up
           </ButtonLink>
         </div>

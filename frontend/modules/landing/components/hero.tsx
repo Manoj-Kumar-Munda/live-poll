@@ -1,4 +1,4 @@
-import { ButtonLink } from "@/components/ui/button-link";
+import { ButtonLink } from "@/shared/components/ui/button-link";
 import { LivePreview } from "./live-preview";
 
 export function Hero() {

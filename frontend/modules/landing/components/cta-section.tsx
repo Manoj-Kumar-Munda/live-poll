@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ButtonLink } from "@/components/ui/button-link";
+import { ButtonLink } from "@/shared/components/ui/button-link";
 
 export function CtaSection() {
   return (
