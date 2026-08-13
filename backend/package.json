@@ -15,10 +15,13 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "better-auth": "^1.6.27",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "mongodb": "^7.5.0",
     "mongoose": "^9.9.2",
+    "resend": "^6.19.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
