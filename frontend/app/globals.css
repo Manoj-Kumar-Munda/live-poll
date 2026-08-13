@@ -1,0 +1,240 @@
+@import "tailwindcss";
+
+:root {
+  --stage: #0d1117;
+  --surface: #161b22;
+  --surface-raised: #1c2330;
+  --border: #2a3344;
+  --text-primary: #e8edf5;
+  --text-secondary: #8b9cb3;
+  --text-muted: #5c6b82;
+  --electric: #4f8ef7;
+  --electric-glow: rgba(79, 142, 247, 0.35);
+  --spotlight: #f5a623;
+  --signal: #34d399;
+  --signal-glow: rgba(52, 211, 153, 0.25);
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  --background: var(--stage);
+  --foreground: var(--text-primary);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-stage: var(--stage);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-border: var(--border);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-electric: var(--electric);
+  --color-spotlight: var(--spotlight);
+  --color-signal: var(--signal);
+  --font-sans: var(--font-geist-sans);
+  --font-display: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--stage);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Press feedback — buttons and pressable links */
+.pressable {
+  transition: transform 160ms var(--ease-out);
+}
+
+.pressable:active {
+  transform: scale(0.97);
+}
+
+/* Live badge pulse */
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 var(--signal-glow);
+  }
+  50% {
+    opacity: 0.85;
+    box-shadow: 0 0 12px 4px var(--signal-glow);
+  }
+}
+
+.live-badge {
+  animation: live-pulse 2s var(--ease-in-out) infinite;
+}
+
+/* Answer bar fill animation */
+@keyframes bar-grow-a {
+  0%,
+  15% {
+    width: 12%;
+  }
+  45%,
+  65% {
+    width: 68%;
+  }
+  100% {
+    width: 68%;
+  }
+}
+
+@keyframes bar-grow-b {
+  0%,
+  15% {
+    width: 8%;
+  }
+  45%,
+  65% {
+    width: 22%;
+  }
+  100% {
+    width: 22%;
+  }
+}
+
+@keyframes bar-grow-c {
+  0%,
+  15% {
+    width: 5%;
+  }
+  45%,
+  65% {
+    width: 7%;
+  }
+  100% {
+    width: 7%;
+  }
+}
+
+@keyframes bar-grow-d {
+  0%,
+  15% {
+    width: 3%;
+  }
+  45%,
+  65% {
+    width: 3%;
+  }
+  100% {
+    width: 3%;
+  }
+}
+
+.bar-a {
+  animation: bar-grow-a 4s var(--ease-out) infinite;
+}
+
+.bar-b {
+  animation: bar-grow-b 4s var(--ease-out) infinite;
+}
+
+.bar-c {
+  animation: bar-grow-c 4s var(--ease-out) infinite;
+}
+
+.bar-d {
+  animation: bar-grow-d 4s var(--ease-out) infinite;
+}
+
+/* Staggered feature card entrance */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-item {
+  opacity: 0;
+  animation: fade-up 300ms var(--ease-out) forwards;
+}
+
+.stagger-item:nth-child(1) {
+  animation-delay: 0ms;
+}
+.stagger-item:nth-child(2) {
+  animation-delay: 50ms;
+}
+.stagger-item:nth-child(3) {
+  animation-delay: 100ms;
+}
+.stagger-item:nth-child(4) {
+  animation-delay: 150ms;
+}
+.stagger-item:nth-child(5) {
+  animation-delay: 200ms;
+}
+.stagger-item:nth-child(6) {
+  animation-delay: 250ms;
+}
+
+/* Ambient grid glow */
+.hero-glow {
+  background:
+    radial-gradient(
+      ellipse 60% 50% at 70% 40%,
+      rgba(79, 142, 247, 0.12) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 40% 40% at 20% 80%,
+      rgba(245, 166, 35, 0.06) 0%,
+      transparent 60%
+    );
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .live-badge,
+  .bar-a,
+  .bar-b,
+  .bar-c,
+  .bar-d,
+  .stagger-item {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .pressable:active {
+    transform: none;
+  }
+
+  .bar-a {
+    width: 68%;
+  }
+  .bar-b {
+    width: 22%;
+  }
+  .bar-c {
+    width: 7%;
+  }
+  .bar-d {
+    width: 3%;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-hover {
+    transition:
+      border-color 200ms var(--ease-out),
+      transform 200ms var(--ease-out);
+  }
+
+  .card-hover:hover {
+    border-color: var(--electric);
+    transform: translateY(-2px);
+  }
+}
