@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -14,8 +15,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "./password-input";
 import { loginSchema, type LoginValues } from "../schemas/auth.schema";
+import { authClient } from "../../../lib/auth-client";
+import { redirectByRole } from "../utils/helpers";
 
 export function LoginForm() {
+  const router = useRouter();
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -25,9 +29,21 @@ export function LoginForm() {
     },
   });
 
-  function onSubmit(_values: LoginValues) {
-    // TODO: Implement login logic.
-    console.log(_values);
+  async function onSubmit(values: LoginValues) {
+    const { data, error } = await authClient.signIn.email({
+      email: values.email,
+      password: values.password,
+      rememberMe: values.remember,
+    });
+
+    if (error) {
+      form.setError("root", {
+        message: error.message || "Could not log in. Check your email and password.",
+      });
+      return;
+    }
+
+    redirectByRole(router, data?.user.role);
   }
 
   return (
@@ -84,8 +100,10 @@ export function LoginForm() {
         </Link>
       </div>
 
-      <Button type="submit" size="lg" className="w-full">
-        Log in
+      <FieldError errors={[form.formState.errors.root]} />
+
+      <Button type="submit" size="lg" className="w-full" disabled={form.formState.isSubmitting}>
+        {form.formState.isSubmitting ? "Logging in..." : "Log in"}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">

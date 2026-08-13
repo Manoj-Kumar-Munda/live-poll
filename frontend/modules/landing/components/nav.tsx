@@ -1,7 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
+import { pathForRole } from "@/modules/auth/utils/helpers";
 
 export function LandingNav() {
+  const { data: session, isPending } = authClient.useSession();
+  const appPath = pathForRole(session?.user.role);
+
   return (
     <header className="fixed top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
       <nav
@@ -25,10 +32,20 @@ export function LandingNav() {
           <Button variant="ghost" nativeButton={false} render={<Link href="/quizzes" />} className="hidden sm:inline-flex">
             Browse quizzes
           </Button>
-          <Button variant="ghost" nativeButton={false} render={<Link href="/login" />}>
-            Log in
-          </Button>
-          <Button nativeButton={false} render={<Link href="/register" />}>Sign up</Button>
+          {isPending ? null : session?.user ? (
+            <Button nativeButton={false} render={<Link href={appPath} />}>
+              {session.user.role === "host" ? "Dashboard" : "Home"}
+            </Button>
+          ) : (
+            <>
+              <Button variant="ghost" nativeButton={false} render={<Link href="/login" />}>
+                Log in
+              </Button>
+              <Button nativeButton={false} render={<Link href="/register" />}>
+                Sign up
+              </Button>
+            </>
+          )}
         </div>
       </nav>
     </header>

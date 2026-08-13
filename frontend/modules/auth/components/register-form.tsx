@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { PasswordInput } from "./password-input";
 import { registerSchema, type RegisterValues } from "../schemas/auth.schema";
+import { authClient } from "../../../lib/auth-client";
+import { redirectByRole } from "../utils/helpers";
 import type { UserRole } from "@/shared/types";
 
 const roles: { value: UserRole; label: string }[] = [
@@ -22,6 +25,7 @@ const roles: { value: UserRole; label: string }[] = [
 ];
 
 export function RegisterForm() {
+  const router = useRouter();
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -32,9 +36,22 @@ export function RegisterForm() {
     },
   });
 
-  function onSubmit(_values: RegisterValues) {
-    // TODO: Implement register logic.
-    console.log(_values);
+  async function onSubmit(values: RegisterValues) {
+    const { data, error } = await authClient.signUp.email({
+      name: values.name,
+      email: values.email,
+      password: values.password,
+      role: values.role,
+    });
+
+    if (error) {
+      form.setError("root", {
+        message: error.message || "Could not create your account.",
+      });
+      return;
+    }
+
+    redirectByRole(router, data?.user.role);
   }
 
   return (
@@ -113,8 +130,10 @@ export function RegisterForm() {
         />
       </FieldGroup>
 
-      <Button type="submit" size="lg" className="w-full">
-        Create account
+      <FieldError errors={[form.formState.errors.root]} />
+
+      <Button type="submit" size="lg" className="w-full" disabled={form.formState.isSubmitting}>
+        {form.formState.isSubmitting ? "Creating account..." : "Create account"}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
