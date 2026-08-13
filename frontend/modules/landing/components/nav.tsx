@@ -1,19 +1,19 @@
 import Link from "next/link";
-import { ButtonLink } from "@/shared/components/ui/button-link";
+import { Button } from "@/components/ui/button";
 
 export function LandingNav() {
   return (
-    <header className="fixed top-0 z-50 w-full border-b border-border/60 bg-stage/80 backdrop-blur-md">
+    <header className="fixed top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
       <nav
         className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5 sm:px-8"
         aria-label="Main"
       >
         <Link
           href="/"
-          className="pressable flex items-center gap-2 font-display text-lg font-bold tracking-tight"
+          className="inline-flex items-center gap-2 font-display text-lg font-bold tracking-tight"
         >
           <span
-            className="flex h-7 w-7 items-center justify-center rounded-md bg-electric text-xs font-bold text-white"
+            className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground"
             aria-hidden="true"
           >
             LP
@@ -22,21 +22,13 @@ export function LandingNav() {
         </Link>
 
         <div className="flex items-center gap-1 sm:gap-2">
-          <Link
-            href="/quizzes"
-            className="pressable hidden rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors duration-200 sm:inline-flex hover:text-text-primary"
-          >
+          <Button variant="ghost" nativeButton={false} render={<Link href="/quizzes" />} className="hidden sm:inline-flex">
             Browse quizzes
-          </Link>
-          <Link
-            href="/auth/login"
-            className="pressable rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors duration-200 hover:text-text-primary"
-          >
+          </Button>
+          <Button variant="ghost" nativeButton={false} render={<Link href="/login" />}>
             Log in
-          </Link>
-          <ButtonLink href="/auth/register" className="px-4 py-2">
-            Sign up
-          </ButtonLink>
+          </Button>
+          <Button nativeButton={false} render={<Link href="/register" />}>Sign up</Button>
         </div>
       </nav>
     </header>

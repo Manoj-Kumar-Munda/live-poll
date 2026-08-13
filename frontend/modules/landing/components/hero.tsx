@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { ButtonLink } from "@/shared/components/ui/button-link";
+import { Button } from "@/components/ui/button";
 import { LivePreview } from "./live-preview";
 
 export function Hero() {
@@ -7,31 +8,31 @@ export function Hero() {
     <section className="hero-glow relative overflow-hidden pt-28 pb-16 sm:pt-32 sm:pb-24">
       <div className="mx-auto grid max-w-6xl gap-12 px-5 sm:px-8 lg:grid-cols-2 lg:items-center lg:gap-16">
         <div>
-          <p className="mb-4 text-sm font-medium uppercase tracking-widest text-electric">
+          <p className="mb-4 text-sm font-medium uppercase tracking-widest text-primary">
             Real-time quizzes & polling
           </p>
-          <h1 className="font-display text-4xl font-extrabold leading-[1.1] tracking-tight text-text-primary sm:text-5xl lg:text-[3.25rem]">
+          <h1 className="font-display text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-[3.25rem]">
             Questions live.
             <br />
-            <span className="text-electric">Answers instant.</span>
+            <span className="text-primary">Answers instant.</span>
           </h1>
-          <p className="mt-5 max-w-lg text-base leading-relaxed text-text-secondary sm:text-lg">
+          <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
             Host scored MCQs, quick polls, and open-text word clouds — all
             synced in real time. Your audience joins with a room code and
             competes on a live leaderboard.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <ButtonLink href="/auth/register">
+            <Button size="lg" nativeButton={false} render={<Link href="/register" />}>
               Create a quiz
-              <ArrowRight size={16} aria-hidden />
-            </ButtonLink>
-            <ButtonLink href="/join" variant="secondary">
+              <ArrowRight data-icon="inline-end" />
+            </Button>
+            <Button size="lg" variant="outline" nativeButton={false} render={<Link href="/join" />}>
               Join with room code
-            </ButtonLink>
+            </Button>
           </div>
 
-          <p className="mt-4 text-sm text-text-muted">
+          <p className="mt-4 text-sm text-muted-foreground">
             Free to start. No credit card required.
           </p>
         </div>

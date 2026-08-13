@@ -89,7 +89,7 @@ export function Features() {
           {features.map((feature) => (
             <article
               key={feature.title}
-              className="stagger-item card-hover rounded-xl border border-border bg-surface p-5"
+              className="stagger-item card-hover rounded-xl border border-border bg-surface p-5 shadow-[0_1px_2px_rgba(17,24,39,0.04)]"
             >
               <div
                 className={`mb-4 flex h-10 w-10 items-center justify-center rounded-lg ${feature.accentBg} ${feature.accent}`}

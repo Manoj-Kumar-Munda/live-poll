@@ -9,13 +9,13 @@ export function LandingFooter() {
         </p>
         <div className="flex items-center gap-6 text-sm text-text-secondary">
           <Link
-            href="/auth/login"
+            href="/login"
             className="pressable transition-colors duration-200 hover:text-text-primary"
           >
             Log in
           </Link>
           <Link
-            href="/auth/register"
+            href="/register"
             className="pressable transition-colors duration-200 hover:text-text-primary"
           >
             Sign up

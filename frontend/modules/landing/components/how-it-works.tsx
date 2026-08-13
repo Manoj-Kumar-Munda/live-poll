@@ -29,7 +29,7 @@ export function HowItWorks() {
         </h2>
 
         <div className="grid gap-8 lg:grid-cols-2">
-          <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
+          <div className="rounded-2xl border border-border bg-surface p-6 shadow-[0_1px_2px_rgba(17,24,39,0.04)] sm:p-8">
             <div className="mb-6 flex items-center gap-3">
               <span
                 className="flex h-9 w-9 items-center justify-center rounded-lg bg-electric/15 text-electric"
@@ -61,7 +61,7 @@ export function HowItWorks() {
             </ol>
           </div>
 
-          <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
+          <div className="rounded-2xl border border-border bg-surface p-6 shadow-[0_1px_2px_rgba(17,24,39,0.04)] sm:p-8">
             <div className="mb-6 flex items-center gap-3">
               <span
                 className="flex h-9 w-9 items-center justify-center rounded-lg bg-spotlight/15 text-spotlight"
