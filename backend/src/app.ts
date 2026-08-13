@@ -3,7 +3,7 @@ import express from "express";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "@/lib/auth.js";
 import { env } from "@/config/env.js";
-import userRouter from "@/modules/auth/routes/user.route.js";
+import userRouter from "@/modules/auth/user.route.js";
 import { notFoundHandler } from "@/middlewares/notFoundHandler.js";
 import { errorHandler } from "@/middlewares/errorHandler.js";
 

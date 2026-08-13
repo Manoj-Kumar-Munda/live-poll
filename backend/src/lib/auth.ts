@@ -3,7 +3,7 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { APIError } from "better-auth/api";
 import { getAuthDb, getMongoClient } from "@/config/db.js";
 import { env } from "@/config/env.js";
-import { emailService } from "@/modules/auth/services/email.service.js";
+import { emailService } from "@/modules/auth/email.service.js";
 import { isUserRole } from "@/modules/auth/types.js";
 
 export const auth = betterAuth({
