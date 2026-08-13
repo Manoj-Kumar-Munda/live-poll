@@ -1,14 +1,15 @@
+import { AuthShell } from "./auth-shell";
+import { RegisterForm } from "./register-form";
+
 export function RegisterPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center px-5">
-      <div className="w-full max-w-sm text-center">
-        <h1 className="font-display text-2xl font-bold text-text-primary">
-          Create an account
-        </h1>
-        <p className="mt-2 text-sm text-text-secondary">
-          Register to host quizzes or compete as a participant.
-        </p>
-      </div>
-    </main>
+    <AuthShell
+      title="Create an account"
+      subtitle="Register as a host to run quizzes, or as a participant to join live rooms."
+      panelTitle="Run live quizzes that feel instant."
+      panelSubtitle="Share a room code, lock joining when you're ready, and watch results land the moment the timer ends."
+    >
+      <RegisterForm />
+    </AuthShell>
   );
 }

@@ -1,24 +1,56 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 :root {
-  --stage: #0d1117;
-  --surface: #161b22;
-  --surface-raised: #1c2330;
-  --border: #2a3344;
-  --text-primary: #e8edf5;
-  --text-secondary: #8b9cb3;
-  --text-muted: #5c6b82;
-  --electric: #4f8ef7;
-  --electric-glow: rgba(79, 142, 247, 0.35);
-  --spotlight: #f5a623;
-  --signal: #34d399;
-  --signal-glow: rgba(52, 211, 153, 0.25);
+  --stage: #ffffff;
+  --surface: #ffffff;
+  --surface-raised: #f9fafb;
+  --border: oklch(0.923 0.003 48.717);
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --electric: #3a3af4;
+  --electric-deep: #2f2fe0;
+  --electric-glow: rgba(58, 58, 244, 0.28);
+  --spotlight: #7c6cf7;
+  --signal: #16a34a;
+  --signal-glow: rgba(22, 163, 74, 0.22);
+  --danger: #ef4444;
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-
-  --background: var(--stage);
-  --foreground: var(--text-primary);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.147 0.004 49.25);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.147 0.004 49.25);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.147 0.004 49.25);
+  --primary: #3a3af4;
+  --primary-foreground: #ffffff;
+  --secondary: oklch(0.967 0.001 286.375);
+  --secondary-foreground: oklch(0.21 0.006 285.885);
+  --muted: oklch(0.97 0.001 106.424);
+  --muted-foreground: oklch(0.553 0.013 58.071);
+  --accent: oklch(0.97 0.001 106.424);
+  --accent-foreground: oklch(0.216 0.006 56.043);
+  --destructive: oklch(0.577 0.245 27.325);
+  --input: oklch(0.923 0.003 48.717);
+  --ring: #3a3af4;
+  --chart-1: oklch(0.809 0.105 251.813);
+  --chart-2: oklch(0.623 0.214 259.815);
+  --chart-3: oklch(0.546 0.245 262.881);
+  --chart-4: oklch(0.488 0.243 264.376);
+  --chart-5: oklch(0.424 0.199 265.638);
+  --radius: 0.875rem;
+  --sidebar: oklch(0.985 0.001 106.423);
+  --sidebar-foreground: oklch(0.147 0.004 49.25);
+  --sidebar-primary: oklch(0.546 0.245 262.881);
+  --sidebar-primary-foreground: oklch(0.97 0.014 254.604);
+  --sidebar-accent: oklch(0.97 0.001 106.424);
+  --sidebar-accent-foreground: oklch(0.216 0.006 56.043);
+  --sidebar-border: oklch(0.923 0.003 48.717);
+  --sidebar-ring: oklch(0.709 0.01 56.259);
 }
 
 @theme inline {
@@ -32,11 +64,49 @@
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
   --color-electric: var(--electric);
+  --color-electric-deep: var(--electric-deep);
   --color-spotlight: var(--spotlight);
   --color-signal: var(--signal);
-  --font-sans: var(--font-geist-sans);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-sans);
   --font-display: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 body {
@@ -45,7 +115,6 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-/* Press feedback — buttons and pressable links */
 .pressable {
   transition: transform 160ms var(--ease-out);
 }
@@ -54,7 +123,6 @@ body {
   transform: scale(0.97);
 }
 
-/* Live badge pulse */
 @keyframes live-pulse {
   0%,
   100% {
@@ -71,7 +139,6 @@ body {
   animation: live-pulse 2s var(--ease-in-out) infinite;
 }
 
-/* Answer bar fill animation */
 @keyframes bar-grow-a {
   0%,
   15% {
@@ -144,7 +211,6 @@ body {
   animation: bar-grow-d 4s var(--ease-out) infinite;
 }
 
-/* Staggered feature card entrance */
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -180,22 +246,20 @@ body {
   animation-delay: 250ms;
 }
 
-/* Ambient grid glow */
 .hero-glow {
   background:
     radial-gradient(
-      ellipse 60% 50% at 70% 40%,
-      rgba(79, 142, 247, 0.12) 0%,
-      transparent 70%
+      ellipse 70% 55% at 80% 0%,
+      rgba(58, 58, 244, 0.1) 0%,
+      transparent 62%
     ),
     radial-gradient(
-      ellipse 40% 40% at 20% 80%,
-      rgba(245, 166, 35, 0.06) 0%,
-      transparent 60%
+      ellipse 45% 40% at 8% 90%,
+      rgba(124, 108, 247, 0.08) 0%,
+      transparent 58%
     );
 }
 
-/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .live-badge,
   .bar-a,
@@ -230,11 +294,26 @@ body {
   .card-hover {
     transition:
       border-color 200ms var(--ease-out),
-      transform 200ms var(--ease-out);
+      transform 200ms var(--ease-out),
+      box-shadow 200ms var(--ease-out);
   }
 
   .card-hover:hover {
     border-color: var(--electric);
     transform: translateY(-2px);
+    box-shadow: 0 12px 28px -16px var(--electric-glow);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    color-scheme: light;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
