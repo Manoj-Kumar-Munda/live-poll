@@ -1,11 +1,23 @@
 import cors from "cors";
 import express from "express";
-import { notFoundHandler } from "./middlewares/notFoundHandler.js";
-import { errorHandler } from "./middlewares/errorHandler.js";
+import { toNodeHandler } from "better-auth/node";
+import { auth } from "@/modules/auth/auth.js";
+import { env } from "@/config/env.js";
+import userRouter from "@/modules/auth/routes/user.route.js";
+import { notFoundHandler } from "@/middlewares/notFoundHandler.js";
+import { errorHandler } from "@/middlewares/errorHandler.js";
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: env.CORS_ORIGIN ?? env.CLIENT_URL,
+    credentials: true,
+  }),
+);
+
+app.all("/api/auth/{*splat}", toNodeHandler(auth));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -13,6 +25,9 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
+app.use("/api/users", userRouter);
+
 app.use(notFoundHandler);
 app.use(errorHandler);
+
 export default app;
