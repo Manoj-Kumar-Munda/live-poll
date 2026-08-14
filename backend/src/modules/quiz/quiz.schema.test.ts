@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { ZodError } from "zod";
 import { QUIZ_STATUS } from "@/types/quiz.types.js";
-import { createQuizSchema, toQuizCreateDocument } from "./quiz.schema.js";
+import {
+  createQuizSchema,
+  listQuizzesQuerySchema,
+  toQuizCreateDocument,
+} from "./quiz.schema.js";
 
 function getValidationErrors(error: ZodError) {
   return error.issues.map((issue) => ({
@@ -147,6 +151,35 @@ describe("createQuizSchema", () => {
           expect.objectContaining({
             path: "timeLimitSeconds",
             message: "Time limit must be at most 300 seconds",
+          }),
+        ]),
+      );
+    }
+  });
+});
+
+describe("listQuizzesQuerySchema", () => {
+  it("accepts an empty query", () => {
+    expect(listQuizzesQuerySchema.parse({})).toEqual({});
+  });
+
+  it("accepts a valid status filter", () => {
+    expect(listQuizzesQuerySchema.parse({ status: "DRAFT" })).toEqual({
+      status: QUIZ_STATUS.DRAFT,
+    });
+  });
+
+  it("rejects an invalid status with a formatted error", () => {
+    try {
+      listQuizzesQuerySchema.parse({ status: "LIVE" });
+      expect.fail("Expected validation to fail");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ZodError);
+      expect(getValidationErrors(error as ZodError)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "status",
+            message: "Status must be DRAFT, PUBLISHED, or ARCHIVED",
           }),
         ]),
       );

@@ -69,6 +69,27 @@ Lists published quizzes for public browse. No `correctAnswer` in response.
 | `DELETE` | `/api/quizzes/:id/questions/:questionId` | Delete question |
 | `PUT` | `/api/quizzes/:id/questions/reorder` | Reorder questions |
 
+### `GET /api/quizzes`
+
+**Auth:** host. Lists quizzes owned by the current user, newest `updatedAt` first.
+
+Optional query: `?status=DRAFT|PUBLISHED|ARCHIVED`
+
+Success `200`:
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Quizzes fetched",
+  "data": {
+    "quizzes": []
+  }
+}
+```
+
+Invalid `status` → `400` with `errors: [{ "path": "status", "message": "Status must be DRAFT, PUBLISHED, or ARCHIVED" }]`.
+
 ### Create quiz body
 
 ```json

@@ -181,6 +181,25 @@ export const components = {
         },
       },
     },
+    ListQuizzesResponse: {
+      type: "object",
+      required: ["success", "statusCode", "message", "data"],
+      properties: {
+        success: { type: "boolean", example: true },
+        statusCode: { type: "integer", example: 200 },
+        message: { type: "string", example: "Quizzes fetched" },
+        data: {
+          type: "object",
+          required: ["quizzes"],
+          properties: {
+            quizzes: {
+              type: "array",
+              items: { $ref: "#/components/schemas/Quiz" },
+            },
+          },
+        },
+      },
+    },
   },
   responses: {
     Unauthorized: {

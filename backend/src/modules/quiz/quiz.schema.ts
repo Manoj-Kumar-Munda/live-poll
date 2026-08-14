@@ -48,6 +48,16 @@ export const createQuizSchema = z.object({
 
 export type CreateQuizInput = z.infer<typeof createQuizSchema>;
 
+export const listQuizzesQuerySchema = z.object({
+  status: z
+    .enum([QUIZ_STATUS.DRAFT, QUIZ_STATUS.PUBLISHED, QUIZ_STATUS.ARCHIVED], {
+      error: "Status must be DRAFT, PUBLISHED, or ARCHIVED",
+    })
+    .optional(),
+});
+
+export type ListQuizzesQuery = z.infer<typeof listQuizzesQuerySchema>;
+
 /**
  * Maps validated API input + auth context to Mongoose create payload.
  * Keeps createQuizSchema and Quiz model fields in sync.

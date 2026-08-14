@@ -13,7 +13,7 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | Landing page | ✅ UI complete |
 | Auth (backend) | ✅ better-auth, roles, password reset email |
 | Auth (frontend) | ✅ login, register, session gates |
-| Quiz CRUD (backend) | ✅ full REST module |
+| Quiz CRUD (backend) | 🔶 `POST` + `GET /api/quizzes` (in progress) |
 | Quiz UI (frontend) | ❌ stubs only |
 | Sessions / realtime | ❌ not started |
 | Participant live flow | ❌ not started |
@@ -51,7 +51,7 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | Method | Path | Auth | Notes |
 |--------|------|------|-------|
 | GET | `/api/quizzes/published` | — | Public list; no `correctAnswer` |
-| GET | `/api/quizzes` | host | Optional `?status=DRAFT\|PUBLISHED\|ARCHIVED` |
+| GET | `/api/quizzes` | host | List own quizzes; optional `?status=DRAFT\|PUBLISHED\|ARCHIVED` |
 | POST | `/api/quizzes` | host | Creates `DRAFT` |
 | GET | `/api/quizzes/:id` | host | Full quiz + questions + answers |
 | PATCH | `/api/quizzes/:id` | host | Metadata; **DRAFT only** |
@@ -126,7 +126,7 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 | Date | Change |
 |------|--------|
 | 2026-08-14 | Added project docs (`AGENTS.md`, `ARCHITECTURE.md`, `STATE.md`) |
-| 2026-08-14 | Quiz backend module: CRUD, questions, publish/archive, public published list |
+| 2026-08-14 | Quiz slice 2: `GET /api/quizzes` host list with optional status filter |
 | 2026-08-14 | Removed email verification requirement from better-auth |
 | Earlier | Auth backend + frontend integration, landing page, light theme, module folder structure |
 

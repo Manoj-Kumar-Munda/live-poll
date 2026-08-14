@@ -60,6 +60,35 @@ export const paths = {
     },
   },
   "/api/quizzes": {
+    get: {
+      tags: ["Quizzes"],
+      summary: "List host quizzes",
+      description:
+        "Host only. Returns quizzes owned by the current user. Optional `status` filter.",
+      security: [{ sessionCookie: [] }],
+      parameters: [
+        {
+          name: "status",
+          in: "query",
+          required: false,
+          schema: { $ref: "#/components/schemas/QuizStatus" },
+          description: "Filter by quiz status",
+        },
+      ],
+      responses: {
+        "200": {
+          description: "Quizzes fetched",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ListQuizzesResponse" },
+            },
+          },
+        },
+        "400": { $ref: "#/components/responses/ValidationError" },
+        "401": { $ref: "#/components/responses/Unauthorized" },
+        "403": { $ref: "#/components/responses/Forbidden" },
+      },
+    },
     post: {
       tags: ["Quizzes"],
       summary: "Create a draft quiz",

@@ -30,16 +30,3 @@ export type ParticipantStatus =
 export const PARTICIPANT_STATUSES = Object.values(
   PARTICIPANT_STATUS,
 ) as ParticipantStatus[];
-
-export type QuizResponse = {
-  id: string;
-  ownerId: string;
-  title: string;
-  description: string | null;
-  status: QuizStatus;
-  pointsPerQuestion: number;
-  timeLimitSeconds: number;
-  questionCount: number;
-  createdAt: string;
-  updatedAt: string;
-};
