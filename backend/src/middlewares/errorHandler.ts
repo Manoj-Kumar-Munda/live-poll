@@ -1,42 +1,48 @@
-import { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
-import { ZodError } from 'zod';
-import { env } from '@/config/env.js';
+import {
+  type ErrorRequestHandler,
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
+import { ZodError } from "zod";
+import { env } from "@/config/env.js";
 import { ApiError } from "@/shared/utils/api-error.js";
 import { ApiResponse } from "@/shared/utils/api-response.js";
 
+function logServerError(err: unknown): void {
+  if (err instanceof Error) {
+    console.error(err.stack ?? err.message);
+    return;
+  }
+
+  console.error(err);
+}
+
 export const errorHandler: ErrorRequestHandler = (
   err: unknown,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
-
   if (res.headersSent) {
     return next(err);
   }
 
-  const isProduction = env.NODE_ENV === 'production';
-
-  // Handle Zod validation errors cleanly
   if (err instanceof ZodError) {
     const response = new ApiResponse({
       statusCode: 400,
-      message: 'Validation failed',
+      message: "Validation failed",
       data: null,
       errors: err.issues.map((issue) => ({
-        path: issue.path.join('.'),
+        path: issue.path.join("."),
         message: issue.message,
       })),
     });
 
-    res.status(400).json({
-      ...response,
-      ...(!isProduction && { stack: err.stack }),
-    });
+    res.status(400).json(response);
     return;
   }
 
-  // Handle ApiError instances
   if (err instanceof ApiError) {
     const response = new ApiResponse({
       statusCode: err.statusCode,
@@ -45,17 +51,19 @@ export const errorHandler: ErrorRequestHandler = (
       errors: err.errors,
     });
 
-    res.status(err.statusCode).json({
-      ...response,
-      ...(!isProduction && { stack: err.stack }),
-    });
+    res.status(err.statusCode).json(response);
     return;
   }
 
-  // Handle unknown errors
+  logServerError(err);
+
   const statusCode = 500;
-  const message = err instanceof Error ? err.message : 'Internal Server Error';
-  const stack = err instanceof Error ? err.stack : undefined;
+  const message =
+    env.NODE_ENV === "production"
+      ? "Internal Server Error"
+      : err instanceof Error
+        ? err.message
+        : "Internal Server Error";
 
   const response = new ApiResponse({
     statusCode,
@@ -64,8 +72,5 @@ export const errorHandler: ErrorRequestHandler = (
     errors: [],
   });
 
-  res.status(statusCode).json({
-    ...response,
-    ...(!isProduction && { stack }),
-  });
+  res.status(statusCode).json(response);
 };
