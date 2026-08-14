@@ -26,7 +26,7 @@ Backend env: `backend/.env.example`. Frontend: `NEXT_PUBLIC_API_URL`, `NEXT_PUBL
 - **Roles:** `host` | `participant` — stored on user, chosen at register.
 - **REST:** Non-realtime CRUD (quizzes, profile). Standard `ApiResponse` / `ApiError` envelope.
 - **Realtime (planned):** Socket.IO for live sessions — not implemented yet.
-- **Data:** MongoDB. Quiz questions are **embedded** in Quiz documents. Answers will be a separate collection (PRD).
+- **Data:** MongoDB. Quiz metadata is a `Quiz` collection. Questions planned as separate `Question` + `QuizQuestion` (`MCQ` \| `POLL` \| `OPEN_TEXT`). Answers / attempts as a separate collection.
 
 Details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
@@ -37,7 +37,8 @@ Details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 - Module folders: `modules/<name>/` with `*.model.ts`, `*.schema.ts` (Zod), `*.service.ts`, `*.controller.ts`, `*.route.ts`
 - Path alias: `@/*` → `src/*`
 - Auth middleware: `@/modules/auth/middleware.js` — `requireAuth`, `requireRole("host")`
-- Shared enums in `src/types/` (e.g. `quiz.types.ts`)
+- Shared enums in `src/types/` (e.g. `QUIZ_STATUS`)
+- Module API types next to the module (e.g. `modules/quiz/quiz.types.ts`)
 - ESM: import with `.js` extension in TypeScript sources
 
 ### Frontend (`frontend/`)
@@ -78,8 +79,9 @@ See [`docs/API.md`](docs/API.md). Mount points in `backend/src/app.ts`:
 
 - `GET /health`
 - `ALL /api/auth/*` — better-auth
+- `GET /api/docs` — Swagger UI
 - `/api/users` — profile
-- `/api/quizzes` — quiz CRUD (host + public published list)
+- `/api/quizzes` — host quiz metadata CRUD (list, create, get, update DRAFT, delete). Questions / publish not built.
 
 ## When you finish a feature
 

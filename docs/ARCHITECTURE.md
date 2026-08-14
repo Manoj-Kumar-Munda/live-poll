@@ -56,11 +56,17 @@ Each feature module typically contains:
 ### Errors
 
 - `ApiError` + `asyncHandler` + global `errorHandler`
-- `ZodError` → 400 with field paths
+- `ZodError` → 400 with `{ path, message }` (no stack in client responses)
+
+### API docs
+
+- Spec: `src/docs/openapi/` (`components.ts`, `paths.ts`)
+- UI: `GET /api/docs` (swagger-ui-express)
 
 ### Types
 
-- `src/types/` — shared const arrays and types (`quiz.types.ts`, `auth.types.ts`)
+- `src/types/` — shared enums (`quiz.types.ts`: `QUIZ_STATUS`, `QUESTION_TYPE`)
+- Module-local API types in `modules/quiz/quiz.types.ts` (`QuizResponse`)
 - `src/shared/types/express.d.ts` — `Request.user`, `Request.session`
 
 ## Frontend
@@ -106,16 +112,13 @@ frontend/
 
 - `ownerId` (better-auth user id)
 - `title`, `description?`, `status`: `DRAFT` | `PUBLISHED` | `ARCHIVED`
-- `pointsPerMcq` (default 10), `timeLimitSeconds` (default 30)
-- `questions[]` embedded subdocuments:
-  - `id` (UUID), `type`: `MCQ` | `YES_NO` | `OPEN_TEXT`
-  - `prompt`, `order`
-  - MCQ: `options[]`, `correctAnswer`
-  - OPEN_TEXT: `maxLength`
+- `pointsPerQuestion` (default 10)
+- `durationPerQuestion` (milliseconds; API field `timeLimitSeconds`)
+- No questions yet — planned as separate `Question` + `QuizQuestion` collections (`MCQ` | `POLL` | `OPEN_TEXT`)
 
 ### Not implemented
 
-- Session, Participant, Answer collections
+- Question, QuizQuestion, Session, Participant, QuizAttempt, QuizResult
 - User is managed by better-auth collections
 
 ## Environment variables

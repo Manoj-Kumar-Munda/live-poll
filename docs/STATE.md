@@ -13,7 +13,7 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | Landing page | ✅ UI complete |
 | Auth (backend) | ✅ better-auth, roles, password reset email |
 | Auth (frontend) | ✅ login, register, session gates |
-| Quiz CRUD (backend) | 🔶 `POST` + `GET /api/quizzes` (in progress) |
+| Quiz CRUD (backend) | 🔶 host quiz metadata CRUD; questions / publish not built |
 | Quiz UI (frontend) | ❌ stubs only |
 | Sessions / realtime | ❌ not started |
 | Participant live flow | ❌ not started |
@@ -46,26 +46,35 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | GET | `/api/users/me` | session | Current user + session |
 | PATCH | `/api/users/me` | session | Update `name` |
 
-### Quizzes (`/api/quizzes`)
+### Docs
 
 | Method | Path | Auth | Notes |
 |--------|------|------|-------|
-| GET | `/api/quizzes/published` | — | Public list; no `correctAnswer` |
-| GET | `/api/quizzes` | host | List own quizzes; optional `?status=DRAFT\|PUBLISHED\|ARCHIVED` |
-| POST | `/api/quizzes` | host | Creates `DRAFT` |
-| GET | `/api/quizzes/:id` | host | Full quiz + questions + answers |
-| PATCH | `/api/quizzes/:id` | host | Metadata; **DRAFT only** |
-| DELETE | `/api/quizzes/:id` | host | **DRAFT only** |
-| POST | `/api/quizzes/:id/publish` | host | Requires ≥1 question |
-| POST | `/api/quizzes/:id/archive` | host | `PUBLISHED` → `ARCHIVED` |
-| POST | `/api/quizzes/:id/questions` | host | Add question; **DRAFT only** |
-| PATCH | `/api/quizzes/:id/questions/:questionId` | host | **DRAFT only** |
-| DELETE | `/api/quizzes/:id/questions/:questionId` | host | **DRAFT only** |
-| PUT | `/api/quizzes/:id/questions/reorder` | host | Body: `{ questionIds: string[] }` |
+| GET | `/api/docs` | — | Swagger UI |
+| GET | `/api/docs/openapi.json` | — | OpenAPI 3 spec |
 
-**Question types:** `MCQ` (2–4 options, one correct), `YES_NO`, `OPEN_TEXT` (with `maxLength`).
+### Quizzes (`/api/quizzes`)
 
-**Files:** `backend/src/modules/quiz/quiz.{model,schema,service,controller,route}.ts`
+| Method | Path | Auth | Status | Notes |
+|--------|------|------|--------|-------|
+| GET | `/api/quizzes` | host | ✅ | Own quizzes; optional `?status=DRAFT\|PUBLISHED\|ARCHIVED` |
+| POST | `/api/quizzes` | host | ✅ | Creates `DRAFT` |
+| GET | `/api/quizzes/:id` | host | ✅ | Owner-scoped detail; `questionCount` is 0 until questions exist |
+| PUT | `/api/quizzes/:id` | host | ✅ | Metadata; **DRAFT only** |
+| DELETE | `/api/quizzes/:id` | host | ✅ | Owner-scoped delete |
+| GET | `/api/quizzes/published` | — | ❌ | Public list |
+| POST | `/api/quizzes/:id/publish` | host | ❌ | Requires ≥1 question |
+| POST | `/api/quizzes/:id/archive` | host | ❌ | `PUBLISHED` → `ARCHIVED` |
+| POST | `/api/quizzes/:id/questions` | host | ❌ | Add question |
+| PATCH | `/api/quizzes/:id/questions/:questionId` | host | ❌ | |
+| DELETE | `/api/quizzes/:id/questions/:questionId` | host | ❌ | |
+| PUT | `/api/quizzes/:id/questions/reorder` | host | ❌ | |
+
+**Quiz model:** `pointsPerQuestion` (default 10), `durationPerQuestion` stored in ms; API uses `timeLimitSeconds`. Status: `DRAFT` \| `PUBLISHED` \| `ARCHIVED`.
+
+**Planned question types:** `MCQ`, `POLL`, `OPEN_TEXT` (not built).
+
+**Files:** `backend/src/modules/quiz/quiz.{model,schema,service,controller,route,types,constants}.ts`
 
 ---
 
@@ -115,6 +124,9 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 - [ ] **Answer collection** — immediate writes on submit
 - [ ] **Participant** — join by room code, waiting room, answer UI
 - [ ] **Leaderboard** — in-memory per session, batch score updates
+- [ ] **Quiz questions** — `Question` + `QuizQuestion`, add/update/delete/reorder
+- [ ] **Publish / archive** quiz
+- [ ] **Public published list** — `GET /api/quizzes/published`
 - [ ] **Frontend quiz management** — consume `/api/quizzes`
 - [ ] **Frontend browse** — consume `/api/quizzes/published` + live badges (needs sessions)
 - [ ] **Participant history / stats** on `/home`
@@ -126,7 +138,7 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 | Date | Change |
 |------|--------|
 | 2026-08-14 | Added project docs (`AGENTS.md`, `ARCHITECTURE.md`, `STATE.md`) |
-| 2026-08-14 | Quiz slice 2: `GET /api/quizzes` host list with optional status filter |
+| 2026-08-14 | Quiz host metadata CRUD: list, create, get by id, update (DRAFT), delete |
 | 2026-08-14 | Removed email verification requirement from better-auth |
 | Earlier | Auth backend + frontend integration, landing page, light theme, module folder structure |
 
