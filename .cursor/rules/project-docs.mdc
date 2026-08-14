@@ -1,0 +1,17 @@
+---
+description: Keep project docs in sync when implementing features
+alwaysApply: true
+---
+
+# Project documentation
+
+Before coding, read repo root `AGENTS.md` and `docs/STATE.md` for current architecture and what's already built.
+
+When you **complete** a feature (not for trivial fixes):
+
+1. Update `docs/STATE.md` — feature matrix, module table, changelog entry with date
+2. Update `docs/API.md` if REST endpoints changed
+3. Update `docs/ARCHITECTURE.md` only if stack, folders, or core patterns changed
+4. Keep `AGENTS.md` summary accurate if routes or conventions changed
+
+Do not duplicate long specs in rules — link to `docs/`.

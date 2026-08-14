@@ -1,0 +1,144 @@
+# Implementation State
+
+**Last updated:** 2026-08-14
+
+Living record of what exists in the codebase. Update this file when a feature ships. Product intent remains in [PRD.md](PRD.md).
+
+---
+
+## Summary
+
+| Area | Status |
+|------|--------|
+| Landing page | ✅ UI complete |
+| Auth (backend) | ✅ better-auth, roles, password reset email |
+| Auth (frontend) | ✅ login, register, session gates |
+| Quiz CRUD (backend) | ✅ full REST module |
+| Quiz UI (frontend) | ❌ stubs only |
+| Sessions / realtime | ❌ not started |
+| Participant live flow | ❌ not started |
+| Public browse API wired | ❌ page stub only |
+
+---
+
+## Backend — implemented
+
+### Health
+
+| Method | Path | Auth |
+|--------|------|------|
+| GET | `/health` | — |
+
+### better-auth
+
+| Path | Notes |
+|------|-------|
+| `/api/auth/*` | Email/password sign-up, sign-in, sign-out, session, password reset |
+
+- Email verification **disabled**
+- User `role`: `host` \| `participant` (set at registration)
+- Password reset emails via Resend
+
+### Users (`/api/users`)
+
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| GET | `/api/users/me` | session | Current user + session |
+| PATCH | `/api/users/me` | session | Update `name` |
+
+### Quizzes (`/api/quizzes`)
+
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| GET | `/api/quizzes/published` | — | Public list; no `correctAnswer` |
+| GET | `/api/quizzes` | host | Optional `?status=DRAFT\|PUBLISHED\|ARCHIVED` |
+| POST | `/api/quizzes` | host | Creates `DRAFT` |
+| GET | `/api/quizzes/:id` | host | Full quiz + questions + answers |
+| PATCH | `/api/quizzes/:id` | host | Metadata; **DRAFT only** |
+| DELETE | `/api/quizzes/:id` | host | **DRAFT only** |
+| POST | `/api/quizzes/:id/publish` | host | Requires ≥1 question |
+| POST | `/api/quizzes/:id/archive` | host | `PUBLISHED` → `ARCHIVED` |
+| POST | `/api/quizzes/:id/questions` | host | Add question; **DRAFT only** |
+| PATCH | `/api/quizzes/:id/questions/:questionId` | host | **DRAFT only** |
+| DELETE | `/api/quizzes/:id/questions/:questionId` | host | **DRAFT only** |
+| PUT | `/api/quizzes/:id/questions/reorder` | host | Body: `{ questionIds: string[] }` |
+
+**Question types:** `MCQ` (2–4 options, one correct), `YES_NO`, `OPEN_TEXT` (with `maxLength`).
+
+**Files:** `backend/src/modules/quiz/quiz.{model,schema,service,controller,route}.ts`
+
+---
+
+## Frontend — implemented
+
+### Routes
+
+| Path | Guard | UI status |
+|------|-------|-----------|
+| `/` | `RedirectIfAuthenticated` | ✅ Landing |
+| `/login`, `/register` | `(auth)/layout` redirects if logged in | ✅ Forms wired to better-auth |
+| `/home` | `RequireAuth` participant | 🔶 Stub |
+| `/join` | `RequireAuth` participant | 🔶 Stub |
+| `/session/[sessionId]` | `RequireAuth` participant | 🔶 Stub |
+| `/dashboard` | `RequireAuth` host | 🔶 Stub |
+| `/dashboard/quizzes` | `RequireAuth` host | 🔶 Stub |
+| `/dashboard/quizzes/[id]` | `RequireAuth` host | 🔶 Stub |
+| `/dashboard/sessions/[sessionId]` | `RequireAuth` host | 🔶 Stub |
+| `/quizzes` | — | 🔶 Stub |
+
+Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
+
+### Auth integration
+
+- `lib/auth-client.ts` — better-auth React client, cookies
+- `modules/auth/components/session-gates.tsx` — `RequireAuth`, `RedirectIfAuthenticated`
+- Login → redirect by role (`/dashboard` or `/home`)
+- Register → redirect by role (no email verification step)
+
+### Modules with real UI
+
+- `modules/landing/` — nav, hero, features, CTA, footer
+- `modules/auth/` — login/register pages and forms
+
+### Not wired to backend APIs yet
+
+- Quiz list / create / edit / publish
+- Public browse (`/quizzes`)
+- Any session or participant flow
+
+---
+
+## Not implemented (next up per PRD)
+
+- [ ] **Session module** — model, room codes, `WAITING` \| `LIVE` \| `FINISHED`
+- [ ] **Socket.IO** — live session state, question launch, timers, results
+- [ ] **Answer collection** — immediate writes on submit
+- [ ] **Participant** — join by room code, waiting room, answer UI
+- [ ] **Leaderboard** — in-memory per session, batch score updates
+- [ ] **Frontend quiz management** — consume `/api/quizzes`
+- [ ] **Frontend browse** — consume `/api/quizzes/published` + live badges (needs sessions)
+- [ ] **Participant history / stats** on `/home`
+
+---
+
+## Changelog
+
+| Date | Change |
+|------|--------|
+| 2026-08-14 | Added project docs (`AGENTS.md`, `ARCHITECTURE.md`, `STATE.md`) |
+| 2026-08-14 | Quiz backend module: CRUD, questions, publish/archive, public published list |
+| 2026-08-14 | Removed email verification requirement from better-auth |
+| Earlier | Auth backend + frontend integration, landing page, light theme, module folder structure |
+
+---
+
+## How to update this file
+
+After shipping a feature:
+
+1. Update **Summary** table statuses.
+2. Add rows to **Backend** or **Frontend** API/route tables.
+3. Move checklist items from **Not implemented** when done.
+4. Add a **Changelog** row with date and one-line description.
+
+Keep entries factual (what exists in code), not planned (what PRD says should exist).
