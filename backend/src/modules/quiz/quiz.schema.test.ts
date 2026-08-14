@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import { QUIZ_STATUS } from "@/types/quiz.types.js";
 import {
   createQuizSchema,
+  getQuizByIdSchema,
   listQuizzesQuerySchema,
   toQuizCreateDocument,
 } from "./quiz.schema.js";
@@ -180,6 +181,50 @@ describe("listQuizzesQuerySchema", () => {
           expect.objectContaining({
             path: "status",
             message: "Status must be DRAFT, PUBLISHED, or ARCHIVED",
+          }),
+        ]),
+      );
+    }
+  });
+});
+
+describe("getQuizByIdSchema", () => {
+  it("accepts a valid MongoDB ObjectId", () => {
+    const id = "674a1b2c3d4e5f6789012345";
+
+    expect(getQuizByIdSchema.parse({ id })).toEqual({ id });
+  });
+
+  it("rejects a UUID", () => {
+    try {
+      getQuizByIdSchema.parse({
+        id: "550e8400-e29b-41d4-a716-446655440000",
+      });
+      expect.fail("Expected validation to fail");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ZodError);
+      expect(getValidationErrors(error as ZodError)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "id",
+            message: "Invalid quiz id",
+          }),
+        ]),
+      );
+    }
+  });
+
+  it("rejects a malformed id", () => {
+    try {
+      getQuizByIdSchema.parse({ id: "not-an-id" });
+      expect.fail("Expected validation to fail");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ZodError);
+      expect(getValidationErrors(error as ZodError)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "id",
+            message: "Invalid quiz id",
           }),
         ]),
       );

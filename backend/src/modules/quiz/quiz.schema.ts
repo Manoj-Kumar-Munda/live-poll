@@ -1,7 +1,20 @@
 import { z } from "zod";
+import mongoose from "mongoose";
 import { QUIZ_STATUS } from "@/types/quiz.types.js";
 import { QUIZ_LIMITS } from "./quiz.constants.js";
 
+function isValidMongoObjectId(value: string): boolean {
+  if (!/^[a-f\d]{24}$/i.test(value)) {
+    return false;
+  }
+
+  return String(new mongoose.Types.ObjectId(value)) === value;
+}
+
+export const mongoObjectIdSchema = z
+  .string({ error: "Id is required" })
+  .refine(isValidMongoObjectId, { message: "Invalid quiz id" });
+  
 export const createQuizSchema = z.object({
   title: z
     .string({ error: "Title is required" })
@@ -58,6 +71,9 @@ export const listQuizzesQuerySchema = z.object({
 
 export type ListQuizzesQuery = z.infer<typeof listQuizzesQuerySchema>;
 
+export const getQuizByIdSchema = z.object({
+  id: mongoObjectIdSchema,
+});
 /**
  * Maps validated API input + auth context to Mongoose create payload.
  * Keeps createQuizSchema and Quiz model fields in sync.

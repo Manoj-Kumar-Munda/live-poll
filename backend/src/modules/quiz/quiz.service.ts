@@ -6,6 +6,7 @@ import {
 import { Quiz, type QuizDocument } from "./quiz.model.js";
 import type { QuizResponse } from "./quiz.types.js";
 import type { QuizStatus } from "@/types/quiz.types.js";
+import { ApiError } from "@/shared/utils/api-error.js";
 
 function toQuizResponse(quiz: QuizDocument, questionCount = 0): QuizResponse {
   return {
@@ -44,4 +45,15 @@ export async function listQuizzes(
   const quizzes = await Quiz.find(filter).sort({ updatedAt: -1 }).exec();
 
   return quizzes.map((quiz) => toQuizResponse(quiz as QuizDocument));
+}
+
+export async function getQuizById(
+  ownerId: string,
+  id: string,
+): Promise<QuizResponse> {
+  const quiz = await Quiz.findOne({ _id: id, ownerId }).exec();
+  if (!quiz) {
+    throw new ApiError(404, "Quiz not found");
+  }
+  return toQuizResponse(quiz as QuizDocument);
 }

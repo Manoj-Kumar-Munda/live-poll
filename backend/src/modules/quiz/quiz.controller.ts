@@ -1,6 +1,6 @@
 import { ApiResponse } from "@/shared/utils/api-response.js";
 import { asyncHandler } from "@/shared/utils/async-handler.js";
-import { createQuizSchema, listQuizzesQuerySchema } from "./quiz.schema.js";
+import { createQuizSchema, getQuizByIdSchema, listQuizzesQuerySchema } from "./quiz.schema.js";
 import * as quizService from "./quiz.service.js";
 
 export const listQuizzes = asyncHandler(async (req, res) => {
@@ -24,6 +24,18 @@ export const createQuiz = asyncHandler(async (req, res) => {
     new ApiResponse({
       statusCode: 201,
       message: "Quiz created",
+      data: { quiz },
+    }),
+  );
+});
+
+export const getQuizById = asyncHandler(async (req, res) => {
+  const { id } = getQuizByIdSchema.parse(req.params);
+  const quiz = await quizService.getQuizById(req.user!.id, id);
+  res.status(200).json(
+    new ApiResponse({
+      statusCode: 200,
+      message: "Quiz fetched",
       data: { quiz },
     }),
   );
