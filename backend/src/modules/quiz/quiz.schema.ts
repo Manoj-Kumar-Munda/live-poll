@@ -150,3 +150,9 @@ export function toQuizUpdateDocument(fields: UpdateQuizFields) {
 
   return update;
 }
+
+export const deleteQuizByIdSchema = z.object({
+  id: mongoObjectIdSchema,
+});
+
+export type DeleteQuizByIdInput = z.infer<typeof deleteQuizByIdSchema>;

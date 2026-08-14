@@ -87,3 +87,14 @@ export async function updateQuizById(
 
   return toQuizResponse(updatedQuiz as QuizDocument);
 }
+
+export async function deleteQuizById(
+  ownerId: string,
+  id: string,
+): Promise<void> {
+  const quiz = await Quiz.findOne({ _id: id, ownerId }).exec();
+  if (!quiz) {
+    throw new ApiError(404, "Quiz not found");
+  }
+  await quiz.deleteOne().exec();
+}
