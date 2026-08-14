@@ -35,6 +35,7 @@ const quizSchema = new Schema(
       min: QUIZ_DURATION_MS.min,
       max: QUIZ_DURATION_MS.max,
     },
+    nextQuestionOrder: { type: Number, default: 0, min: 0 },
   },
   { timestamps: true },
 );

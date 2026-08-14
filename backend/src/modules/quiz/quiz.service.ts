@@ -125,6 +125,24 @@ async function requireOwnedQuiz(ownerId: string, id: string) {
   return quiz;
 }
 
+async function withMongoTransaction<T>(
+  work: (session: mongoose.ClientSession) => Promise<T>,
+): Promise<T> {
+  const session = await mongoose.startSession();
+  try {
+    let result: T | undefined;
+    await session.withTransaction(async () => {
+      result = await work(session);
+    });
+    if (result === undefined) {
+      throw new Error("Transaction completed without a result");
+    }
+    return result;
+  } finally {
+    await session.endSession();
+  }
+}
+
 export async function createQuiz(
   ownerId: string,
   input: CreateQuizInput,
@@ -197,15 +215,21 @@ export async function deleteQuizById(
   ownerId: string,
   id: string,
 ): Promise<void> {
-  const quiz = await requireOwnedQuiz(ownerId, id);
-  const links = await QuizQuestion.find({ quizId: id }).exec();
-  const questionIds = links.map((link) => link.questionId);
+  await withMongoTransaction(async (session) => {
+    const quiz = await Quiz.findOne({ _id: id, ownerId }).session(session);
+    if (!quiz) {
+      throw new ApiError(404, "Quiz not found");
+    }
 
-  await QuizQuestion.deleteMany({ quizId: id }).exec();
-  if (questionIds.length > 0) {
-    await Question.deleteMany({ _id: { $in: questionIds } }).exec();
-  }
-  await quiz.deleteOne();
+    const links = await QuizQuestion.find({ quizId: id }).session(session);
+    const questionIds = links.map((link) => link.questionId);
+
+    await QuizQuestion.deleteMany({ quizId: id }).session(session);
+    if (questionIds.length > 0) {
+      await Question.deleteMany({ _id: { $in: questionIds } }).session(session);
+    }
+    await Quiz.deleteOne({ _id: id, ownerId }).session(session);
+  });
 }
 
 export async function addQuestion(
@@ -213,31 +237,68 @@ export async function addQuestion(
   quizId: string,
   input: AddQuestionInput,
 ): Promise<QuestionResponse> {
-  const quiz = await requireOwnedQuiz(ownerId, quizId);
+  return withMongoTransaction(async (session) => {
+    const lastLink = await QuizQuestion.findOne({ quizId })
+      .sort({ order: -1 })
+      .select({ order: 1 })
+      .session(session)
+      .lean();
+    const minNextOrder = lastLink ? lastLink.order + 1 : 0;
 
-  if (quiz.status !== QUIZ_STATUS.DRAFT) {
-    throw new ApiError(400, "Questions can only be added to draft quizzes");
-  }
+    const quiz = await Quiz.findOneAndUpdate(
+      { _id: quizId, ownerId, status: QUIZ_STATUS.DRAFT },
+      [
+        {
+          $set: {
+            nextQuestionOrder: {
+              $add: [
+                {
+                  $max: [
+                    { $ifNull: ["$nextQuestionOrder", 0] },
+                    minNextOrder,
+                  ],
+                },
+                1,
+              ],
+            },
+          },
+        },
+      ],
+      { new: true, session },
+    );
 
-  const last = await QuizQuestion.findOne({ quizId })
-    .sort({ order: -1 })
-    .exec();
-  const order = last ? last.order + 1 : 0;
+    if (!quiz) {
+      const existing = await Quiz.findOne({ _id: quizId, ownerId }).session(
+        session,
+      );
+      if (!existing) {
+        throw new ApiError(404, "Quiz not found");
+      }
+      throw new ApiError(400, "Questions can only be added to draft quizzes");
+    }
 
-  const question = await Question.create(
-    toQuestionCreateDocument(ownerId, input),
-  );
+    const order = quiz.nextQuestionOrder - 1;
 
-  try {
-    await QuizQuestion.create({
-      quizId: quiz._id,
-      questionId: question._id,
-      order,
-    });
-  } catch (error) {
-    await Question.deleteOne({ _id: question._id }).exec();
-    throw error;
-  }
+    const [question] = await Question.create(
+      [toQuestionCreateDocument(ownerId, input)],
+      { session },
+    );
 
-  return toQuestionResponse(question as QuestionDocument, order);
+    if (!question) {
+      throw new ApiError(500, "Failed to create question");
+    }
+
+    await QuizQuestion.create(
+      [
+        {
+          quizId: quiz._id,
+          questionId: question._id,
+          order,
+        },
+      ],
+      { session },
+    );
+
+    return toQuestionResponse(question as QuestionDocument, order);
+  });
 }

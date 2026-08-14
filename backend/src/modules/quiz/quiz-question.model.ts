@@ -18,7 +18,7 @@ const quizQuestionSchema = new Schema(
   { timestamps: true },
 );
 
-quizQuestionSchema.index({ quizId: 1, order: 1 });
+quizQuestionSchema.index({ quizId: 1, order: 1 }, { unique: true });
 quizQuestionSchema.index({ quizId: 1, questionId: 1 }, { unique: true });
 
 export type QuizQuestionDocument = InferSchemaType<typeof quizQuestionSchema> & {
