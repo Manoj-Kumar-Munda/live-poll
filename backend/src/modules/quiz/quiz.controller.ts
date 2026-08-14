@@ -67,9 +67,9 @@ export const deleteQuizById = asyncHandler(async (req, res) => {
 });
 
 export const addQuestion = asyncHandler(async (req, res) => {
-  const { id } = addQuestionParamsSchema.parse(req.params);
+  const { quizId }  = addQuestionParamsSchema.parse(req.params);
   const input = addQuestionSchema.parse(req.body);
-  const question = await quizService.addQuestion(req.user!.id, id, input);
+  const question = await quizService.addQuestion(req.user!.id, quizId, input);
 
   res.status(201).json(
     new ApiResponse({

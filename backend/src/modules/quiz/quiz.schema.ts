@@ -157,7 +157,7 @@ export const deleteQuizByIdSchema = z.object({
 export type DeleteQuizByIdInput = z.infer<typeof deleteQuizByIdSchema>;
 
 export const addQuestionParamsSchema = z.object({
-  id: mongoObjectIdSchema,
+  quizId: mongoObjectIdSchema,
 });
 
 const promptSchema = z
