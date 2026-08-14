@@ -6,6 +6,9 @@ import {
   getQuizByIdSchema,
   listQuizzesQuerySchema,
   toQuizCreateDocument,
+  toQuizUpdateDocument,
+  updateQuizByIdSchema,
+  updateQuizFieldsSchema,
 } from "./quiz.schema.js";
 
 function getValidationErrors(error: ZodError) {
@@ -229,5 +232,78 @@ describe("getQuizByIdSchema", () => {
         ]),
       );
     }
+  });
+});
+
+describe("updateQuizByIdSchema", () => {
+  it("accepts a valid MongoDB ObjectId", () => {
+    const id = "674a1b2c3d4e5f6789012345";
+
+    expect(updateQuizByIdSchema.parse({ id })).toEqual({ id });
+  });
+});
+
+describe("updateQuizFieldsSchema", () => {
+  it("accepts a partial update with one field", () => {
+    expect(updateQuizFieldsSchema.parse({ title: "Updated title" })).toEqual({
+      title: "Updated title",
+    });
+  });
+
+  it("accepts multiple fields", () => {
+    expect(
+      updateQuizFieldsSchema.parse({
+        title: "Updated title",
+        timeLimitSeconds: 45,
+      }),
+    ).toEqual({
+      title: "Updated title",
+      timeLimitSeconds: 45,
+    });
+  });
+
+  it("rejects an empty body", () => {
+    try {
+      updateQuizFieldsSchema.parse({});
+      expect.fail("Expected validation to fail");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ZodError);
+      expect(getValidationErrors(error as ZodError)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            message: "At least one field is required",
+          }),
+        ]),
+      );
+    }
+  });
+
+  it("rejects an empty title", () => {
+    try {
+      updateQuizFieldsSchema.parse({ title: "   " });
+      expect.fail("Expected validation to fail");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ZodError);
+      expect(getValidationErrors(error as ZodError)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "title",
+            message: "Title is required",
+          }),
+        ]),
+      );
+    }
+  });
+
+  it("maps validated fields to mongoose update document", () => {
+    const fields = updateQuizFieldsSchema.parse({
+      title: "Updated title",
+      timeLimitSeconds: 60,
+    });
+
+    expect(toQuizUpdateDocument(fields)).toEqual({
+      title: "Updated title",
+      durationPerQuestion: 60_000,
+    });
   });
 });
