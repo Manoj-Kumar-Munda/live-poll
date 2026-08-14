@@ -114,7 +114,11 @@ frontend/
 - `title`, `description?`, `status`: `DRAFT` | `PUBLISHED` | `ARCHIVED`
 - `pointsPerQuestion` (default 10)
 - `durationPerQuestion` (milliseconds; API field `timeLimitSeconds`)
-- No questions yet — planned as separate `Question` + `QuizQuestion` collections (`MCQ` | `POLL` | `OPEN_TEXT`)
+- `questions` linked via `QuizQuestion` (`quizId`, `questionId`, `order`)
+- `Question`: `ownerId`, `prompt`, `type` `MCQ` | `POLL` | `OPEN_TEXT`
+  - MCQ: `options[]`, `correctAnswer` (lowercase)
+  - POLL: `options[]` (no correct answer)
+  - OPEN_TEXT: `maxLength`
 
 ### Not implemented
 

@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { ZodError } from "zod";
-import { QUIZ_STATUS } from "@/types/quiz.types.js";
+import { QUESTION_TYPE, QUIZ_STATUS } from "@/types/quiz.types.js";
 import {
+  addQuestionSchema,
   createQuizSchema,
   getQuizByIdSchema,
   listQuizzesQuerySchema,
+  toQuestionCreateDocument,
   toQuizCreateDocument,
   toQuizUpdateDocument,
   updateQuizByIdSchema,
@@ -304,6 +306,105 @@ describe("updateQuizFieldsSchema", () => {
     expect(toQuizUpdateDocument(fields)).toEqual({
       title: "Updated title",
       durationPerQuestion: 60_000,
+    });
+  });
+});
+
+describe("addQuestionSchema", () => {
+  it("accepts an MCQ with a matching correct answer", () => {
+    const result = addQuestionSchema.parse({
+      type: "MCQ",
+      prompt: "Capital of France?",
+      options: ["Paris", "Rome", "Madrid"],
+      correctAnswer: "Paris",
+    });
+
+    expect(result.type).toBe(QUESTION_TYPE.MCQ);
+  });
+
+  it("rejects an MCQ whose correct answer is not in options", () => {
+    try {
+      addQuestionSchema.parse({
+        type: "MCQ",
+        prompt: "Capital of France?",
+        options: ["Paris", "Rome"],
+        correctAnswer: "Berlin",
+      });
+      expect.fail("Expected validation to fail");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ZodError);
+      expect(getValidationErrors(error as ZodError)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "correctAnswer",
+            message: "Correct answer must match one of the options",
+          }),
+        ]),
+      );
+    }
+  });
+
+  it("accepts a POLL with host-defined options and no correct answer", () => {
+    const result = addQuestionSchema.parse({
+      type: "POLL",
+      prompt: "Which topic next?",
+      options: ["React", "Node.js"],
+    });
+
+    expect(result).toMatchObject({
+      type: QUESTION_TYPE.POLL,
+      prompt: "Which topic next?",
+    });
+  });
+
+  it("rejects duplicate POLL options", () => {
+    try {
+      addQuestionSchema.parse({
+        type: "POLL",
+        prompt: "Which topic next?",
+        options: ["React", "react"],
+      });
+      expect.fail("Expected validation to fail");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ZodError);
+      expect(getValidationErrors(error as ZodError)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "options",
+            message: "Options must be unique",
+          }),
+        ]),
+      );
+    }
+  });
+
+  it("accepts OPEN_TEXT with default maxLength", () => {
+    const result = addQuestionSchema.parse({
+      type: "OPEN_TEXT",
+      prompt: "One word for this session",
+    });
+
+    expect(result).toEqual({
+      type: QUESTION_TYPE.OPEN_TEXT,
+      prompt: "One word for this session",
+      maxLength: 80,
+    });
+  });
+
+  it("maps MCQ options and answer to lowercase", () => {
+    const input = addQuestionSchema.parse({
+      type: "MCQ",
+      prompt: "Capital of France?",
+      options: ["Paris", "Rome"],
+      correctAnswer: "Paris",
+    });
+
+    expect(toQuestionCreateDocument("user-1", input)).toEqual({
+      ownerId: "user-1",
+      type: QUESTION_TYPE.MCQ,
+      prompt: "Capital of France?",
+      options: ["paris", "rome"],
+      correctAnswer: "paris",
     });
   });
 });

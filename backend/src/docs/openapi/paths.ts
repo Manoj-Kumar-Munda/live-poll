@@ -117,4 +117,41 @@ export const paths = {
       },
     },
   },
+  "/api/quizzes/{id}/questions": {
+    post: {
+      tags: ["Quizzes"],
+      summary: "Add a question to a draft quiz",
+      security: [{ sessionCookie: [] }],
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string" },
+          description: "Quiz MongoDB ObjectId",
+        },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/AddQuestionRequest" },
+          },
+        },
+      },
+      responses: {
+        "201": {
+          description: "Question added",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/AddQuestionResponse" },
+            },
+          },
+        },
+        "400": { $ref: "#/components/responses/ValidationError" },
+        "401": { $ref: "#/components/responses/Unauthorized" },
+        "403": { $ref: "#/components/responses/Forbidden" },
+      },
+    },
+  },
 } as const;

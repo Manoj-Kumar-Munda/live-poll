@@ -81,7 +81,7 @@ See [`docs/API.md`](docs/API.md). Mount points in `backend/src/app.ts`:
 - `ALL /api/auth/*` — better-auth
 - `GET /api/docs` — Swagger UI
 - `/api/users` — profile
-- `/api/quizzes` — host quiz metadata CRUD (list, create, get, update DRAFT, delete). Questions / publish not built.
+- `/api/quizzes` — host quiz CRUD + add questions (`MCQ` / `POLL` / `OPEN_TEXT`). Publish not built.
 
 ## When you finish a feature
 

@@ -71,9 +71,10 @@ Body: `{ name: string }` (1–100 chars).
 |--------|------|-------------|
 | `GET` | `/api/quizzes` | List own quizzes. Query: `?status=DRAFT\|PUBLISHED\|ARCHIVED` |
 | `POST` | `/api/quizzes` | Create draft quiz |
-| `GET` | `/api/quizzes/:id` | Get quiz by id (owner only) |
+| `GET` | `/api/quizzes/:id` | Get quiz by id (owner only), includes `questions` |
 | `PUT` | `/api/quizzes/:id` | Update metadata — **DRAFT only** |
-| `DELETE` | `/api/quizzes/:id` | Delete own quiz |
+| `DELETE` | `/api/quizzes/:id` | Delete own quiz (also deletes its questions) |
+| `POST` | `/api/quizzes/:id/questions` | Add a question — **DRAFT only** |
 
 ### `GET /api/quizzes`
 
@@ -111,11 +112,11 @@ Creates a quiz in `DRAFT`.
 
 `pointsPerQuestion` default 10 (1–1000). `timeLimitSeconds` default 30 (5–300). Stored internally as `durationPerQuestion` milliseconds.
 
-Success `201`: `{ data: { quiz } }` (shape below). `questionCount` is `0` until questions exist.
+Success `201`: `{ data: { quiz } }` (shape below).
 
 ### `GET /api/quizzes/:id`
 
-Owner-scoped. `404` if missing or not owned.
+Owner-scoped. `404` if missing or not owned. Includes ordered `questions`.
 
 ### `PUT /api/quizzes/:id`
 
@@ -132,7 +133,44 @@ Owner-scoped. `404` if missing or not owned.
 
 ### `DELETE /api/quizzes/:id`
 
-Owner-scoped. Success `200` with `data: null`.
+Owner-scoped. Also deletes linked questions. Success `200` with `data: null`.
+
+### `POST /api/quizzes/:id/questions`
+
+**DRAFT only.** Options and `correctAnswer` are stored lowercase.
+
+**MCQ** — 2–4 unique options; `correctAnswer` must match an option.
+
+```json
+{
+  "type": "MCQ",
+  "prompt": "Capital of France?",
+  "options": ["Paris", "Rome", "Madrid"],
+  "correctAnswer": "Paris"
+}
+```
+
+**POLL** — 2–6 unique options; no correct answer (opinion).
+
+```json
+{
+  "type": "POLL",
+  "prompt": "Which topic should we cover next?",
+  "options": ["React", "Node.js", "Databases"]
+}
+```
+
+**OPEN_TEXT** — `maxLength` default 80 (1–500).
+
+```json
+{
+  "type": "OPEN_TEXT",
+  "prompt": "One word for this session",
+  "maxLength": 80
+}
+```
+
+Success `201`: `{ data: { question } }`.
 
 ### Quiz response shape
 
@@ -147,9 +185,21 @@ Owner-scoped. Success `200` with `data: null`.
   "timeLimitSeconds": 30,
   "questionCount": 0,
   "createdAt": "...",
-  "updatedAt": "..."
+  "updatedAt": "...",
+  "questions": [
+    {
+      "id": "mongodb ObjectId",
+      "type": "MCQ",
+      "prompt": "...",
+      "order": 0,
+      "options": ["paris", "rome"],
+      "correctAnswer": "paris"
+    }
+  ]
 }
 ```
+
+List / create / update omit `questions` but include `questionCount`.
 
 ### Quiz status rules (product)
 
@@ -167,7 +217,7 @@ Update is enforced as DRAFT-only. Publish / archive endpoints are not implemente
 
 - `GET /api/quizzes/published`
 - Publish / archive
-- Questions (`MCQ` \| `POLL` \| `OPEN_TEXT`)
+- Update / delete / reorder questions
 - Sessions (`/api/sessions`, room codes)
 - Answers / `QuizAttempt`
 - Leaderboard persist (`QuizResult`)

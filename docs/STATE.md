@@ -13,7 +13,7 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | Landing page | ✅ UI complete |
 | Auth (backend) | ✅ better-auth, roles, password reset email |
 | Auth (frontend) | ✅ login, register, session gates |
-| Quiz CRUD (backend) | 🔶 host quiz metadata CRUD; questions / publish not built |
+| Quiz CRUD (backend) | 🔶 host quiz CRUD + add questions; publish not built |
 | Quiz UI (frontend) | ❌ stubs only |
 | Sessions / realtime | ❌ not started |
 | Participant live flow | ❌ not started |
@@ -59,22 +59,22 @@ Living record of what exists in the codebase. Update this file when a feature sh
 |--------|------|------|--------|-------|
 | GET | `/api/quizzes` | host | ✅ | Own quizzes; optional `?status=DRAFT\|PUBLISHED\|ARCHIVED` |
 | POST | `/api/quizzes` | host | ✅ | Creates `DRAFT` |
-| GET | `/api/quizzes/:id` | host | ✅ | Owner-scoped detail; `questionCount` is 0 until questions exist |
+| GET | `/api/quizzes/:id` | host | ✅ | Owner-scoped detail + ordered `questions` |
 | PUT | `/api/quizzes/:id` | host | ✅ | Metadata; **DRAFT only** |
-| DELETE | `/api/quizzes/:id` | host | ✅ | Owner-scoped delete |
+| DELETE | `/api/quizzes/:id` | host | ✅ | Owner-scoped; also deletes questions |
+| POST | `/api/quizzes/:id/questions` | host | ✅ | Add `MCQ` / `POLL` / `OPEN_TEXT`; **DRAFT only** |
 | GET | `/api/quizzes/published` | — | ❌ | Public list |
 | POST | `/api/quizzes/:id/publish` | host | ❌ | Requires ≥1 question |
 | POST | `/api/quizzes/:id/archive` | host | ❌ | `PUBLISHED` → `ARCHIVED` |
-| POST | `/api/quizzes/:id/questions` | host | ❌ | Add question |
 | PATCH | `/api/quizzes/:id/questions/:questionId` | host | ❌ | |
 | DELETE | `/api/quizzes/:id/questions/:questionId` | host | ❌ | |
 | PUT | `/api/quizzes/:id/questions/reorder` | host | ❌ | |
 
 **Quiz model:** `pointsPerQuestion` (default 10), `durationPerQuestion` stored in ms; API uses `timeLimitSeconds`. Status: `DRAFT` \| `PUBLISHED` \| `ARCHIVED`.
 
-**Planned question types:** `MCQ`, `POLL`, `OPEN_TEXT` (not built).
+**Question types:** `MCQ` (2–4 options + correct answer), `POLL` (2–6 options, no correct answer), `OPEN_TEXT` (`maxLength`, default 80). Stored in `Question` + `QuizQuestion` (order).
 
-**Files:** `backend/src/modules/quiz/quiz.{model,schema,service,controller,route,types,constants}.ts`
+**Files:** `backend/src/modules/quiz/quiz.{model,schema,service,controller,route,types,constants}.ts`, `question.model.ts`, `quiz-question.model.ts`
 
 ---
 
@@ -124,7 +124,7 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 - [ ] **Answer collection** — immediate writes on submit
 - [ ] **Participant** — join by room code, waiting room, answer UI
 - [ ] **Leaderboard** — in-memory per session, batch score updates
-- [ ] **Quiz questions** — `Question` + `QuizQuestion`, add/update/delete/reorder
+- [ ] **Quiz questions** — update / delete / reorder
 - [ ] **Publish / archive** quiz
 - [ ] **Public published list** — `GET /api/quizzes/published`
 - [ ] **Frontend quiz management** — consume `/api/quizzes`
@@ -138,7 +138,7 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 | Date | Change |
 |------|--------|
 | 2026-08-14 | Added project docs (`AGENTS.md`, `ARCHITECTURE.md`, `STATE.md`) |
-| 2026-08-14 | Quiz host metadata CRUD: list, create, get by id, update (DRAFT), delete |
+| 2026-08-14 | Add questions to draft quizzes (`MCQ` / `POLL` / `OPEN_TEXT`) |
 | 2026-08-14 | Removed email verification requirement from better-auth |
 | Earlier | Auth backend + frontend integration, landing page, light theme, module folder structure |
 

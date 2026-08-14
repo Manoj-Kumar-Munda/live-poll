@@ -19,3 +19,11 @@ export const QUIZ_DURATION_MS = {
   max: QUIZ_LIMITS.timeLimitSeconds.max * 1000,
   default: QUIZ_LIMITS.timeLimitSeconds.default * 1000,
 } as const;
+
+export const QUESTION_LIMITS = {
+  promptMaxLength: 500,
+  optionMaxLength: 120,
+  mcqOptions: { min: 2, max: 4 },
+  pollOptions: { min: 2, max: 6 },
+  openTextMaxLength: { min: 1, max: 500, default: 80 },
+} as const;

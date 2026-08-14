@@ -1,6 +1,6 @@
 import { ApiResponse } from "@/shared/utils/api-response.js";
 import { asyncHandler } from "@/shared/utils/async-handler.js";
-import { createQuizSchema, deleteQuizByIdSchema, getQuizByIdSchema, listQuizzesQuerySchema, updateQuizByIdSchema, updateQuizFieldsSchema } from "./quiz.schema.js";
+import { createQuizSchema, deleteQuizByIdSchema, getQuizByIdSchema, listQuizzesQuerySchema, addQuestionParamsSchema, addQuestionSchema, updateQuizByIdSchema, updateQuizFieldsSchema } from "./quiz.schema.js";
 import * as quizService from "./quiz.service.js";
 
 export const listQuizzes = asyncHandler(async (req, res) => {
@@ -62,6 +62,20 @@ export const deleteQuizById = asyncHandler(async (req, res) => {
       statusCode: 200,
       message: "Quiz deleted",
       data: null,
+    }),
+  );
+});
+
+export const addQuestion = asyncHandler(async (req, res) => {
+  const { id } = addQuestionParamsSchema.parse(req.params);
+  const input = addQuestionSchema.parse(req.body);
+  const question = await quizService.addQuestion(req.user!.id, id, input);
+
+  res.status(201).json(
+    new ApiResponse({
+      statusCode: 201,
+      message: "Question added",
+      data: { question },
     }),
   );
 });

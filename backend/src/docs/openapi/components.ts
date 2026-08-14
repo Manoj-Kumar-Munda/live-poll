@@ -200,6 +200,81 @@ export const components = {
         },
       },
     },
+    QuestionType: {
+      type: "string",
+      enum: ["MCQ", "POLL", "OPEN_TEXT"],
+    },
+    Question: {
+      type: "object",
+      required: ["id", "type", "prompt", "order"],
+      properties: {
+        id: { type: "string" },
+        type: { $ref: "#/components/schemas/QuestionType" },
+        prompt: { type: "string" },
+        order: { type: "integer", minimum: 0 },
+        options: { type: "array", items: { type: "string" } },
+        correctAnswer: { type: "string" },
+        maxLength: { type: "integer" },
+      },
+    },
+    AddQuestionRequest: {
+      oneOf: [
+        {
+          type: "object",
+          required: ["type", "prompt", "options", "correctAnswer"],
+          properties: {
+            type: { type: "string", enum: ["MCQ"] },
+            prompt: { type: "string" },
+            options: {
+              type: "array",
+              items: { type: "string" },
+              minItems: 2,
+              maxItems: 4,
+            },
+            correctAnswer: { type: "string" },
+          },
+        },
+        {
+          type: "object",
+          required: ["type", "prompt", "options"],
+          properties: {
+            type: { type: "string", enum: ["POLL"] },
+            prompt: { type: "string" },
+            options: {
+              type: "array",
+              items: { type: "string" },
+              minItems: 2,
+              maxItems: 6,
+            },
+          },
+        },
+        {
+          type: "object",
+          required: ["type", "prompt"],
+          properties: {
+            type: { type: "string", enum: ["OPEN_TEXT"] },
+            prompt: { type: "string" },
+            maxLength: { type: "integer", default: 80 },
+          },
+        },
+      ],
+    },
+    AddQuestionResponse: {
+      type: "object",
+      required: ["success", "statusCode", "message", "data"],
+      properties: {
+        success: { type: "boolean", example: true },
+        statusCode: { type: "integer", example: 201 },
+        message: { type: "string", example: "Question added" },
+        data: {
+          type: "object",
+          required: ["question"],
+          properties: {
+            question: { $ref: "#/components/schemas/Question" },
+          },
+        },
+      },
+    },
   },
   responses: {
     Unauthorized: {
