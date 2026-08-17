@@ -24,6 +24,7 @@ import {
   useUpdateQuestion,
   useUpdateQuiz,
 } from "../api/use-quizzes";
+import { useCreateSession } from "../api/use-sessions";
 import {
   createQuizSchema,
   type CreateQuizValues,
@@ -48,6 +49,7 @@ export function QuizDetailPage({ quizId }: QuizDetailPageProps) {
   const deleteQuestion = useDeleteQuestion(quizId);
   const publishQuiz = usePublishQuiz(quizId);
   const archiveQuiz = useArchiveQuiz(quizId);
+  const createSession = useCreateSession();
 
   const form = useForm<CreateQuizValues>({
     resolver: zodResolver(createQuizSchema),
@@ -123,6 +125,15 @@ export function QuizDetailPage({ quizId }: QuizDetailPageProps) {
   async function handleArchive() {
     try {
       await archiveQuiz.mutateAsync();
+    } catch {
+      // Toast handled globally.
+    }
+  }
+
+  async function handleStartSession() {
+    try {
+      const session = await createSession.mutateAsync(quizId);
+      router.push(`/dashboard/sessions/${session.id}`);
     } catch {
       // Toast handled globally.
     }
@@ -205,14 +216,23 @@ export function QuizDetailPage({ quizId }: QuizDetailPageProps) {
             </>
           ) : null}
           {quiz.status === "PUBLISHED" ? (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleArchive}
-              disabled={archiveQuiz.isPending}
-            >
-              Archive
-            </Button>
+            <>
+              <Button
+                type="button"
+                onClick={handleStartSession}
+                disabled={createSession.isPending}
+              >
+                {createSession.isPending ? "Starting..." : "Start session"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleArchive}
+                disabled={archiveQuiz.isPending}
+              >
+                Archive
+              </Button>
+            </>
           ) : null}
         </div>
       </div>
