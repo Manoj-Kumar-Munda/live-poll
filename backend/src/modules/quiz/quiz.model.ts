@@ -1,5 +1,6 @@
 import mongoose, { Schema, type InferSchemaType } from "mongoose";
 import { QUIZ_DURATION_MS, QUIZ_LIMITS } from "./quiz.constants.js";
+import { questionSubdocumentSchema } from "./question.model.js";
 import { QUIZ_STATUSES, QUIZ_STATUS } from "@/types/quiz.types.js";
 
 const quizSchema = new Schema(
@@ -35,7 +36,10 @@ const quizSchema = new Schema(
       min: QUIZ_DURATION_MS.min,
       max: QUIZ_DURATION_MS.max,
     },
-    nextQuestionOrder: { type: Number, default: 0, min: 0 },
+    questions: {
+      type: [questionSubdocumentSchema],
+      default: [],
+    },
   },
   { timestamps: true },
 );

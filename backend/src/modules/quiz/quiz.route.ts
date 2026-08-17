@@ -5,9 +5,9 @@ import { addQuestion, createQuiz, deleteQuizById, getQuizById, listQuizzes, upda
 const router = Router();
 router.get("/", requireAuth, requireRole("host"), listQuizzes);
 router.post("/", requireAuth, requireRole("host"), createQuiz);
-router.post("/:id/questions", requireAuth, requireRole("host"), addQuestion);
-router.get("/:id", requireAuth, requireRole("host"), getQuizById);
-router.put("/:id", requireAuth, requireRole("host"), updateQuizById);
-router.delete("/:id", requireAuth, requireRole("host"), deleteQuizById);
+router.post("/:quizId/questions", requireAuth, requireRole("host"), addQuestion);
+router.get("/:quizId", requireAuth, requireRole("host"), getQuizById);
+router.put("/:quizId", requireAuth, requireRole("host"), updateQuizById);
+router.delete("/:quizId", requireAuth, requireRole("host"), deleteQuizById);
 
 export default router;

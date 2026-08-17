@@ -278,14 +278,10 @@ export const addQuestionSchema = z.discriminatedUnion("type", [
 
 export type AddQuestionInput = z.infer<typeof addQuestionSchema>;
 
-export function toQuestionCreateDocument(
-  ownerId: string,
-  input: AddQuestionInput,
-) {
+export function toQuestionSubdocument(input: AddQuestionInput) {
   if (input.type === QUESTION_TYPE.MCQ) {
     const options = input.options.map((option) => option.toLowerCase());
     return {
-      ownerId,
       type: input.type,
       prompt: input.prompt,
       options,
@@ -295,7 +291,6 @@ export function toQuestionCreateDocument(
 
   if (input.type === QUESTION_TYPE.POLL) {
     return {
-      ownerId,
       type: input.type,
       prompt: input.prompt,
       options: input.options.map((option) => option.toLowerCase()),
@@ -303,7 +298,6 @@ export function toQuestionCreateDocument(
   }
 
   return {
-    ownerId,
     type: input.type,
     prompt: input.prompt,
     maxLength: input.maxLength,

@@ -30,7 +30,7 @@ export const createQuiz = asyncHandler(async (req, res) => {
 });
 
 export const getQuizById = asyncHandler(async (req, res) => {
-  const { id } = getQuizByIdSchema.parse(req.params);
+  const { id } = getQuizByIdSchema.parse({ id: req.params.quizId });
   const quiz = await quizService.getQuizById(req.user!.id, id);
   res.status(200).json(
     new ApiResponse({
@@ -42,7 +42,7 @@ export const getQuizById = asyncHandler(async (req, res) => {
 });
 
 export const updateQuizById = asyncHandler(async (req, res) => {
-  const { id } = updateQuizByIdSchema.parse(req.params);
+  const { id } = updateQuizByIdSchema.parse({ id: req.params.quizId });
   const fields = updateQuizFieldsSchema.parse(req.body);
   const quiz = await quizService.updateQuizById(req.user!.id, id, fields);
   res.status(200).json(
@@ -55,7 +55,7 @@ export const updateQuizById = asyncHandler(async (req, res) => {
 });
 
 export const deleteQuizById = asyncHandler(async (req, res) => {
-  const { id } = deleteQuizByIdSchema.parse(req.params);
+  const { id } = deleteQuizByIdSchema.parse({ id: req.params.quizId });
   await quizService.deleteQuizById(req.user!.id, id);
   res.status(200).json(
     new ApiResponse({

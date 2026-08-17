@@ -6,7 +6,7 @@ import {
   createQuizSchema,
   getQuizByIdSchema,
   listQuizzesQuerySchema,
-  toQuestionCreateDocument,
+  toQuestionSubdocument,
   toQuizCreateDocument,
   toQuizUpdateDocument,
   updateQuizByIdSchema,
@@ -399,8 +399,7 @@ describe("addQuestionSchema", () => {
       correctAnswer: "Paris",
     });
 
-    expect(toQuestionCreateDocument("user-1", input)).toEqual({
-      ownerId: "user-1",
+    expect(toQuestionSubdocument(input)).toEqual({
       type: QUESTION_TYPE.MCQ,
       prompt: "Capital of France?",
       options: ["paris", "rome"],

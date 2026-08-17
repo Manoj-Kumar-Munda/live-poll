@@ -1,6 +1,5 @@
-import mongoose from "mongoose";
 import {
-  toQuestionCreateDocument,
+  toQuestionSubdocument,
   toQuizCreateDocument,
   toQuizUpdateDocument,
   type AddQuestionInput,
@@ -8,8 +7,7 @@ import {
   type ListQuizzesQuery,
   type UpdateQuizFields,
 } from "./quiz.schema.js";
-import { Question, type QuestionDocument } from "./question.model.js";
-import { QuizQuestion } from "./quiz-question.model.js";
+import type { QuestionSubdocument } from "./question.model.js";
 import { Quiz, type QuizDocument } from "./quiz.model.js";
 import type {
   QuestionResponse,
@@ -39,7 +37,7 @@ function toQuizResponse(quiz: QuizDocument, questionCount = 0): QuizResponse {
 }
 
 function toQuestionResponse(
-  question: QuestionDocument,
+  question: QuestionSubdocument,
   order: number,
 ): QuestionResponse {
   const response: QuestionResponse = {
@@ -70,51 +68,8 @@ function toQuestionResponse(
   return response;
 }
 
-async function countQuestions(quizId: string): Promise<number> {
-  return QuizQuestion.countDocuments({ quizId });
-}
-
-async function countQuestionsByQuizIds(
-  quizIds: mongoose.Types.ObjectId[],
-): Promise<Map<string, number>> {
-  const counts = new Map<string, number>();
-
-  if (quizIds.length === 0) {
-    return counts;
-  }
-
-  const rows = await QuizQuestion.aggregate<{
-    _id: mongoose.Types.ObjectId;
-    count: number;
-  }>([
-    { $match: { quizId: { $in: quizIds } } },
-    { $group: { _id: "$quizId", count: { $sum: 1 } } },
-  ]);
-
-  for (const row of rows) {
-    counts.set(row._id.toString(), row.count);
-  }
-
-  return counts;
-}
-
-async function loadOrderedQuestions(
-  quizId: string,
-): Promise<QuestionResponse[]> {
-  const links = await QuizQuestion.find({ quizId }).sort({ order: 1 }).exec();
-  const questionIds = links.map((link) => link.questionId);
-  const questions = await Question.find({ _id: { $in: questionIds } }).exec();
-  const byId = new Map(
-    questions.map((question) => [question._id.toString(), question]),
-  );
-
-  return links.flatMap((link) => {
-    const question = byId.get(link.questionId.toString());
-    if (!question) {
-      return [];
-    }
-    return [toQuestionResponse(question as QuestionDocument, link.order)];
-  });
+function toQuestionResponses(questions: QuestionSubdocument[]): QuestionResponse[] {
+  return questions.map((question, order) => toQuestionResponse(question, order));
 }
 
 async function requireOwnedQuiz(ownerId: string, id: string) {
@@ -123,24 +78,6 @@ async function requireOwnedQuiz(ownerId: string, id: string) {
     throw new ApiError(404, "Quiz not found");
   }
   return quiz;
-}
-
-async function withMongoTransaction<T>(
-  work: (session: mongoose.ClientSession) => Promise<T>,
-): Promise<T> {
-  const session = await mongoose.startSession();
-  try {
-    let result: T | undefined;
-    await session.withTransaction(async () => {
-      result = await work(session);
-    });
-    if (result === undefined) {
-      throw new Error("Transaction completed without a result");
-    }
-    return result;
-  } finally {
-    await session.endSession();
-  }
 }
 
 export async function createQuiz(
@@ -163,13 +100,9 @@ export async function listQuizzes(
   }
 
   const quizzes = await Quiz.find(filter).sort({ updatedAt: -1 }).exec();
-  const counts = await countQuestionsByQuizIds(quizzes.map((quiz) => quiz._id));
 
   return quizzes.map((quiz) =>
-    toQuizResponse(
-      quiz as QuizDocument,
-      counts.get(quiz._id.toString()) ?? 0,
-    ),
+    toQuizResponse(quiz as QuizDocument, quiz.questions.length),
   );
 }
 
@@ -178,7 +111,7 @@ export async function getQuizById(
   id: string,
 ): Promise<QuizDetailResponse> {
   const quiz = await requireOwnedQuiz(ownerId, id);
-  const questions = await loadOrderedQuestions(id);
+  const questions = toQuestionResponses(quiz.questions as QuestionSubdocument[]);
 
   return {
     ...toQuizResponse(quiz as QuizDocument, questions.length),
@@ -207,29 +140,20 @@ export async function updateQuizById(
     throw new ApiError(404, "Quiz not found");
   }
 
-  const questionCount = await countQuestions(id);
-  return toQuizResponse(updatedQuiz as QuizDocument, questionCount);
+  return toQuizResponse(
+    updatedQuiz as QuizDocument,
+    updatedQuiz.questions.length,
+  );
 }
 
 export async function deleteQuizById(
   ownerId: string,
   id: string,
 ): Promise<void> {
-  await withMongoTransaction(async (session) => {
-    const quiz = await Quiz.findOne({ _id: id, ownerId }).session(session);
-    if (!quiz) {
-      throw new ApiError(404, "Quiz not found");
-    }
-
-    const links = await QuizQuestion.find({ quizId: id }).session(session);
-    const questionIds = links.map((link) => link.questionId);
-
-    await QuizQuestion.deleteMany({ quizId: id }).session(session);
-    if (questionIds.length > 0) {
-      await Question.deleteMany({ _id: { $in: questionIds } }).session(session);
-    }
-    await Quiz.deleteOne({ _id: id, ownerId }).session(session);
-  });
+  const result = await Quiz.deleteOne({ _id: id, ownerId }).exec();
+  if (result.deletedCount === 0) {
+    throw new ApiError(404, "Quiz not found");
+  }
 }
 
 export async function addQuestion(
@@ -237,68 +161,20 @@ export async function addQuestion(
   quizId: string,
   input: AddQuestionInput,
 ): Promise<QuestionResponse> {
-  return withMongoTransaction(async (session) => {
-    const lastLink = await QuizQuestion.findOne({ quizId })
-      .sort({ order: -1 })
-      .select({ order: 1 })
-      .session(session)
-      .lean();
-    const minNextOrder = lastLink ? lastLink.order + 1 : 0;
+  const quiz = await Quiz.findOneAndUpdate(
+    { _id: quizId, ownerId, status: QUIZ_STATUS.DRAFT },
+    { $push: { questions: toQuestionSubdocument(input) } },
+    { new: true, runValidators: true },
+  ).exec();
 
-    const quiz = await Quiz.findOneAndUpdate(
-      { _id: quizId, ownerId, status: QUIZ_STATUS.DRAFT },
-      [
-        {
-          $set: {
-            nextQuestionOrder: {
-              $add: [
-                {
-                  $max: [
-                    { $ifNull: ["$nextQuestionOrder", 0] },
-                    minNextOrder,
-                  ],
-                },
-                1,
-              ],
-            },
-          },
-        },
-      ],
-      { new: true, session },
-    );
-
-    if (!quiz) {
-      const existing = await Quiz.findOne({ _id: quizId, ownerId }).session(
-        session,
-      );
-      if (!existing) {
-        throw new ApiError(404, "Quiz not found");
-      }
-      throw new ApiError(400, "Questions can only be added to draft quizzes");
+  if (!quiz) {
+    const existing = await Quiz.findOne({ _id: quizId, ownerId }).exec();
+    if (!existing) {
+      throw new ApiError(404, "Quiz not found");
     }
+    throw new ApiError(400, "Questions can only be added to draft quizzes");
+  }
 
-    const order = quiz.nextQuestionOrder - 1;
-
-    const [question] = await Question.create(
-      [toQuestionCreateDocument(ownerId, input)],
-      { session },
-    );
-
-    if (!question) {
-      throw new ApiError(500, "Failed to create question");
-    }
-
-    await QuizQuestion.create(
-      [
-        {
-          quizId: quiz._id,
-          questionId: question._id,
-          order,
-        },
-      ],
-      { session },
-    );
-
-    return toQuestionResponse(question as QuestionDocument, order);
-  });
+  const question = quiz.questions[quiz.questions.length - 1] as QuestionSubdocument;
+  return toQuestionResponse(question, quiz.questions.length - 1);
 }

@@ -2,9 +2,8 @@ import mongoose, { Schema, type InferSchemaType } from "mongoose";
 import { QUESTION_LIMITS } from "./quiz.constants.js";
 import { QUESTION_TYPES } from "@/types/quiz.types.js";
 
-const questionSchema = new Schema(
+export const questionSubdocumentSchema = new Schema(
   {
-    ownerId: { type: String, required: true, index: true },
     prompt: {
       type: String,
       required: true,
@@ -31,13 +30,11 @@ const questionSchema = new Schema(
       default: undefined,
     },
   },
-  { timestamps: true },
+  { _id: true },
 );
 
-export type QuestionDocument = InferSchemaType<typeof questionSchema> & {
+export type QuestionSubdocument = InferSchemaType<
+  typeof questionSubdocumentSchema
+> & {
   _id: mongoose.Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
 };
-
-export const Question = mongoose.model("Question", questionSchema);
