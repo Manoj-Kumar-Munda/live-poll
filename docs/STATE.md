@@ -1,6 +1,6 @@
 # Implementation State
 
-**Last updated:** 2026-08-14
+**Last updated:** 2026-08-17
 
 Living record of what exists in the codebase. Update this file when a feature ships. Product intent remains in [PRD.md](PRD.md).
 
@@ -68,13 +68,12 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | POST | `/api/quizzes/:id/archive` | host | ❌ | `PUBLISHED` → `ARCHIVED` |
 | PATCH | `/api/quizzes/:id/questions/:questionId` | host | ❌ | |
 | DELETE | `/api/quizzes/:id/questions/:questionId` | host | ❌ | |
-| PUT | `/api/quizzes/:id/questions/reorder` | host | ❌ | |
 
 **Quiz model:** `pointsPerQuestion` (default 10), `durationPerQuestion` stored in ms; API uses `timeLimitSeconds`. Status: `DRAFT` \| `PUBLISHED` \| `ARCHIVED`.
 
-**Question types:** `MCQ` (2–4 options + correct answer), `POLL` (2–6 options, no correct answer), `OPEN_TEXT` (`maxLength`, default 80). Stored in `Question` + `QuizQuestion` (order).
+**Question types:** `MCQ` (2–4 options + correct answer), `POLL` (2–6 options, no correct answer), `OPEN_TEXT` (`maxLength`, default 80). Embedded subdocuments on `Quiz.questions` (array order = display order).
 
-**Files:** `backend/src/modules/quiz/quiz.{model,schema,service,controller,route,types,constants}.ts`, `question.model.ts`, `quiz-question.model.ts`
+**Files:** `backend/src/modules/quiz/quiz.{model,schema,service,controller,route,types,constants}.ts`, `question.model.ts` (subdocument schema only)
 
 ---
 
@@ -124,7 +123,7 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 - [ ] **Answer collection** — immediate writes on submit
 - [ ] **Participant** — join by room code, waiting room, answer UI
 - [ ] **Leaderboard** — in-memory per session, batch score updates
-- [ ] **Quiz questions** — update / delete / reorder
+- [ ] **Quiz questions** — update / delete
 - [ ] **Publish / archive** quiz
 - [ ] **Public published list** — `GET /api/quizzes/published`
 - [ ] **Frontend quiz management** — consume `/api/quizzes`
@@ -137,6 +136,8 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 | Date | Change |
 |------|--------|
+| 2026-08-17 | Drop question reorder from MVP scope (add order only; reorder deferred) |
+| 2026-08-17 | Embed questions as subdocuments on `Quiz` (removed `Question` / `QuizQuestion` collections) |
 | 2026-08-14 | Added project docs (`AGENTS.md`, `ARCHITECTURE.md`, `STATE.md`) |
 | 2026-08-14 | Add questions to draft quizzes (`MCQ` / `POLL` / `OPEN_TEXT`) |
 | 2026-08-14 | Removed email verification requirement from better-auth |

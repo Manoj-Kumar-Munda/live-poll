@@ -114,15 +114,15 @@ frontend/
 - `title`, `description?`, `status`: `DRAFT` | `PUBLISHED` | `ARCHIVED`
 - `pointsPerQuestion` (default 10)
 - `durationPerQuestion` (milliseconds; API field `timeLimitSeconds`)
-- `questions` linked via `QuizQuestion` (`quizId`, `questionId`, `order`)
-- `Question`: `ownerId`, `prompt`, `type` `MCQ` | `POLL` | `OPEN_TEXT`
+- Questions are **embedded subdocuments** on `Quiz.questions` (array order = display order). No separate collection or shared question bank.
+- Subdocument fields: `prompt`, `type` `MCQ` | `POLL` | `OPEN_TEXT`
   - MCQ: `options[]`, `correctAnswer` (lowercase)
   - POLL: `options[]` (no correct answer)
   - OPEN_TEXT: `maxLength`
 
 ### Not implemented
 
-- Question, QuizQuestion, Session, Participant, QuizAttempt, QuizResult
+- Session, Participant, QuizAttempt, QuizResult
 - User is managed by better-auth collections
 
 ## Environment variables

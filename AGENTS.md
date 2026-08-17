@@ -26,7 +26,7 @@ Backend env: `backend/.env.example`. Frontend: `NEXT_PUBLIC_API_URL`, `NEXT_PUBL
 - **Roles:** `host` | `participant` — stored on user, chosen at register.
 - **REST:** Non-realtime CRUD (quizzes, profile). Standard `ApiResponse` / `ApiError` envelope.
 - **Realtime (planned):** Socket.IO for live sessions — not implemented yet.
-- **Data:** MongoDB. Quiz metadata is a `Quiz` collection. Questions planned as separate `Question` + `QuizQuestion` (`MCQ` \| `POLL` \| `OPEN_TEXT`). Answers / attempts as a separate collection.
+- **Data:** MongoDB. `Quiz` collection with embedded `questions[]` subdocuments (`MCQ` \| `POLL` \| `OPEN_TEXT`). Answers / attempts as a separate collection.
 
 Details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 

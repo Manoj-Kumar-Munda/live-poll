@@ -133,7 +133,7 @@ Owner-scoped. `404` if missing or not owned. Includes ordered `questions`.
 
 ### `DELETE /api/quizzes/:id`
 
-Owner-scoped. Also deletes linked questions. Success `200` with `data: null`.
+Owner-scoped. Also deletes embedded questions. Success `200` with `data: null`.
 
 ### `POST /api/quizzes/:id/questions`
 
@@ -217,7 +217,7 @@ Update is enforced as DRAFT-only. Publish / archive endpoints are not implemente
 
 - `GET /api/quizzes/published`
 - Publish / archive
-- Update / delete / reorder questions
+- Update / delete questions
 - Sessions (`/api/sessions`, room codes)
 - Answers / `QuizAttempt`
 - Leaderboard persist (`QuizResult`)

@@ -9,7 +9,7 @@
 ## 1. Overview
 
 ### 1.1 Product Vision
-A real-time live quiz and polling application where a Host can create quizzes, start live sessions, and control the flow of questions, while Participants join via a room code and compete or respond in real time.
+A real-time live quiz and polling application for **casual group activities** (icebreakers, team events, pub-style rounds) — not formal education. A Host creates a quiz for a specific occasion, starts a live session, and controls the flow of questions, while Participants join via a room code and compete or respond in real time.
 
 ### 1.2 Target Users
 - **Host (Admin):** Creates and manages quizzes, controls live sessions.
@@ -46,7 +46,9 @@ A real-time live quiz and polling application where a Host can create quizzes, s
 ## 3. Core Concepts
 
 ### 3.1 Quiz
-A Quiz is a collection of questions created by a Host.
+A Quiz is a collection of questions created by a Host for a specific activity.
+
+**Questions are quiz-scoped:** each question belongs to exactly one quiz. There is no shared question bank, templates library, or cross-quiz reuse — hosts build questions inline while editing a draft quiz.
 
 **Statuses:**
 - `DRAFT` → Can be edited and deleted.
@@ -107,7 +109,7 @@ A user who joins a specific session.
 #### Quiz Management
 - Create quiz (saved as `DRAFT`).
 - Edit quiz only while in `DRAFT`.
-- Add / remove / reorder questions.
+- Add / remove questions (order follows add sequence; explicit reorder not in MVP).
 - Configure default time limit (default 30 seconds) and points per MCQ.
 - Publish quiz → status becomes `PUBLISHED`.
 - View past sessions of a quiz.
@@ -198,7 +200,7 @@ A user who joins a specific session.
 ### 6.3 Key Data Entities
 - User (via better-auth)
 - Quiz
-- Question (embedded in Quiz)
+- Question (embedded subdocuments on `Quiz`)
 - Session
 - Participant
 - Answer (recommended as separate collection for better write performance)
@@ -253,7 +255,7 @@ A user who joins a specific session.
 - Multiple correct answers for MCQ
 - Teams mode
 - Image support in questions
-- Question bank / templates
+- Reorder questions within a quiz
 - Export results (CSV)
 - Advanced analytics for Host
 - Redis (will be added later for higher scale)
