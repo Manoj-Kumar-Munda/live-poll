@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Raleway } from "next/font/google";
+import { QueryProvider } from "@/components/providers/query-provider";
+import { AppToaster } from "@/components/providers/app-toaster";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +29,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={cn("h-full antialiased font-sans", geistSans.variable, geistMono.variable, raleway.variable)}
     >
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        <QueryProvider>
+          {children}
+          <AppToaster />
+        </QueryProvider>
+      </body>
     </html>
   );
 }
