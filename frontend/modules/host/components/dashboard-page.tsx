@@ -59,7 +59,7 @@ export function DashboardPage() {
                 <Button
                   className="mt-4"
                   nativeButton={false}
-                  render={<Link href="/dashboard/quizzes" />}
+                  render={<Link href="/dashboard/quizzes/new" />}
                 >
                   Create a quiz
                 </Button>
