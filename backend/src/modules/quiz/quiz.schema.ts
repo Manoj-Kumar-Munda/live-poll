@@ -10,9 +10,14 @@ function isValidMongoObjectId(value: string): boolean {
   return String(new mongoose.Types.ObjectId(value)) === value;
 }
 
-export const mongoObjectIdSchema = z
-  .string({ error: "Id is required" })
-  .refine(isValidMongoObjectId, { message: "Invalid quiz id" });
+function mongoObjectIdSchema(invalidMessage: string) {
+  return z
+    .string({ error: "Id is required" })
+    .refine(isValidMongoObjectId, { message: invalidMessage });
+}
+
+export const quizIdSchema = mongoObjectIdSchema("Invalid quiz id");
+export const questionIdSchema = mongoObjectIdSchema("Invalid question id");
 
 const quizTitleSchema = z
   .string({ error: "Title is required" })
@@ -80,11 +85,11 @@ export const listQuizzesQuerySchema = z.object({
 export type ListQuizzesQuery = z.infer<typeof listQuizzesQuerySchema>;
 
 export const getQuizByIdSchema = z.object({
-  id: mongoObjectIdSchema,
+  id: quizIdSchema,
 });
 
 export const updateQuizByIdSchema = z.object({
-  id: mongoObjectIdSchema,
+  id: quizIdSchema,
 });
 
 export const updateQuizFieldsSchema = z
@@ -151,13 +156,22 @@ export function toQuizUpdateDocument(fields: UpdateQuizFields) {
 }
 
 export const deleteQuizByIdSchema = z.object({
-  id: mongoObjectIdSchema,
+  id: quizIdSchema,
 });
 
 export type DeleteQuizByIdInput = z.infer<typeof deleteQuizByIdSchema>;
 
 export const addQuestionParamsSchema = z.object({
-  quizId: mongoObjectIdSchema,
+  quizId: quizIdSchema,
+});
+
+export const questionOnQuizParamsSchema = z.object({
+  quizId: quizIdSchema,
+  questionId: questionIdSchema,
+});
+
+export const quizActionParamsSchema = z.object({
+  quizId: quizIdSchema,
 });
 
 const promptSchema = z
@@ -277,6 +291,8 @@ export const addQuestionSchema = z.discriminatedUnion("type", [
 ]);
 
 export type AddQuestionInput = z.infer<typeof addQuestionSchema>;
+export const updateQuestionSchema = addQuestionSchema;
+export type UpdateQuestionInput = AddQuestionInput;
 
 export function toQuestionSubdocument(input: AddQuestionInput) {
   if (input.type === QUESTION_TYPE.MCQ) {

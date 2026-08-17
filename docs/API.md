@@ -5,6 +5,8 @@ All JSON responses use the `ApiResponse` envelope unless noted.
 
 Interactive docs: [Swagger UI](http://localhost:4000/api/docs) · [openapi.json](http://localhost:4000/api/docs/openapi.json)
 
+Swagger covers the implemented HTTP routes (health, users, quiz CRUD + add question). Auth stays at `/api/auth/*` (better-auth, not listed as OpenAPI operations).
+
 ## Health
 
 ### `GET /health`
@@ -73,8 +75,12 @@ Body: `{ name: string }` (1–100 chars).
 | `POST` | `/api/quizzes` | Create draft quiz |
 | `GET` | `/api/quizzes/:id` | Get quiz by id (owner only), includes `questions` |
 | `PUT` | `/api/quizzes/:id` | Update metadata — **DRAFT only** |
-| `DELETE` | `/api/quizzes/:id` | Delete own quiz (also deletes its questions) |
+| `DELETE` | `/api/quizzes/:id` | Delete own quiz — **DRAFT only** |
 | `POST` | `/api/quizzes/:id/questions` | Add a question — **DRAFT only** |
+| `PATCH` | `/api/quizzes/:id/questions/:questionId` | Update a question — **DRAFT only** |
+| `DELETE` | `/api/quizzes/:id/questions/:questionId` | Delete a question — **DRAFT only** |
+| `POST` | `/api/quizzes/:id/publish` | `DRAFT` → `PUBLISHED`; requires ≥1 question |
+| `POST` | `/api/quizzes/:id/archive` | `PUBLISHED` → `ARCHIVED` |
 
 ### `GET /api/quizzes`
 
@@ -133,7 +139,7 @@ Owner-scoped. `404` if missing or not owned. Includes ordered `questions`.
 
 ### `DELETE /api/quizzes/:id`
 
-Owner-scoped. Also deletes embedded questions. Success `200` with `data: null`.
+Owner-scoped. **DRAFT only** (`400` otherwise). Deletes the quiz and its embedded questions. Success `200` with `data: null`.
 
 ### `POST /api/quizzes/:id/questions`
 
@@ -172,6 +178,24 @@ Owner-scoped. Also deletes embedded questions. Success `200` with `data: null`.
 
 Success `201`: `{ data: { question } }`.
 
+### `PATCH /api/quizzes/:id/questions/:questionId`
+
+**DRAFT only.** Same body as add. Replaces the question in place (keeps `id` and `order`).
+
+### `DELETE /api/quizzes/:id/questions/:questionId`
+
+**DRAFT only.** Success `200` with `data: null`. Remaining questions keep their array order (re-indexed on the next GET).
+
+### `POST /api/quizzes/:id/publish`
+
+**DRAFT only.** Requires at least one question (`400` otherwise). Sets status to `PUBLISHED`. After this, metadata and questions cannot be edited or deleted.
+
+Success `200`: `{ data: { quiz } }`.
+
+### `POST /api/quizzes/:id/archive`
+
+**PUBLISHED only.** Sets status to `ARCHIVED`. Success `200`: `{ data: { quiz } }`.
+
 ### Quiz response shape
 
 ```json
@@ -209,15 +233,13 @@ List / create / update omit `questions` but include `questionCount`.
 | `PUBLISHED` | no | no | — | → `ARCHIVED` |
 | `ARCHIVED` | no | no | — | — |
 
-Update is enforced as DRAFT-only. Publish / archive endpoints are not implemented yet.
+Update is enforced as DRAFT-only. Delete quiz is DRAFT-only. Publish and archive are implemented.
 
 ---
 
 ## Not implemented
 
 - `GET /api/quizzes/published`
-- Publish / archive
-- Update / delete questions
 - Sessions (`/api/sessions`, room codes)
 - Answers / `QuizAttempt`
 - Leaderboard persist (`QuizResult`)

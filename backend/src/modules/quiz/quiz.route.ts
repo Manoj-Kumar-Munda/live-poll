@@ -1,13 +1,30 @@
 import { Router } from "express";
 import { requireAuth, requireRole } from "@/modules/auth/middleware.js";
-import { addQuestion, createQuiz, deleteQuizById, getQuizById, listQuizzes, updateQuizById } from "./quiz.controller.js";
+import {
+  addQuestion,
+  archiveQuiz,
+  createQuiz,
+  deleteQuestion,
+  deleteQuizById,
+  getQuizById,
+  listQuizzes,
+  publishQuiz,
+  updateQuestion,
+  updateQuizById,
+} from "./quiz.controller.js";
+
+const hostOnly = [requireAuth, requireRole("host")] as const;
 
 const router = Router();
-router.get("/", requireAuth, requireRole("host"), listQuizzes);
-router.post("/", requireAuth, requireRole("host"), createQuiz);
-router.post("/:quizId/questions", requireAuth, requireRole("host"), addQuestion);
-router.get("/:quizId", requireAuth, requireRole("host"), getQuizById);
-router.put("/:quizId", requireAuth, requireRole("host"), updateQuizById);
-router.delete("/:quizId", requireAuth, requireRole("host"), deleteQuizById);
+router.get("/", ...hostOnly, listQuizzes);
+router.post("/", ...hostOnly, createQuiz);
+router.post("/:quizId/questions", ...hostOnly, addQuestion);
+router.patch("/:quizId/questions/:questionId", ...hostOnly, updateQuestion);
+router.delete("/:quizId/questions/:questionId", ...hostOnly, deleteQuestion);
+router.post("/:quizId/publish", ...hostOnly, publishQuiz);
+router.post("/:quizId/archive", ...hostOnly, archiveQuiz);
+router.get("/:quizId", ...hostOnly, getQuizById);
+router.put("/:quizId", ...hostOnly, updateQuizById);
+router.delete("/:quizId", ...hostOnly, deleteQuizById);
 
 export default router;

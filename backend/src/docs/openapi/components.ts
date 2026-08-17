@@ -200,6 +200,92 @@ export const components = {
         },
       },
     },
+    QuizDetail: {
+      allOf: [
+        { $ref: "#/components/schemas/Quiz" },
+        {
+          type: "object",
+          required: ["questions"],
+          properties: {
+            questions: {
+              type: "array",
+              items: { $ref: "#/components/schemas/Question" },
+            },
+          },
+        },
+      ],
+    },
+    GetQuizResponse: {
+      type: "object",
+      required: ["success", "statusCode", "message", "data"],
+      properties: {
+        success: { type: "boolean", example: true },
+        statusCode: { type: "integer", example: 200 },
+        message: { type: "string", example: "Quiz fetched" },
+        data: {
+          type: "object",
+          required: ["quiz"],
+          properties: {
+            quiz: { $ref: "#/components/schemas/QuizDetail" },
+          },
+        },
+      },
+    },
+    UpdateQuizRequest: {
+      type: "object",
+      minProperties: 1,
+      properties: {
+        title: {
+          type: "string",
+          minLength: 1,
+          maxLength: 120,
+          example: "Updated title",
+        },
+        description: {
+          type: "string",
+          maxLength: 2000,
+          example: "Optional",
+        },
+        pointsPerQuestion: {
+          type: "integer",
+          minimum: 1,
+          maximum: 1000,
+          example: 10,
+        },
+        timeLimitSeconds: {
+          type: "integer",
+          minimum: 5,
+          maximum: 300,
+          example: 30,
+        },
+      },
+    },
+    UpdateQuizResponse: {
+      type: "object",
+      required: ["success", "statusCode", "message", "data"],
+      properties: {
+        success: { type: "boolean", example: true },
+        statusCode: { type: "integer", example: 200 },
+        message: { type: "string", example: "Quiz updated" },
+        data: {
+          type: "object",
+          required: ["quiz"],
+          properties: {
+            quiz: { $ref: "#/components/schemas/Quiz" },
+          },
+        },
+      },
+    },
+    DeleteQuizResponse: {
+      type: "object",
+      required: ["success", "statusCode", "message", "data"],
+      properties: {
+        success: { type: "boolean", example: true },
+        statusCode: { type: "integer", example: 200 },
+        message: { type: "string", example: "Quiz deleted" },
+        data: { nullable: true, example: null },
+      },
+    },
     QuestionType: {
       type: "string",
       enum: ["MCQ", "POLL", "OPEN_TEXT"],
@@ -275,6 +361,64 @@ export const components = {
         },
       },
     },
+    UpdateQuestionResponse: {
+      type: "object",
+      required: ["success", "statusCode", "message", "data"],
+      properties: {
+        success: { type: "boolean", example: true },
+        statusCode: { type: "integer", example: 200 },
+        message: { type: "string", example: "Question updated" },
+        data: {
+          type: "object",
+          required: ["question"],
+          properties: {
+            question: { $ref: "#/components/schemas/Question" },
+          },
+        },
+      },
+    },
+    DeleteQuestionResponse: {
+      type: "object",
+      required: ["success", "statusCode", "message", "data"],
+      properties: {
+        success: { type: "boolean", example: true },
+        statusCode: { type: "integer", example: 200 },
+        message: { type: "string", example: "Question deleted" },
+        data: { nullable: true, example: null },
+      },
+    },
+    PublishQuizResponse: {
+      type: "object",
+      required: ["success", "statusCode", "message", "data"],
+      properties: {
+        success: { type: "boolean", example: true },
+        statusCode: { type: "integer", example: 200 },
+        message: { type: "string", example: "Quiz published" },
+        data: {
+          type: "object",
+          required: ["quiz"],
+          properties: {
+            quiz: { $ref: "#/components/schemas/Quiz" },
+          },
+        },
+      },
+    },
+    ArchiveQuizResponse: {
+      type: "object",
+      required: ["success", "statusCode", "message", "data"],
+      properties: {
+        success: { type: "boolean", example: true },
+        statusCode: { type: "integer", example: 200 },
+        message: { type: "string", example: "Quiz archived" },
+        data: {
+          type: "object",
+          required: ["quiz"],
+          properties: {
+            quiz: { $ref: "#/components/schemas/Quiz" },
+          },
+        },
+      },
+    },
   },
   responses: {
     Unauthorized: {
@@ -316,6 +460,20 @@ export const components = {
             message: "Validation failed",
             data: null,
             errors: [{ path: "title", message: "Title is required" }],
+          },
+        },
+      },
+    },
+    NotFound: {
+      description: "Resource not found or not owned by the current user",
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/ApiErrorResponse" },
+          example: {
+            success: false,
+            statusCode: 404,
+            message: "Quiz not found",
+            data: null,
           },
         },
       },

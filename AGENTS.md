@@ -71,7 +71,7 @@ Validation errors: `400` with `errors: [{ path, message }]`.
 | `/login`, `/register` | public | Auth forms wired to better-auth |
 | `/quizzes` | public | Browse stub |
 | `/home`, `/join`, `/session/[id]` | participant | Stubs + `RequireAuth` |
-| `/dashboard`, `/dashboard/quizzes/*`, `/dashboard/sessions/*` | host | Stubs + `RequireAuth` |
+| `/dashboard`, `/dashboard/quizzes/*`, `/dashboard/sessions/*` | host | Quiz list/editor + session stub |
 
 ## Implemented backend API
 
@@ -81,7 +81,7 @@ See [`docs/API.md`](docs/API.md). Mount points in `backend/src/app.ts`:
 - `ALL /api/auth/*` — better-auth
 - `GET /api/docs` — Swagger UI
 - `/api/users` — profile
-- `/api/quizzes` — host quiz CRUD + add questions (`MCQ` / `POLL` / `OPEN_TEXT`). Publish not built.
+- `/api/quizzes` — host quiz CRUD, questions, publish, archive
 
 ## When you finish a feature
 

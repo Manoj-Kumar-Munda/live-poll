@@ -6,6 +6,7 @@ import {
   createQuizSchema,
   getQuizByIdSchema,
   listQuizzesQuerySchema,
+  questionOnQuizParamsSchema,
   toQuestionSubdocument,
   toQuizCreateDocument,
   toQuizUpdateDocument,
@@ -306,6 +307,17 @@ describe("updateQuizFieldsSchema", () => {
     expect(toQuizUpdateDocument(fields)).toEqual({
       title: "Updated title",
       durationPerQuestion: 60_000,
+    });
+  });
+});
+
+describe("questionOnQuizParamsSchema", () => {
+  it("accepts quiz and question ObjectIds", () => {
+    const quizId = "507f1f77bcf86cd799439011";
+    const questionId = "507f1f77bcf86cd799439012";
+    expect(questionOnQuizParamsSchema.parse({ quizId, questionId })).toEqual({
+      quizId,
+      questionId,
     });
   });
 });

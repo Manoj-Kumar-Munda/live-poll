@@ -13,8 +13,8 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | Landing page | ✅ UI complete |
 | Auth (backend) | ✅ better-auth, roles, password reset email |
 | Auth (frontend) | ✅ login, register, session gates |
-| Quiz CRUD (backend) | 🔶 host quiz CRUD + add questions; publish not built |
-| Quiz UI (frontend) | ❌ stubs only |
+| Quiz CRUD (backend) | ✅ host CRUD, questions, publish, archive |
+| Quiz UI (frontend) | ✅ host list, editor, publish |
 | Sessions / realtime | ❌ not started |
 | Participant live flow | ❌ not started |
 | Public browse API wired | ❌ page stub only |
@@ -61,13 +61,13 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | POST | `/api/quizzes` | host | ✅ | Creates `DRAFT` |
 | GET | `/api/quizzes/:id` | host | ✅ | Owner-scoped detail + ordered `questions` |
 | PUT | `/api/quizzes/:id` | host | ✅ | Metadata; **DRAFT only** |
-| DELETE | `/api/quizzes/:id` | host | ✅ | Owner-scoped; also deletes questions |
+| DELETE | `/api/quizzes/:id` | host | ✅ | **DRAFT only**; deletes embedded questions |
 | POST | `/api/quizzes/:id/questions` | host | ✅ | Add `MCQ` / `POLL` / `OPEN_TEXT`; **DRAFT only** |
+| PATCH | `/api/quizzes/:id/questions/:questionId` | host | ✅ | Replace question; **DRAFT only** |
+| DELETE | `/api/quizzes/:id/questions/:questionId` | host | ✅ | **DRAFT only** |
+| POST | `/api/quizzes/:id/publish` | host | ✅ | Requires ≥1 question; locks edits |
+| POST | `/api/quizzes/:id/archive` | host | ✅ | `PUBLISHED` → `ARCHIVED` |
 | GET | `/api/quizzes/published` | — | ❌ | Public list |
-| POST | `/api/quizzes/:id/publish` | host | ❌ | Requires ≥1 question |
-| POST | `/api/quizzes/:id/archive` | host | ❌ | `PUBLISHED` → `ARCHIVED` |
-| PATCH | `/api/quizzes/:id/questions/:questionId` | host | ❌ | |
-| DELETE | `/api/quizzes/:id/questions/:questionId` | host | ❌ | |
 
 **Quiz model:** `pointsPerQuestion` (default 10), `durationPerQuestion` stored in ms; API uses `timeLimitSeconds`. Status: `DRAFT` \| `PUBLISHED` \| `ARCHIVED`.
 
@@ -88,9 +88,9 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | `/home` | `RequireAuth` participant | 🔶 Stub |
 | `/join` | `RequireAuth` participant | 🔶 Stub |
 | `/session/[sessionId]` | `RequireAuth` participant | 🔶 Stub |
-| `/dashboard` | `RequireAuth` host | 🔶 Stub |
-| `/dashboard/quizzes` | `RequireAuth` host | 🔶 Stub |
-| `/dashboard/quizzes/[id]` | `RequireAuth` host | 🔶 Stub |
+| `/dashboard` | `RequireAuth` host | ✅ Overview + recent quizzes |
+| `/dashboard/quizzes` | `RequireAuth` host | ✅ List, filter, create |
+| `/dashboard/quizzes/[id]` | `RequireAuth` host | ✅ Edit draft / view published |
 | `/dashboard/sessions/[sessionId]` | `RequireAuth` host | 🔶 Stub |
 | `/quizzes` | — | 🔶 Stub |
 
@@ -107,10 +107,10 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 - `modules/landing/` — nav, hero, features, CTA, footer
 - `modules/auth/` — login/register pages and forms
+- `modules/host/` — dashboard, quiz list, quiz editor (create / questions / publish / archive)
 
 ### Not wired to backend APIs yet
 
-- Quiz list / create / edit / publish
 - Public browse (`/quizzes`)
 - Any session or participant flow
 
@@ -123,10 +123,7 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 - [ ] **Answer collection** — immediate writes on submit
 - [ ] **Participant** — join by room code, waiting room, answer UI
 - [ ] **Leaderboard** — in-memory per session, batch score updates
-- [ ] **Quiz questions** — update / delete
-- [ ] **Publish / archive** quiz
 - [ ] **Public published list** — `GET /api/quizzes/published`
-- [ ] **Frontend quiz management** — consume `/api/quizzes`
 - [ ] **Frontend browse** — consume `/api/quizzes/published` + live badges (needs sessions)
 - [ ] **Participant history / stats** on `/home`
 
@@ -136,6 +133,8 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 | Date | Change |
 |------|--------|
+| 2026-08-17 | Host quiz lifecycle: update/delete questions, publish, archive; host dashboard UI |
+| 2026-08-17 | OpenAPI/Swagger: document GET/PUT/DELETE `/api/quizzes/:id` |
 | 2026-08-17 | Drop question reorder from MVP scope (add order only; reorder deferred) |
 | 2026-08-17 | Embed questions as subdocuments on `Quiz` (removed `Question` / `QuizQuestion` collections) |
 | 2026-08-14 | Added project docs (`AGENTS.md`, `ARCHITECTURE.md`, `STATE.md`) |
