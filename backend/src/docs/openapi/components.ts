@@ -419,6 +419,132 @@ export const components = {
         },
       },
     },
+    LiveSessionStatus: {
+      type: "string",
+      enum: ["WAITING", "LIVE", "FINISHED"],
+    },
+    LiveSessionParticipant: {
+      type: "object",
+      required: [
+        "id",
+        "userId",
+        "displayName",
+        "status",
+        "score",
+        "joinedAt",
+      ],
+      properties: {
+        id: { type: "string" },
+        userId: { type: "string" },
+        displayName: { type: "string" },
+        status: {
+          type: "string",
+          enum: ["ACTIVE", "QUIT", "FINISHED"],
+        },
+        score: { type: "integer" },
+        joinedAt: { type: "string", format: "date-time" },
+      },
+    },
+    LiveSession: {
+      type: "object",
+      required: [
+        "id",
+        "quizId",
+        "quizTitle",
+        "hostId",
+        "roomCode",
+        "status",
+        "participantCount",
+        "currentQuestionIndex",
+        "questionEndsAt",
+        "expiresAt",
+        "liveStartedAt",
+        "finishedAt",
+        "createdAt",
+        "updatedAt",
+      ],
+      properties: {
+        id: { type: "string" },
+        quizId: { type: "string" },
+        quizTitle: { type: "string" },
+        hostId: { type: "string" },
+        roomCode: { type: "string", example: "ABCDEF" },
+        status: { $ref: "#/components/schemas/LiveSessionStatus" },
+        participantCount: { type: "integer" },
+        currentQuestionIndex: { type: "integer" },
+        questionEndsAt: { type: "string", format: "date-time", nullable: true },
+        expiresAt: { type: "string", format: "date-time" },
+        liveStartedAt: { type: "string", format: "date-time", nullable: true },
+        finishedAt: { type: "string", format: "date-time", nullable: true },
+        createdAt: { type: "string", format: "date-time" },
+        updatedAt: { type: "string", format: "date-time" },
+      },
+    },
+    LiveSessionDetail: {
+      allOf: [
+        { $ref: "#/components/schemas/LiveSession" },
+        {
+          type: "object",
+          required: ["role", "participants"],
+          properties: {
+            role: { type: "string", enum: ["host", "participant"] },
+            participants: {
+              type: "array",
+              items: { $ref: "#/components/schemas/LiveSessionParticipant" },
+            },
+          },
+        },
+      ],
+    },
+    CreateLiveSessionRequest: {
+      type: "object",
+      required: ["quizId"],
+      properties: {
+        quizId: { type: "string", pattern: "^[a-fA-F0-9]{24}$" },
+      },
+    },
+    JoinLiveSessionRequest: {
+      type: "object",
+      required: ["roomCode"],
+      properties: {
+        roomCode: { type: "string", minLength: 6, maxLength: 6, example: "ABCDEF" },
+      },
+    },
+    LiveSessionResponse: {
+      type: "object",
+      required: ["success", "statusCode", "message", "data"],
+      properties: {
+        success: { type: "boolean", example: true },
+        statusCode: { type: "integer", example: 200 },
+        message: { type: "string" },
+        data: {
+          type: "object",
+          required: ["session"],
+          properties: {
+            session: { $ref: "#/components/schemas/LiveSessionDetail" },
+          },
+        },
+      },
+    },
+    LiveSessionListResponse: {
+      type: "object",
+      required: ["success", "statusCode", "message", "data"],
+      properties: {
+        success: { type: "boolean", example: true },
+        statusCode: { type: "integer", example: 200 },
+        message: { type: "string", example: "Sessions fetched" },
+        data: {
+          type: "object",
+          required: ["sessions"],
+          properties: {
+            sessions: {
+              type: "array",
+              items: { $ref: "#/components/schemas/LiveSession" },
+            },
+          },
+        },
+      },
+    },
   },
   responses: {
     Unauthorized: {

@@ -15,8 +15,8 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | Auth (frontend) | ✅ login, register, session gates |
 | Quiz CRUD (backend) | ✅ host CRUD, questions, publish, archive |
 | Quiz UI (frontend) | ✅ host list, editor, publish |
-| Sessions / realtime | ❌ not started |
-| Participant live flow | ❌ not started |
+| Sessions / realtime | 🔶 REST sessions; Socket.IO not started |
+| Participant live flow | 🔶 join + waiting room; live Q&A pending |
 | Public browse API wired | ❌ page stub only |
 
 ---
@@ -75,6 +75,24 @@ Living record of what exists in the codebase. Update this file when a feature sh
 
 **Files:** `backend/src/modules/quiz/quiz.{model,schema,service,controller,route,types,constants}.ts`, `question.model.ts` (subdocument schema only)
 
+### Sessions (`/api/sessions`)
+
+| Method | Path | Auth | Status | Notes |
+|--------|------|------|--------|-------|
+| GET | `/api/sessions` | host | ✅ | Optional `?quizId`, `?status=WAITING\|LIVE\|FINISHED` |
+| POST | `/api/sessions` | host | ✅ | Start session on **PUBLISHED** quiz; generates 6-char room code |
+| POST | `/api/sessions/join` | participant | ✅ | Join by `roomCode` while `WAITING` |
+| GET | `/api/sessions/:sessionId` | host or joined participant | ✅ | Detail + participant list |
+| POST | `/api/sessions/:sessionId/start` | host | ✅ | `WAITING` → `LIVE` |
+| POST | `/api/sessions/:sessionId/end` | host | ✅ | → `FINISHED` |
+| POST | `/api/sessions/:sessionId/leave` | participant | ✅ | Mark participant `QUIT` |
+
+**Session model:** `quizId`, `hostId`, `roomCode`, `status` `WAITING` \| `LIVE` \| `FINISHED`, `expiresAt` (4h max), `currentQuestionIndex`, `questionEndsAt`. One active session per quiz per host.
+
+**SessionParticipant model:** `sessionId`, `userId`, `displayName`, `status` `ACTIVE` \| `QUIT` \| `FINISHED`, `score`.
+
+**Files:** `backend/src/modules/session/session.{model,schema,service,controller,route,types,constants}.ts`, `participant.model.ts`
+
 ---
 
 ## Frontend — implemented
@@ -86,12 +104,12 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | `/` | `RedirectIfAuthenticated` | ✅ Landing |
 | `/login`, `/register` | `(auth)/layout` redirects if logged in | ✅ Forms wired to better-auth |
 | `/home` | `RequireAuth` participant | 🔶 Stub |
-| `/join` | `RequireAuth` participant | 🔶 Stub |
-| `/session/[sessionId]` | `RequireAuth` participant | 🔶 Stub |
+| `/join` | `RequireAuth` participant | ✅ Room code join |
+| `/session/[sessionId]` | `RequireAuth` participant | 🔶 Waiting room; live Q&A pending |
 | `/dashboard` | `RequireAuth` host | ✅ Overview + recent quizzes |
 | `/dashboard/quizzes` | `RequireAuth` host | ✅ List, filter, create |
 | `/dashboard/quizzes/[id]` | `RequireAuth` host | ✅ Edit draft / view published |
-| `/dashboard/sessions/[sessionId]` | `RequireAuth` host | 🔶 Stub |
+| `/dashboard/sessions/[sessionId]` | `RequireAuth` host | ✅ Control room (room code, start/end) |
 | `/quizzes` | — | 🔶 Stub |
 
 Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
@@ -107,21 +125,21 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 - `modules/landing/` — nav, hero, features, CTA, footer
 - `modules/auth/` — login/register pages and forms
-- `modules/host/` — dashboard, quiz list, quiz editor (create / questions / publish / archive)
+- `modules/host/` — dashboard, quiz list, quiz editor, session control room
+- `modules/participant/` — join by room code, waiting room
 
 ### Not wired to backend APIs yet
 
 - Public browse (`/quizzes`)
-- Any session or participant flow
+- Live question flow (Socket.IO)
 
 ---
 
 ## Not implemented (next up per PRD)
 
-- [ ] **Session module** — model, room codes, `WAITING` \| `LIVE` \| `FINISHED`
 - [ ] **Socket.IO** — live session state, question launch, timers, results
 - [ ] **Answer collection** — immediate writes on submit
-- [ ] **Participant** — join by room code, waiting room, answer UI
+- [ ] **Participant** — answer UI, results, leaderboard
 - [ ] **Leaderboard** — in-memory per session, batch score updates
 - [ ] **Public published list** — `GET /api/quizzes/published`
 - [ ] **Frontend browse** — consume `/api/quizzes/published` + live badges (needs sessions)
@@ -133,7 +151,7 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 | Date | Change |
 |------|--------|
-| 2026-08-17 | Host quiz lifecycle: update/delete questions, publish, archive; host dashboard UI |
+| 2026-08-17 | Sessions REST API: room codes, join, start/end; host control room + participant join UI |
 | 2026-08-17 | OpenAPI/Swagger: document GET/PUT/DELETE `/api/quizzes/:id` |
 | 2026-08-17 | Drop question reorder from MVP scope (add order only; reorder deferred) |
 | 2026-08-17 | Embed questions as subdocuments on `Quiz` (removed `Question` / `QuizQuestion` collections) |

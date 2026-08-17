@@ -402,4 +402,208 @@ export const paths = {
       },
     },
   },
+  "/api/sessions": {
+    get: {
+      tags: ["Sessions"],
+      summary: "List host sessions",
+      security: [{ sessionCookie: [] }],
+      parameters: [
+        {
+          name: "quizId",
+          in: "query",
+          required: false,
+          schema: { type: "string", pattern: "^[a-fA-F0-9]{24}$" },
+        },
+        {
+          name: "status",
+          in: "query",
+          required: false,
+          schema: { $ref: "#/components/schemas/LiveSessionStatus" },
+        },
+      ],
+      responses: {
+        "200": {
+          description: "Sessions fetched",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/LiveSessionListResponse" },
+            },
+          },
+        },
+        "401": { $ref: "#/components/responses/Unauthorized" },
+        "403": { $ref: "#/components/responses/Forbidden" },
+      },
+    },
+    post: {
+      tags: ["Sessions"],
+      summary: "Start a session on a published quiz",
+      security: [{ sessionCookie: [] }],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/CreateLiveSessionRequest" },
+          },
+        },
+      },
+      responses: {
+        "201": {
+          description: "Session created",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/LiveSessionResponse" },
+            },
+          },
+        },
+        "400": { $ref: "#/components/responses/ValidationError" },
+        "401": { $ref: "#/components/responses/Unauthorized" },
+        "403": { $ref: "#/components/responses/Forbidden" },
+        "404": { $ref: "#/components/responses/NotFound" },
+        "409": { $ref: "#/components/responses/ValidationError" },
+      },
+    },
+  },
+  "/api/sessions/join": {
+    post: {
+      tags: ["Sessions"],
+      summary: "Join a session by room code",
+      security: [{ sessionCookie: [] }],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/JoinLiveSessionRequest" },
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: "Joined session",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/LiveSessionResponse" },
+            },
+          },
+        },
+        "400": { $ref: "#/components/responses/ValidationError" },
+        "401": { $ref: "#/components/responses/Unauthorized" },
+        "403": { $ref: "#/components/responses/Forbidden" },
+        "404": { $ref: "#/components/responses/NotFound" },
+      },
+    },
+  },
+  "/api/sessions/{sessionId}": {
+    get: {
+      tags: ["Sessions"],
+      summary: "Get session detail",
+      security: [{ sessionCookie: [] }],
+      parameters: [
+        {
+          name: "sessionId",
+          in: "path",
+          required: true,
+          schema: { type: "string", pattern: "^[a-fA-F0-9]{24}$" },
+        },
+      ],
+      responses: {
+        "200": {
+          description: "Session fetched",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/LiveSessionResponse" },
+            },
+          },
+        },
+        "401": { $ref: "#/components/responses/Unauthorized" },
+        "403": { $ref: "#/components/responses/Forbidden" },
+        "404": { $ref: "#/components/responses/NotFound" },
+      },
+    },
+  },
+  "/api/sessions/{sessionId}/start": {
+    post: {
+      tags: ["Sessions"],
+      summary: "Start quiz (WAITING → LIVE)",
+      security: [{ sessionCookie: [] }],
+      parameters: [
+        {
+          name: "sessionId",
+          in: "path",
+          required: true,
+          schema: { type: "string", pattern: "^[a-fA-F0-9]{24}$" },
+        },
+      ],
+      responses: {
+        "200": {
+          description: "Session started",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/LiveSessionResponse" },
+            },
+          },
+        },
+        "400": { $ref: "#/components/responses/ValidationError" },
+        "401": { $ref: "#/components/responses/Unauthorized" },
+        "403": { $ref: "#/components/responses/Forbidden" },
+        "404": { $ref: "#/components/responses/NotFound" },
+      },
+    },
+  },
+  "/api/sessions/{sessionId}/end": {
+    post: {
+      tags: ["Sessions"],
+      summary: "End session",
+      security: [{ sessionCookie: [] }],
+      parameters: [
+        {
+          name: "sessionId",
+          in: "path",
+          required: true,
+          schema: { type: "string", pattern: "^[a-fA-F0-9]{24}$" },
+        },
+      ],
+      responses: {
+        "200": {
+          description: "Session ended",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/LiveSessionResponse" },
+            },
+          },
+        },
+        "400": { $ref: "#/components/responses/ValidationError" },
+        "401": { $ref: "#/components/responses/Unauthorized" },
+        "403": { $ref: "#/components/responses/Forbidden" },
+        "404": { $ref: "#/components/responses/NotFound" },
+      },
+    },
+  },
+  "/api/sessions/{sessionId}/leave": {
+    post: {
+      tags: ["Sessions"],
+      summary: "Leave a session",
+      security: [{ sessionCookie: [] }],
+      parameters: [
+        {
+          name: "sessionId",
+          in: "path",
+          required: true,
+          schema: { type: "string", pattern: "^[a-fA-F0-9]{24}$" },
+        },
+      ],
+      responses: {
+        "200": {
+          description: "Left session",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/LiveSessionResponse" },
+            },
+          },
+        },
+        "401": { $ref: "#/components/responses/Unauthorized" },
+        "403": { $ref: "#/components/responses/Forbidden" },
+        "404": { $ref: "#/components/responses/NotFound" },
+      },
+    },
+  },
 } as const;

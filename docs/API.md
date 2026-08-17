@@ -237,10 +237,44 @@ Update is enforced as DRAFT-only. Delete quiz is DRAFT-only. Publish and archive
 
 ---
 
+## Sessions (`/api/sessions`)
+
+Host and participant routes. Cookie session required.
+
+### `GET /api/sessions`
+
+Host only. Optional query: `quizId`, `status` (`WAITING` | `LIVE` | `FINISHED`).
+
+### `POST /api/sessions`
+
+Host only. Body: `{ "quizId": "..." }`. Quiz must be `PUBLISHED`. Returns session in `WAITING` with a 6-character room code.
+
+### `POST /api/sessions/join`
+
+Participant only. Body: `{ "roomCode": "ABCDEF" }`. Session must be `WAITING`.
+
+### `GET /api/sessions/:sessionId`
+
+Host (owner) or joined participant. Returns session detail and participant list.
+
+### `POST /api/sessions/:sessionId/start`
+
+Host only. `WAITING` → `LIVE` (locks joining).
+
+### `POST /api/sessions/:sessionId/end`
+
+Host only. Ends session (`FINISHED`).
+
+### `POST /api/sessions/:sessionId/leave`
+
+Participant only. Marks participant as `QUIT`.
+
+---
+
 ## Not implemented
 
 - `GET /api/quizzes/published`
-- Sessions (`/api/sessions`, room codes)
+- Socket.IO live question flow
 - Answers / `QuizAttempt`
 - Leaderboard persist (`QuizResult`)
 - Participant history / stats

@@ -70,8 +70,8 @@ Validation errors: `400` with `errors: [{ path, message }]`.
 | `/` | public | Landing (placeholder nav uses session) |
 | `/login`, `/register` | public | Auth forms wired to better-auth |
 | `/quizzes` | public | Browse stub |
-| `/home`, `/join`, `/session/[id]` | participant | Stubs + `RequireAuth` |
-| `/dashboard`, `/dashboard/quizzes/*`, `/dashboard/sessions/*` | host | Quiz list/editor + session stub |
+| `/home`, `/join`, `/session/[id]` | participant | Join + waiting room (live Q&A pending) |
+| `/dashboard`, `/dashboard/quizzes/*`, `/dashboard/sessions/*` | host | Quiz list/editor + session control room |
 
 ## Implemented backend API
 
@@ -82,6 +82,7 @@ See [`docs/API.md`](docs/API.md). Mount points in `backend/src/app.ts`:
 - `GET /api/docs` — Swagger UI
 - `/api/users` — profile
 - `/api/quizzes` — host quiz CRUD, questions, publish, archive
+- `/api/sessions` — room codes, join, start/end session
 
 ## When you finish a feature
 
@@ -92,4 +93,4 @@ See [`docs/API.md`](docs/API.md). Mount points in `backend/src/app.ts`:
 
 ## Out of scope (MVP)
 
-Sessions, room codes, Socket.IO, answers, leaderboard, participant history — see PRD §9 and `docs/STATE.md`.
+Socket.IO question flow, answers, leaderboard, participant history — see PRD §9 and `docs/STATE.md`.

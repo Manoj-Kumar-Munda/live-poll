@@ -12,6 +12,7 @@ import {
 import { notFoundHandler } from "@/middlewares/notFoundHandler.js";
 import { errorHandler } from "@/middlewares/errorHandler.js";
 import quizRouter from "@/modules/quiz/quiz.route.js";
+import sessionRouter from "@/modules/session/session.route.js";
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use("/api/docs", swaggerMiddleware, swaggerHandler);
 
 app.use("/api/users", userRouter);
 app.use("/api/quizzes", quizRouter);
+app.use("/api/sessions", sessionRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
