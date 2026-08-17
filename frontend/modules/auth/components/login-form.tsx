@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "./password-input";
 import { loginSchema, type LoginValues } from "../schemas/auth.schema";
 import { authClient } from "../../../lib/auth-client";
+import { showErrorToast } from "@/lib/errors";
 import { redirectByRole } from "../utils/helpers";
 
 export function LoginForm() {
@@ -37,9 +38,10 @@ export function LoginForm() {
     });
 
     if (error) {
-      form.setError("root", {
-        message: error.message || "Could not log in. Check your email and password.",
-      });
+      const message =
+        error.message || "Could not log in. Check your email and password.";
+      showErrorToast(error, message);
+      form.setError("root", { message });
       return;
     }
 

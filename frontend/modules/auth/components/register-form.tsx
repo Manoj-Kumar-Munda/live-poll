@@ -16,6 +16,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { PasswordInput } from "./password-input";
 import { registerSchema, type RegisterValues } from "../schemas/auth.schema";
 import { authClient } from "../../../lib/auth-client";
+import { showErrorToast } from "@/lib/errors";
 import { redirectByRole } from "../utils/helpers";
 import type { UserRole } from "@/shared/types";
 
@@ -45,9 +46,9 @@ export function RegisterForm() {
     });
 
     if (error) {
-      form.setError("root", {
-        message: error.message || "Could not create your account.",
-      });
+      const message = error.message || "Could not create your account.";
+      showErrorToast(error, message);
+      form.setError("root", { message });
       return;
     }
 
