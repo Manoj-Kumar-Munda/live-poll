@@ -13,7 +13,7 @@
          └─────────────────────────────────────────────┴──► MongoDB
 ```
 
-**Planned (not built):** Socket.IO on backend for live session state, in-memory leaderboard per session. But when the game finishes it should be stored in the database.
+**Implemented (partial):** Socket.IO on the same HTTP server as Express. Connections authenticate via better-auth session cookie (`connected` event only). Session rooms and live question flow are not built yet.
 
 ## Backend
 

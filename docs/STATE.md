@@ -15,7 +15,7 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | Auth (frontend) | ✅ login, register, session gates |
 | Quiz CRUD (backend) | ✅ host CRUD, questions, publish, archive |
 | Quiz UI (frontend) | ✅ host list, editor, publish |
-| Sessions / realtime | 🔶 REST sessions; Socket.IO not started |
+| Sessions / realtime | 🔶 REST sessions; Socket.IO auth wired |
 | Participant live flow | 🔶 join + waiting room; live Q&A pending |
 | Public browse API wired | ❌ page stub only |
 
@@ -93,6 +93,16 @@ Living record of what exists in the codebase. Update this file when a feature sh
 
 **Files:** `backend/src/modules/session/session.{model,schema,service,controller,route,types,constants}.ts`, `participant.model.ts`
 
+### Realtime (Socket.IO)
+
+| Piece | Status | Notes |
+|-------|--------|-------|
+| HTTP + Socket.IO server | ✅ | `backend/src/index.ts` shares one `http.Server` |
+| Cookie session auth on connect | ✅ | better-auth `getSession` from handshake headers |
+| `connected` ack event | ✅ | `{ userId, role }` — no session rooms yet |
+
+**Files:** `backend/src/realtime/{socket.server,socket.auth,socket.types,index}.ts`
+
 ---
 
 ## Frontend — implemented
@@ -137,7 +147,8 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 ## Not implemented (next up per PRD)
 
-- [ ] **Socket.IO** — live session state, question launch, timers, results
+- [ ] **Socket.IO session rooms** — join live session room, participant count broadcasts
+- [ ] **Socket.IO question flow** — launch, timers, results
 - [ ] **Answer collection** — immediate writes on submit
 - [ ] **Participant** — answer UI, results, leaderboard
 - [ ] **Leaderboard** — in-memory per session, batch score updates
@@ -151,6 +162,7 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 | Date | Change |
 |------|--------|
+| 2026-08-17 | Socket.IO server on shared HTTP port; cookie auth on connect |
 | 2026-08-17 | Sessions REST API: room codes, join, start/end; host control room + participant join UI |
 | 2026-08-17 | OpenAPI/Swagger: document GET/PUT/DELETE `/api/quizzes/:id` |
 | 2026-08-17 | Drop question reorder from MVP scope (add order only; reorder deferred) |
