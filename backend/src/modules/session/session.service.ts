@@ -23,6 +23,7 @@ import type {
   SessionDetailResponse,
   SessionParticipantResponse,
   SessionResponse,
+  SessionRoomState,
 } from "./session.types.js";
 
 const ACTIVE_SESSION_STATUSES: SessionStatus[] = [
@@ -132,6 +133,31 @@ async function listParticipants(sessionId: string) {
   return participants.map((participant) =>
     toParticipantResponse(participant as SessionParticipantDocument),
   );
+}
+
+async function emitSessionRoomUpdate(sessionId: string) {
+  try {
+    const { broadcastSessionState } = await import(
+      "@/realtime/session.handlers.js"
+    );
+    await broadcastSessionState(sessionId);
+  } catch {
+    // Socket.IO may not be initialized (e.g. tests).
+  }
+}
+
+export async function getSessionRoomState(
+  sessionId: string,
+): Promise<SessionRoomState> {
+  const session = await requireSession(sessionId);
+  const quizTitle = await getQuizTitle(session.quizId.toString());
+  const base = await toSessionResponse(session, quizTitle);
+  const participants = await listParticipants(sessionId);
+
+  return {
+    ...base,
+    participants,
+  };
 }
 
 async function buildSessionDetail(
@@ -302,6 +328,7 @@ export async function joinSession(
     await participant.save();
   }
 
+  await emitSessionRoomUpdate(session._id.toString());
   return buildSessionDetail(session as SessionDocument, "participant");
 }
 
@@ -332,6 +359,7 @@ export async function startSession(
     throw new ApiError(400, "Session can only be started from the waiting room");
   }
 
+  await emitSessionRoomUpdate(sessionId);
   return buildSessionDetail(updated as SessionDocument, "host");
 }
 
@@ -372,6 +400,7 @@ export async function endSession(
     { $set: { status: PARTICIPANT_STATUS.FINISHED } },
   ).exec();
 
+  await emitSessionRoomUpdate(sessionId);
   return buildSessionDetail(updated as SessionDocument, "host");
 }
 
@@ -397,5 +426,6 @@ export async function leaveSession(
   participant.status = PARTICIPANT_STATUS.QUIT;
   await participant.save();
 
+  await emitSessionRoomUpdate(sessionId);
   return buildSessionDetail(session, "participant");
 }

@@ -31,3 +31,8 @@ export type SessionDetailResponse = SessionResponse & {
   role: "host" | "participant";
   participants: SessionParticipantResponse[];
 };
+
+/** Broadcast to everyone in a session socket room (no per-user role). */
+export type SessionRoomState = SessionResponse & {
+  participants: SessionParticipantResponse[];
+};
