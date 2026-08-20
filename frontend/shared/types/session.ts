@@ -1,5 +1,7 @@
 export type SessionStatus = "WAITING" | "LIVE" | "FINISHED";
 
+export type QuestionType = "MCQ" | "POLL" | "OPEN_TEXT";
+
 export type ParticipantStatus = "ACTIVE" | "QUIT" | "FINISHED";
 
 export type SessionParticipant = {
@@ -35,4 +37,31 @@ export type SessionDetail = Session & {
 
 export type SessionRoomState = Session & {
   participants: SessionParticipant[];
+};
+
+export type LiveQuestion = {
+  id: string;
+  type: QuestionType;
+  prompt: string;
+  order: number;
+  options?: string[];
+  maxLength?: number;
+};
+
+export type QuestionStartedPayload = {
+  sessionId: string;
+  index: number;
+  question: LiveQuestion;
+  endsAt: string;
+  serverNow: string;
+};
+
+export type QuestionEndedPayload = {
+  sessionId: string;
+  index: number;
+  reason: "timer" | "host";
+};
+
+export type ParticipantSessionItem = Session & {
+  participantStatus: ParticipantStatus;
 };

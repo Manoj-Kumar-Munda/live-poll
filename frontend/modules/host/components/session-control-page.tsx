@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SessionStatusBadge } from "@/components/session-status-badge";
+import { LiveQuestionPanel } from "@/components/live-question-panel";
+import { useLiveQuestion } from "@/shared/hooks/use-live-question";
 import {
   useEndSession,
   useSession,
@@ -23,6 +25,13 @@ export function SessionControlPage({ sessionId }: SessionControlPageProps) {
   const endSession = useEndSession(sessionId);
 
   useSessionRoom(sessionId, sessionKeys.detail(sessionId));
+  const {
+    activeQuestion,
+    lastEnded,
+    launchQuestion,
+    endQuestion,
+    hasActiveQuestion,
+  } = useLiveQuestion(sessionId);
 
   async function handleStart() {
     try {
@@ -176,10 +185,40 @@ export function SessionControlPage({ sessionId }: SessionControlPageProps) {
       {session.status === "LIVE" ? (
         <section className="mt-8 rounded-xl border border-dashed border-border p-5">
           <h2 className="font-display text-lg font-semibold">Live controls</h2>
-          <p className="mt-2 text-sm text-text-secondary">
-            Question launch, timers, and results arrive in the next slice.
-          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              type="button"
+              onClick={launchQuestion}
+              disabled={hasActiveQuestion}
+            >
+              Launch next question
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={endQuestion}
+              disabled={!hasActiveQuestion}
+            >
+              End question early
+            </Button>
+          </div>
+          {lastEnded && !activeQuestion ? (
+            <p className="mt-3 text-sm text-text-secondary">
+              Question {lastEnded.index + 1} ended (
+              {lastEnded.reason === "timer" ? "time up" : "host ended"}). Results
+              and answers come in the next slice.
+            </p>
+          ) : null}
         </section>
+      ) : null}
+
+      {activeQuestion ? (
+        <LiveQuestionPanel
+          question={activeQuestion.question}
+          endsAt={activeQuestion.endsAt}
+          serverNow={activeQuestion.serverNow}
+          index={activeQuestion.index}
+        />
       ) : null}
     </main>
   );

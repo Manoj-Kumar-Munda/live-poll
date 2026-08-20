@@ -3,7 +3,12 @@
 export type UserRole = "host" | "participant";
 
 export type {
+  LiveQuestion,
+  ParticipantSessionItem,
   ParticipantStatus,
+  QuestionEndedPayload,
+  QuestionStartedPayload,
+  QuestionType,
   Session,
   SessionDetail,
   SessionParticipant,

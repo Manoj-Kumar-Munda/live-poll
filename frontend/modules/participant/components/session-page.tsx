@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SessionStatusBadge } from "@/components/session-status-badge";
+import { LiveQuestionPanel } from "@/components/live-question-panel";
+import { useLiveQuestion } from "@/shared/hooks/use-live-question";
 import {
   useLeaveSession,
   useParticipantSession,
@@ -21,6 +23,7 @@ export function SessionPage({ sessionId }: SessionPageProps) {
   const leaveSession = useLeaveSession(sessionId);
 
   useSessionRoom(sessionId, participantSessionKeys.detail(sessionId));
+  const { activeQuestion, lastEnded } = useLiveQuestion(sessionId);
 
   async function handleLeave() {
     try {
@@ -92,13 +95,26 @@ export function SessionPage({ sessionId }: SessionPageProps) {
         </section>
       ) : null}
 
-      {session.status === "LIVE" ? (
+      {session.status === "LIVE" && !activeQuestion ? (
         <section className="mt-10 rounded-xl border border-border bg-surface p-8 text-center">
-          <p className="font-display text-xl font-semibold">Quiz in progress</p>
+          <p className="font-display text-xl font-semibold">
+            {lastEnded ? "Waiting for the next question" : "Quiz in progress"}
+          </p>
           <p className="mt-2 text-sm text-text-secondary">
-            Live questions and answers are coming in the next slice.
+            {lastEnded
+              ? `Question ${lastEnded.index + 1} has ended. Hang tight.`
+              : "The host will launch the first question soon."}
           </p>
         </section>
+      ) : null}
+
+      {activeQuestion ? (
+        <LiveQuestionPanel
+          question={activeQuestion.question}
+          endsAt={activeQuestion.endsAt}
+          serverNow={activeQuestion.serverNow}
+          index={activeQuestion.index}
+        />
       ) : null}
 
       {session.status === "FINISHED" ? (
