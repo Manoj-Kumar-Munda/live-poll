@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { showErrorToast } from "@/lib/errors";
 import { connectSocket, getSocket } from "@/lib/socket";
@@ -22,6 +22,8 @@ export function useSessionRoom(
   queryKey: readonly unknown[],
 ) {
   const queryClient = useQueryClient();
+  const queryKeyRef = useRef(queryKey);
+  queryKeyRef.current = queryKey;
 
   useEffect(() => {
     if (!sessionId) {
@@ -34,13 +36,13 @@ export function useSessionRoom(
       role: SessionDetail["role"];
       state: SessionRoomState;
     }) {
-      queryClient.setQueryData<SessionDetail>(queryKey, () =>
+      queryClient.setQueryData<SessionDetail>(queryKeyRef.current, () =>
         mergeSessionState(undefined, payload.state, payload.role),
       );
     }
 
     function onState(state: SessionRoomState) {
-      queryClient.setQueryData<SessionDetail>(queryKey, (current) =>
+      queryClient.setQueryData<SessionDetail>(queryKeyRef.current, (current) =>
         current ? mergeSessionState(current, state) : undefined,
       );
     }
@@ -60,5 +62,5 @@ export function useSessionRoom(
       socket.off("session:state", onState);
       socket.off("session:error", onError);
     };
-  }, [queryClient, queryKey, sessionId]);
+  }, [queryClient, sessionId]);
 }

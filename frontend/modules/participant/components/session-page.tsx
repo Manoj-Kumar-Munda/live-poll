@@ -23,7 +23,13 @@ export function SessionPage({ sessionId }: SessionPageProps) {
   const leaveSession = useLeaveSession(sessionId);
 
   useSessionRoom(sessionId, participantSessionKeys.detail(sessionId));
-  const { activeQuestion, lastEnded } = useLiveQuestion(sessionId);
+  const {
+    activeQuestion,
+    lastEnded,
+    submittedAnswer,
+    isSubmitting,
+    submitAnswer,
+  } = useLiveQuestion(sessionId);
 
   async function handleLeave() {
     try {
@@ -114,6 +120,10 @@ export function SessionPage({ sessionId }: SessionPageProps) {
           endsAt={activeQuestion.endsAt}
           serverNow={activeQuestion.serverNow}
           index={activeQuestion.index}
+          mode="answer"
+          submittedValue={submittedAnswer}
+          onSubmit={submitAnswer}
+          isSubmitting={isSubmitting}
         />
       ) : null}
 

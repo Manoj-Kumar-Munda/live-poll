@@ -16,7 +16,7 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | Quiz CRUD (backend) | ✅ host CRUD, questions, publish, archive |
 | Quiz UI (frontend) | ✅ host list, editor, publish |
 | Sessions / realtime | 🔶 REST sessions; Socket.IO auth wired |
-| Participant live flow | 🔶 join + waiting room; live Q&A pending |
+| Participant live flow | 🔶 join + answer UI; results pending |
 | Public browse API wired | ❌ page stub only |
 
 ---
@@ -92,7 +92,9 @@ Living record of what exists in the codebase. Update this file when a feature sh
 
 **SessionParticipant model:** `sessionId`, `userId`, `displayName`, `status` `ACTIVE` \| `QUIT` \| `FINISHED`, `score`.
 
-**Files:** `backend/src/modules/session/session.{model,schema,service,controller,route,types,constants}.ts`, `participant.model.ts`
+**Answer model:** `sessionId`, `userId`, `questionId`, `questionIndex`, `questionType`, `value` (normalized lowercase). Unique per user per question.
+
+**Files:** `backend/src/modules/session/session.{model,schema,service,controller,route,types,constants}.ts`, `participant.model.ts`, `answer.{model,schema,service}.ts`
 
 ### Realtime (Socket.IO)
 
@@ -103,9 +105,9 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | `connected` ack event | ✅ | `{ userId, role }` |
 | Session rooms | ✅ | `session:join` / `session:state`; REST mutations broadcast |
 | Question launch / timers | ✅ | `question:launch`, server `questionEndsAt`, auto-end timer |
-| Answer submission | ❌ | Next slice (uses `answerGraceMs: 400`) |
+| Answer submission | ✅ | `question:answer` → immediate DB write; `question:answered` ack; 400ms grace |
 
-**Files:** `backend/src/realtime/{socket.server,socket.auth,socket.types,session.handlers,session.room,index}.ts`
+**Files:** `backend/src/realtime/{socket.server,socket.auth,socket.types,session.handlers,question.handlers,session.room,index}.ts`
 
 ---
 
@@ -119,7 +121,7 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | `/login`, `/register` | `(auth)/layout` redirects if logged in | ✅ Forms wired to better-auth |
 | `/home` | `RequireAuth` participant | ✅ Quick join + session list |
 | `/join` | `RequireAuth` participant | ✅ Room code join |
-| `/session/[sessionId]` | `RequireAuth` participant | 🔶 Waiting room via socket; live Q&A pending |
+| `/session/[sessionId]` | `RequireAuth` participant | ✅ Join, waiting room, live answer UI |
 | `/dashboard` | `RequireAuth` host | ✅ Overview + recent quizzes |
 | `/dashboard/quizzes` | `RequireAuth` host | ✅ List, filter, create |
 | `/dashboard/quizzes/[id]` | `RequireAuth` host | ✅ Edit draft / view published |
@@ -145,15 +147,14 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 ### Not wired to backend APIs yet
 
 - Public browse (`/quizzes`)
-- Live question flow (Socket.IO)
 
 ---
 
 ## Not implemented (next up per PRD)
 
-- [ ] **Socket.IO question flow** — launch, timers, results
-- [ ] **Answer collection** — immediate writes on submit
-- [ ] **Participant** — answer UI, results, leaderboard
+- [ ] **Question results** — reveal correct answer, vote %, word cloud after each question
+- [ ] **Answer collection** — ~~immediate writes on submit~~ ✅ done via `question:answer`
+- [ ] **Participant** — ~~answer UI~~ ✅; results, leaderboard pending
 - [ ] **Leaderboard** — in-memory per session, batch score updates
 - [ ] **Public published list** — `GET /api/quizzes/published`
 - [ ] **Frontend browse** — consume `/api/quizzes/published` + live badges (needs sessions)
@@ -165,6 +166,7 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 | Date | Change |
 |------|--------|
+| 2026-08-20 | Answer submission via `question:answer` socket; Answer collection; interactive participant UI |
 | 2026-08-20 | Question launch + server timers (`question:started` / `question:ended`, 400ms grace constant) |
 | 2026-08-17 | Socket.IO server on shared HTTP port; cookie auth on connect |
 | 2026-08-17 | Sessions REST API: room codes, join, start/end; host control room + participant join UI |

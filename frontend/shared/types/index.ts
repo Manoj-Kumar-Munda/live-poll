@@ -6,6 +6,7 @@ export type {
   LiveQuestion,
   ParticipantSessionItem,
   ParticipantStatus,
+  QuestionAnsweredPayload,
   QuestionEndedPayload,
   QuestionStartedPayload,
   QuestionType,

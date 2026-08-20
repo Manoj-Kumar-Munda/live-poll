@@ -1,5 +1,6 @@
 import { io, type Socket } from "socket.io-client";
 import type {
+  QuestionAnsweredPayload,
   QuestionEndedPayload,
   QuestionStartedPayload,
   SessionRoomState,
@@ -12,6 +13,7 @@ export type ClientToServerEvents = {
   "session:leave": () => void;
   "question:launch": () => void;
   "question:end": () => void;
+  "question:answer": (payload: { value: string }) => void;
 };
 
 export type ServerToClientEvents = {
@@ -24,6 +26,7 @@ export type ServerToClientEvents = {
   "session:error": (payload: { message: string }) => void;
   "question:started": (payload: QuestionStartedPayload) => void;
   "question:ended": (payload: QuestionEndedPayload) => void;
+  "question:answered": (payload: QuestionAnsweredPayload) => void;
 };
 
 export type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;

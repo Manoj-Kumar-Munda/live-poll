@@ -62,6 +62,18 @@ export type QuestionEndedPayload = {
   reason: "timer" | "host";
 };
 
+export type QuestionAnswerPayload = {
+  sessionId: string;
+  index: number;
+  value: string;
+};
+
+export type QuestionAnsweredPayload = {
+  sessionId: string;
+  index: number;
+  value: string;
+};
+
 export type ParticipantSessionItem = Session & {
   participantStatus: ParticipantStatus;
 };
