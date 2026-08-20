@@ -99,9 +99,11 @@ Living record of what exists in the codebase. Update this file when a feature sh
 |-------|--------|-------|
 | HTTP + Socket.IO server | ✅ | `backend/src/index.ts` shares one `http.Server` |
 | Cookie session auth on connect | ✅ | better-auth `getSession` from handshake headers |
-| `connected` ack event | ✅ | `{ userId, role }` — no session rooms yet |
+| `connected` ack event | ✅ | `{ userId, role }` |
+| Session rooms | ✅ | `session:join` / `session:state`; REST mutations broadcast |
+| Question launch / timers | ❌ | Next slice |
 
-**Files:** `backend/src/realtime/{socket.server,socket.auth,socket.types,index}.ts`
+**Files:** `backend/src/realtime/{socket.server,socket.auth,socket.types,session.handlers,session.room,index}.ts`
 
 ---
 
@@ -115,11 +117,11 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | `/login`, `/register` | `(auth)/layout` redirects if logged in | ✅ Forms wired to better-auth |
 | `/home` | `RequireAuth` participant | 🔶 Stub |
 | `/join` | `RequireAuth` participant | ✅ Room code join |
-| `/session/[sessionId]` | `RequireAuth` participant | 🔶 Waiting room; live Q&A pending |
+| `/session/[sessionId]` | `RequireAuth` participant | 🔶 Waiting room via socket; live Q&A pending |
 | `/dashboard` | `RequireAuth` host | ✅ Overview + recent quizzes |
 | `/dashboard/quizzes` | `RequireAuth` host | ✅ List, filter, create |
 | `/dashboard/quizzes/[id]` | `RequireAuth` host | ✅ Edit draft / view published |
-| `/dashboard/sessions/[sessionId]` | `RequireAuth` host | ✅ Control room (room code, start/end) |
+| `/dashboard/sessions/[sessionId]` | `RequireAuth` host | ✅ Control room (socket live updates) |
 | `/quizzes` | — | 🔶 Stub |
 
 Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
@@ -147,7 +149,6 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 ## Not implemented (next up per PRD)
 
-- [ ] **Socket.IO session rooms** — join live session room, participant count broadcasts
 - [ ] **Socket.IO question flow** — launch, timers, results
 - [ ] **Answer collection** — immediate writes on submit
 - [ ] **Participant** — answer UI, results, leaderboard
@@ -162,6 +163,7 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 | Date | Change |
 |------|--------|
+| 2026-08-18 | Socket.IO session rooms: join, live state broadcast, frontend hook |
 | 2026-08-17 | Socket.IO server on shared HTTP port; cookie auth on connect |
 | 2026-08-17 | Sessions REST API: room codes, join, start/end; host control room + participant join UI |
 | 2026-08-17 | OpenAPI/Swagger: document GET/PUT/DELETE `/api/quizzes/:id` |
