@@ -38,6 +38,10 @@ export type SessionRoomState = SessionResponse & {
   participants: SessionParticipantResponse[];
 };
 
+export type ParticipantSessionItem = SessionResponse & {
+  participantStatus: ParticipantStatus;
+};
+
 export type LiveQuestion = {
   id: string;
   type: QuestionType;

@@ -6,6 +6,7 @@ import {
   getSessionById,
   joinSession,
   leaveSession,
+  listMySessions,
   listSessions,
   startSession,
 } from "./session.controller.js";
@@ -17,6 +18,7 @@ const anyAuth = [requireAuth] as const;
 const router = Router();
 
 router.post("/join", ...participantOnly, joinSession);
+router.get("/mine", ...participantOnly, listMySessions);
 router.get("/", ...hostOnly, listSessions);
 router.post("/", ...hostOnly, createSession);
 router.get("/:sessionId", ...anyAuth, getSessionById);

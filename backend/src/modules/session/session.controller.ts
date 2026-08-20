@@ -21,6 +21,18 @@ export const listSessions = asyncHandler(async (req, res) => {
   );
 });
 
+export const listMySessions = asyncHandler(async (req, res) => {
+  const sessions = await sessionService.listParticipantSessions(req.user!.id);
+
+  res.status(200).json(
+    new ApiResponse({
+      statusCode: 200,
+      message: "Sessions fetched",
+      data: { sessions },
+    }),
+  );
+});
+
 export const createSession = asyncHandler(async (req, res) => {
   const input = createSessionSchema.parse(req.body);
   const session = await sessionService.createSession(req.user!.id, input);

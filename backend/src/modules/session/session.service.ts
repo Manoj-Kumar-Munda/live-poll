@@ -24,6 +24,7 @@ import type {
   SessionParticipantResponse,
   SessionResponse,
   SessionRoomState,
+  ParticipantSessionItem,
 } from "./session.types.js";
 
 const ACTIVE_SESSION_STATUSES: SessionStatus[] = [
@@ -260,6 +261,58 @@ export async function listSessions(
       ),
     ),
   );
+}
+
+export async function listParticipantSessions(
+  userId: string,
+): Promise<ParticipantSessionItem[]> {
+  const memberships = await SessionParticipant.find({
+    userId,
+    status: { $ne: PARTICIPANT_STATUS.QUIT },
+  })
+    .sort({ updatedAt: -1 })
+    .exec();
+
+  if (memberships.length === 0) {
+    return [];
+  }
+
+  const sessionIds = memberships.map((item) => item.sessionId);
+  const sessions = await Session.find({ _id: { $in: sessionIds } })
+    .sort({ updatedAt: -1 })
+    .exec();
+  const sessionById = new Map(
+    sessions.map((session) => [session._id.toString(), session as SessionDocument]),
+  );
+
+  const quizIds = [...new Set(sessions.map((item) => item.quizId.toString()))];
+  const quizzes = await Quiz.find({ _id: { $in: quizIds } })
+    .select("title")
+    .exec();
+  const titleByQuizId = new Map(
+    quizzes.map((quiz) => [quiz._id.toString(), quiz.title]),
+  );
+
+  const results: ParticipantSessionItem[] = [];
+
+  for (const membership of memberships) {
+    const session = sessionById.get(membership.sessionId.toString());
+    if (!session) {
+      continue;
+    }
+
+    const base = await toSessionResponse(
+      session,
+      titleByQuizId.get(session.quizId.toString()) ?? "Quiz",
+    );
+
+    results.push({
+      ...base,
+      participantStatus: membership.status as ParticipantStatus,
+    });
+  }
+
+  return results;
 }
 
 export async function getSessionById(
