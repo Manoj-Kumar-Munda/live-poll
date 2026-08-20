@@ -8,6 +8,8 @@ import {
   useLeaveSession,
   useParticipantSession,
 } from "../api/use-sessions";
+import { participantSessionKeys } from "../api/session-keys";
+import { useSessionRoom } from "@/shared/hooks/use-session-room";
 
 type SessionPageProps = {
   sessionId: string;
@@ -17,6 +19,8 @@ export function SessionPage({ sessionId }: SessionPageProps) {
   const router = useRouter();
   const { data: session, isLoading, isError } = useParticipantSession(sessionId);
   const leaveSession = useLeaveSession(sessionId);
+
+  useSessionRoom(sessionId, participantSessionKeys.detail(sessionId));
 
   async function handleLeave() {
     try {
@@ -92,7 +96,7 @@ export function SessionPage({ sessionId }: SessionPageProps) {
         <section className="mt-10 rounded-xl border border-border bg-surface p-8 text-center">
           <p className="font-display text-xl font-semibold">Quiz in progress</p>
           <p className="mt-2 text-sm text-text-secondary">
-            Live questions and answers are coming with Socket.IO. Hang tight.
+            Live questions and answers are coming in the next slice.
           </p>
         </section>
       ) : null}

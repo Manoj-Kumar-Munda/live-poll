@@ -8,10 +8,6 @@ export function useParticipantSession(sessionId: string) {
   return useQuery({
     queryKey: participantSessionKeys.detail(sessionId),
     queryFn: () => sessionApi.getSession(sessionId),
-    refetchInterval: (query) => {
-      const status = query.state.data?.status;
-      return status === "WAITING" || status === "LIVE" ? 3000 : false;
-    },
   });
 }
 

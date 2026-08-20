@@ -9,6 +9,8 @@ import {
   useSession,
   useStartSession,
 } from "../api/use-sessions";
+import { sessionKeys } from "../api/session-keys";
+import { useSessionRoom } from "@/shared/hooks/use-session-room";
 
 type SessionControlPageProps = {
   sessionId: string;
@@ -19,6 +21,8 @@ export function SessionControlPage({ sessionId }: SessionControlPageProps) {
   const { data: session, isLoading, isError } = useSession(sessionId);
   const startSession = useStartSession(sessionId);
   const endSession = useEndSession(sessionId);
+
+  useSessionRoom(sessionId, sessionKeys.detail(sessionId));
 
   async function handleStart() {
     try {
@@ -173,8 +177,7 @@ export function SessionControlPage({ sessionId }: SessionControlPageProps) {
         <section className="mt-8 rounded-xl border border-dashed border-border p-5">
           <h2 className="font-display text-lg font-semibold">Live controls</h2>
           <p className="mt-2 text-sm text-text-secondary">
-            Question launch, timers, and results will arrive with Socket.IO in
-            the next slice. For now, players see that the quiz has started.
+            Question launch, timers, and results arrive in the next slice.
           </p>
         </section>
       ) : null}

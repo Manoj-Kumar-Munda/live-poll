@@ -7,5 +7,6 @@ export type {
   Session,
   SessionDetail,
   SessionParticipant,
+  SessionRoomState,
   SessionStatus,
 } from "./session";

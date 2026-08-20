@@ -32,3 +32,7 @@ export type SessionDetail = Session & {
   role: "host" | "participant";
   participants: SessionParticipant[];
 };
+
+export type SessionRoomState = Session & {
+  participants: SessionParticipant[];
+};
