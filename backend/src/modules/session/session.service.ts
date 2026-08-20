@@ -400,6 +400,13 @@ export async function endSession(
     { $set: { status: PARTICIPANT_STATUS.FINISHED } },
   ).exec();
 
+  try {
+    const { clearQuestionTimer } = await import("@/realtime/question.timer.js");
+    clearQuestionTimer(sessionId);
+  } catch {
+    // Socket layer may not be initialized in tests.
+  }
+
   await emitSessionRoomUpdate(sessionId);
   return buildSessionDetail(updated as SessionDocument, "host");
 }

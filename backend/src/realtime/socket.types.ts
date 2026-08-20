@@ -1,6 +1,10 @@
 import type { Session } from "@/lib/auth.js";
 import type { UserRole } from "@/modules/auth/types.js";
-import type { SessionRoomState } from "@/modules/session/session.types.js";
+import type {
+  QuestionEndedPayload,
+  QuestionStartedPayload,
+  SessionRoomState,
+} from "@/modules/session/session.types.js";
 
 export type SocketUser = {
   id: string;
@@ -18,6 +22,8 @@ export type SocketSessionData = {
 export type ClientToServerEvents = {
   "session:join": (payload: { sessionId: string }) => void;
   "session:leave": () => void;
+  "question:launch": () => void;
+  "question:end": () => void;
 };
 
 export type ServerToClientEvents = {
@@ -28,6 +34,10 @@ export type ServerToClientEvents = {
   }) => void;
   "session:state": (state: SessionRoomState) => void;
   "session:error": (payload: { message: string }) => void;
+  "question:started": (payload: QuestionStartedPayload) => void;
+  "question:ended": (payload: QuestionEndedPayload) => void;
 };
 
 export type SocketData = SocketSessionData;
+
+export type { QuestionEndedPayload, QuestionStartedPayload };

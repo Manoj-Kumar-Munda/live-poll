@@ -1,4 +1,5 @@
 import type { ParticipantStatus } from "@/types/quiz.types.js";
+import type { QuestionType } from "@/types/quiz.types.js";
 import type { SessionStatus } from "@/types/session.types.js";
 
 export type SessionParticipantResponse = {
@@ -35,4 +36,28 @@ export type SessionDetailResponse = SessionResponse & {
 /** Broadcast to everyone in a session socket room (no per-user role). */
 export type SessionRoomState = SessionResponse & {
   participants: SessionParticipantResponse[];
+};
+
+export type LiveQuestion = {
+  id: string;
+  type: QuestionType;
+  prompt: string;
+  order: number;
+  options?: string[];
+  maxLength?: number;
+};
+
+export type QuestionStartedPayload = {
+  sessionId: string;
+  index: number;
+  question: LiveQuestion;
+  endsAt: string;
+  // serverNow is the server's current time when the question starts, sent alongside endsAt.
+  serverNow: string;
+};
+
+export type QuestionEndedPayload = {
+  sessionId: string;
+  index: number;
+  reason: "timer" | "host";
 };

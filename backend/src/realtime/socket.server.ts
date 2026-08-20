@@ -3,6 +3,7 @@ import type { Express } from "express";
 import { Server } from "socket.io";
 import { env } from "@/config/env.js";
 import { authenticateSocket } from "./socket.auth.js";
+import { registerQuestionHandlers } from "./question.handlers.js";
 import { registerSessionHandlers } from "./session.handlers.js";
 import type {
   ClientToServerEvents,
@@ -47,6 +48,7 @@ export function createSocketServer(app: Express): {
     });
 
     registerSessionHandlers(socket);
+    registerQuestionHandlers(socket);
 
     socket.on("disconnect", () => {
       if (env.NODE_ENV === "development") {

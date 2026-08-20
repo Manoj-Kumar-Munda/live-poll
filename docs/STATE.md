@@ -101,7 +101,8 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | Cookie session auth on connect | ✅ | better-auth `getSession` from handshake headers |
 | `connected` ack event | ✅ | `{ userId, role }` |
 | Session rooms | ✅ | `session:join` / `session:state`; REST mutations broadcast |
-| Question launch / timers | ❌ | Next slice |
+| Question launch / timers | ✅ | `question:launch`, server `questionEndsAt`, auto-end timer |
+| Answer submission | ❌ | Next slice (uses `answerGraceMs: 400`) |
 
 **Files:** `backend/src/realtime/{socket.server,socket.auth,socket.types,session.handlers,session.room,index}.ts`
 
@@ -163,7 +164,7 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 | Date | Change |
 |------|--------|
-| 2026-08-18 | Socket.IO session rooms: join, live state broadcast, frontend hook |
+| 2026-08-20 | Question launch + server timers (`question:started` / `question:ended`, 400ms grace constant) |
 | 2026-08-17 | Socket.IO server on shared HTTP port; cookie auth on connect |
 | 2026-08-17 | Sessions REST API: room codes, join, start/end; host control room + participant join UI |
 | 2026-08-17 | OpenAPI/Swagger: document GET/PUT/DELETE `/api/quizzes/:id` |

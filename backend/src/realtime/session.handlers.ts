@@ -7,6 +7,7 @@ import {
 import type { SessionRoomState } from "@/modules/session/session.types.js";
 import { getSocketServer } from "./socket.server.js";
 import { sessionJoinPayloadSchema, sessionRoomName } from "./session.room.js";
+import { emitActiveQuestionToSocket } from "./question.handlers.js";
 import type {
   ClientToServerEvents,
   ServerToClientEvents,
@@ -65,6 +66,7 @@ export function registerSessionHandlers(socket: SessionSocket) {
         state,
       });
       socket.to(sessionRoomName(sessionId)).emit("session:state", state);
+      await emitActiveQuestionToSocket(socket, sessionId);
     } catch (error) {
       socket.emit("session:error", { message: socketErrorMessage(error) });
     }

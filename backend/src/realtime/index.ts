@@ -1,4 +1,10 @@
-export { authenticateSocket } from "./socket.auth.js";
+export {
+  broadcastQuestionStarted,
+  clearQuestionTimer,
+  emitActiveQuestionToSocket,
+  registerQuestionHandlers,
+} from "./question.handlers.js";
+export { scheduleQuestionEnd } from "./question.timer.js";
 export {
   broadcastSessionState,
   registerSessionHandlers,
