@@ -1,5 +1,12 @@
 import { api } from "@/lib/api";
-import type { SessionDetail } from "@/shared/types";
+import type { ParticipantSessionItem, SessionDetail } from "@/shared/types";
+
+export async function listMySessions() {
+  const { data } = await api.get<{ sessions: ParticipantSessionItem[] }>(
+    "/api/sessions/mine",
+  );
+  return data.sessions;
+}
 
 export async function joinSession(roomCode: string) {
   const { data } = await api.post<{ session: SessionDetail }>(
