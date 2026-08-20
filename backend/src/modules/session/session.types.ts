@@ -65,3 +65,9 @@ export type QuestionEndedPayload = {
   index: number;
   reason: "timer" | "host";
 };
+
+export type QuestionAnsweredPayload = {
+  sessionId: string;
+  index: number;
+  value: string;
+};

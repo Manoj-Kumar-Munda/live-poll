@@ -1,5 +1,7 @@
 import type { Socket } from "socket.io";
 import { ApiError } from "@/shared/utils/api-error.js";
+import { submitAnswerSchema } from "@/modules/session/answer.schema.js";
+import { getUserAnswerForActiveQuestion, submitAnswer } from "@/modules/session/answer.service.js";
 import {
   endCurrentQuestion,
   launchNextQuestion,
@@ -69,6 +71,18 @@ export async function emitActiveQuestionToSocket(
   const payload = await getActiveQuestionPayload(sessionId);
   if (payload) {
     socket.emit("question:started", payload);
+
+    const existingAnswer = await getUserAnswerForActiveQuestion(
+      sessionId,
+      socket.data.user.id,
+    );
+    if (existingAnswer) {
+      socket.emit("question:answered", {
+        sessionId,
+        index: existingAnswer.index,
+        value: existingAnswer.value,
+      });
+    }
   }
 }
 
@@ -112,6 +126,31 @@ export function registerQuestionHandlers(socket: QuestionSocket) {
       const payload = await endCurrentQuestion(sessionId, "host");
       broadcastQuestionEnded(payload);
       await broadcastSessionState(sessionId);
+    } catch (error) {
+      socket.emit("session:error", { message: socketErrorMessage(error) });
+    }
+  });
+
+  socket.on("question:answer", async (payload) => {
+    try {
+      const sessionId = socket.data.liveSessionId;
+      if (!sessionId) {
+        throw new ApiError(400, "Join the session room first");
+      }
+
+      const detail = await getSessionById(socket.data.user.id, sessionId);
+      if (detail.role !== "participant") {
+        throw new ApiError(403, "Only participants can submit answers");
+      }
+
+      const { value } = submitAnswerSchema.parse(payload);
+      const result = await submitAnswer(socket.data.user.id, sessionId, value);
+
+      socket.emit("question:answered", {
+        sessionId,
+        index: result.index,
+        value: result.value,
+      });
     } catch (error) {
       socket.emit("session:error", { message: socketErrorMessage(error) });
     }
