@@ -13,6 +13,7 @@ import {
   SESSION_LIMITS,
 } from "./session.constants.js";
 import { SessionParticipant, type SessionParticipantDocument } from "./participant.model.js";
+import { countUserAnswersBySession, countUserAnswersForSession } from "./answer.service.js";
 import { Session, type SessionDocument } from "./session.model.js";
 import type {
   CreateSessionInput,
@@ -164,16 +165,30 @@ export async function getSessionRoomState(
 async function buildSessionDetail(
   session: SessionDocument,
   role: "host" | "participant",
+  participantUserId?: string,
 ): Promise<SessionDetailResponse> {
   const quizTitle = await getQuizTitle(session.quizId.toString());
   const base = await toSessionResponse(session, quizTitle);
   const participants = await listParticipants(session._id.toString());
 
-  return {
+  const detail: SessionDetailResponse = {
     ...base,
     role,
     participants,
   };
+
+  if (role === "participant" && participantUserId) {
+    const membership = participants.find(
+      (participant) => participant.userId === participantUserId,
+    );
+    detail.myScore = membership?.score ?? 0;
+    detail.myQuestionsAnswered = await countUserAnswersForSession(
+      participantUserId,
+      session._id.toString(),
+    );
+  }
+
+  return detail;
 }
 
 export async function createSession(
@@ -266,10 +281,7 @@ export async function listSessions(
 export async function listParticipantSessions(
   userId: string,
 ): Promise<ParticipantSessionItem[]> {
-  const memberships = await SessionParticipant.find({
-    userId,
-    status: { $ne: PARTICIPANT_STATUS.QUIT },
-  })
+  const memberships = await SessionParticipant.find({ userId })
     .sort({ updatedAt: -1 })
     .exec();
 
@@ -277,7 +289,7 @@ export async function listParticipantSessions(
     return [];
   }
 
-  const sessionIds = memberships.map((item) => item.sessionId);
+  const sessionIds = memberships.map((item) => item.sessionId.toString());
   const sessions = await Session.find({ _id: { $in: sessionIds } })
     .sort({ updatedAt: -1 })
     .exec();
@@ -292,6 +304,8 @@ export async function listParticipantSessions(
   const titleByQuizId = new Map(
     quizzes.map((quiz) => [quiz._id.toString(), quiz.title]),
   );
+
+  const answerCountBySessionId = await countUserAnswersBySession(userId, sessionIds);
 
   const results: ParticipantSessionItem[] = [];
 
@@ -309,6 +323,9 @@ export async function listParticipantSessions(
     results.push({
       ...base,
       participantStatus: membership.status as ParticipantStatus,
+      score: membership.score,
+      questionsAnswered:
+        answerCountBySessionId.get(session._id.toString()) ?? 0,
     });
   }
 
@@ -334,7 +351,7 @@ export async function getSessionById(
     throw new ApiError(403, "You do not have access to this session");
   }
 
-  return buildSessionDetail(session, "participant");
+  return buildSessionDetail(session, "participant", userId);
 }
 
 export async function joinSession(
@@ -382,7 +399,7 @@ export async function joinSession(
   }
 
   await emitSessionRoomUpdate(session._id.toString());
-  return buildSessionDetail(session as SessionDocument, "participant");
+  return buildSessionDetail(session as SessionDocument, "participant", userId);
 }
 
 export async function startSession(
@@ -480,12 +497,12 @@ export async function leaveSession(
   }
 
   if (participant.status === PARTICIPANT_STATUS.QUIT) {
-    return buildSessionDetail(session, "participant");
+    return buildSessionDetail(session, "participant", userId);
   }
 
   participant.status = PARTICIPANT_STATUS.QUIT;
   await participant.save();
 
   await emitSessionRoomUpdate(sessionId);
-  return buildSessionDetail(session, "participant");
+  return buildSessionDetail(session, "participant", userId);
 }

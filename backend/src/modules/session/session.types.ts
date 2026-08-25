@@ -31,6 +31,8 @@ export type SessionResponse = {
 export type SessionDetailResponse = SessionResponse & {
   role: "host" | "participant";
   participants: SessionParticipantResponse[];
+  myScore?: number;
+  myQuestionsAnswered?: number;
 };
 
 /** Broadcast to everyone in a session socket room (no per-user role). */
@@ -40,6 +42,8 @@ export type SessionRoomState = SessionResponse & {
 
 export type ParticipantSessionItem = SessionResponse & {
   participantStatus: ParticipantStatus;
+  score: number;
+  questionsAnswered: number;
 };
 
 export type LiveQuestion = {

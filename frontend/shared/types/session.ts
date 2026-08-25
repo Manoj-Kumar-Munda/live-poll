@@ -33,6 +33,8 @@ export type Session = {
 export type SessionDetail = Session & {
   role: "host" | "participant";
   participants: SessionParticipant[];
+  myScore?: number;
+  myQuestionsAnswered?: number;
 };
 
 export type SessionRoomState = Session & {
@@ -76,4 +78,6 @@ export type QuestionAnsweredPayload = {
 
 export type ParticipantSessionItem = Session & {
   participantStatus: ParticipantStatus;
+  score: number;
+  questionsAnswered: number;
 };

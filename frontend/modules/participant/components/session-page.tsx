@@ -131,7 +131,9 @@ export function SessionPage({ sessionId }: SessionPageProps) {
         <section className="mt-10 rounded-xl border border-border bg-surface p-8 text-center">
           <p className="font-display text-xl font-semibold">Session ended</p>
           <p className="mt-2 text-sm text-text-secondary">
-            Thanks for playing. Head back home to join another session.
+            You answered {session.myQuestionsAnswered ?? 0}{" "}
+            {(session.myQuestionsAnswered ?? 0) === 1 ? "question" : "questions"}.
+            Thanks for playing.
           </p>
           <Link
             href="/home"

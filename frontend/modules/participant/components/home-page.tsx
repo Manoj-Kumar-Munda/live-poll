@@ -5,6 +5,33 @@ import { SessionStatusBadge } from "@/components/session-status-badge";
 import { useMySessions } from "../api/use-sessions";
 import { JoinSessionForm } from "./join-session-form";
 
+function formatQuestionsAnswered(count: number) {
+  return `${count} ${count === 1 ? "question" : "questions"} answered`;
+}
+
+function formatPlayedSummary(session: {
+  questionsAnswered: number;
+  score: number;
+  finishedAt: string | null;
+  participantStatus: string;
+}) {
+  const parts = [formatQuestionsAnswered(session.questionsAnswered)];
+
+  if (session.score > 0) {
+    parts.push(`${session.score} pts`);
+  }
+
+  if (session.finishedAt) {
+    parts.push(new Date(session.finishedAt).toLocaleDateString());
+  }
+
+  if (session.participantStatus === "QUIT") {
+    parts.push("Left early");
+  }
+
+  return parts.join(" · ");
+}
+
 export function ParticipantHomePage() {
   const { data: sessions = [], isLoading } = useMySessions();
 
@@ -15,7 +42,9 @@ export function ParticipantHomePage() {
   );
   const pastSessions = sessions.filter(
     (session) =>
-      session.status === "FINISHED" || session.participantStatus === "FINISHED",
+      session.status === "FINISHED" ||
+      session.participantStatus === "FINISHED" ||
+      session.participantStatus === "QUIT",
   );
 
   return (
@@ -56,6 +85,9 @@ export function ParticipantHomePage() {
                     <p className="text-sm text-text-secondary">
                       Room {session.roomCode} · {session.participantCount}{" "}
                       {session.participantCount === 1 ? "player" : "players"}
+                      {session.questionsAnswered > 0
+                        ? ` · ${formatQuestionsAnswered(session.questionsAnswered)}`
+                        : null}
                     </p>
                   </div>
                   <SessionStatusBadge status={session.status} />
@@ -73,9 +105,14 @@ export function ParticipantHomePage() {
             {pastSessions.map((session) => (
               <li
                 key={session.id}
-                className="flex items-center justify-between gap-4 px-5 py-4 text-sm text-text-secondary"
+                className="flex items-center justify-between gap-4 px-5 py-4"
               >
-                <span>{session.quizTitle}</span>
+                <div>
+                  <p className="font-medium">{session.quizTitle}</p>
+                  <p className="text-sm text-text-secondary">
+                    {formatPlayedSummary(session)}
+                  </p>
+                </div>
                 <SessionStatusBadge status={session.status} />
               </li>
             ))}

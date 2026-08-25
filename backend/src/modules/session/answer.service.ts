@@ -1,4 +1,5 @@
 import type { QuestionSubdocument } from "@/modules/quiz/question.model.js";
+import mongoose from "mongoose";
 import { Quiz } from "@/modules/quiz/quiz.model.js";
 import { PARTICIPANT_STATUS, QUESTION_TYPE } from "@/types/quiz.types.js";
 import { SESSION_STATUS } from "@/types/session.types.js";
@@ -167,4 +168,34 @@ export async function getUserAnswerForActiveQuestion(
     userId,
     session.currentQuestionIndex,
   );
+}
+
+export async function countUserAnswersForSession(
+  userId: string,
+  sessionId: string,
+): Promise<number> {
+  return Answer.countDocuments({ sessionId, userId }).exec();
+}
+
+export async function countUserAnswersBySession(
+  userId: string,
+  sessionIds: string[],
+): Promise<Map<string, number>> {
+  if (sessionIds.length === 0) {
+    return new Map();
+  }
+
+  const rows = await Answer.aggregate<{ _id: string; count: number }>([
+    {
+      $match: {
+        userId,
+        sessionId: {
+          $in: sessionIds.map((id) => new mongoose.Types.ObjectId(id)),
+        },
+      },
+    },
+    { $group: { _id: "$sessionId", count: { $sum: 1 } } },
+  ]).exec();
+
+  return new Map(rows.map((row) => [row._id.toString(), row.count]));
 }

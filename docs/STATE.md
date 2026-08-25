@@ -82,7 +82,7 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | GET | `/api/sessions` | host | ✅ | Optional `?quizId`, `?status=WAITING\|LIVE\|FINISHED` |
 | POST | `/api/sessions` | host | ✅ | Start session on **PUBLISHED** quiz; generates 6-char room code |
 | POST | `/api/sessions/join` | participant | ✅ | Join by `roomCode` while `WAITING` |
-| GET | `/api/sessions/mine` | participant | ✅ | Sessions the user joined (not quit) |
+| GET | `/api/sessions/mine` | participant | ✅ | Sessions joined; includes `score`, `questionsAnswered` |
 | GET | `/api/sessions/:sessionId` | host or joined participant | ✅ | Detail + participant list |
 | POST | `/api/sessions/:sessionId/start` | host | ✅ | `WAITING` → `LIVE` |
 | POST | `/api/sessions/:sessionId/end` | host | ✅ | → `FINISHED` |
