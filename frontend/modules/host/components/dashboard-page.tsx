@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SessionStatusBadge } from "@/components/session-status-badge";
+import type { Session } from "@/shared/types";
 import { useQuizzes } from "../api/use-quizzes";
 import { useSessions } from "../api/use-sessions";
-import { StatusBadge } from "./status-badge";
 
 export function DashboardPage() {
   const { data: quizzes = [], isLoading: quizzesLoading } = useQuizzes();
@@ -15,9 +15,17 @@ export function DashboardPage() {
     (session) => session.status === "WAITING" || session.status === "LIVE",
   );
 
+  const recentHostedEvents = sessions
+    .filter((session) => session.status === "FINISHED")
+    .sort(
+      (a, b) =>
+        new Date(b.finishedAt ?? b.updatedAt).getTime() -
+        new Date(a.finishedAt ?? a.updatedAt).getTime(),
+    )
+    .slice(0, 5);
+
   const drafts = quizzes.filter((quiz) => quiz.status === "DRAFT").length;
   const published = quizzes.filter((quiz) => quiz.status === "PUBLISHED").length;
-  const recent = quizzes.slice(0, 5);
   const isLoading = quizzesLoading || sessionsLoading;
 
   return (
@@ -26,11 +34,10 @@ export function DashboardPage() {
         <div>
           <p className="text-sm font-medium text-primary">Host</p>
           <h1 className="font-display text-3xl font-bold tracking-tight text-text-primary">
-            Tonight&apos;s set list
+            Dashboard
           </h1>
           <p className="mt-2 max-w-xl text-sm text-text-secondary">
-            Draft a quiz, publish when you&apos;re ready, then run a live session
-            from the control room.
+            Manage your quizzes and launch live events.
           </p>
         </div>
         <Button nativeButton={false} render={<Link href="/dashboard/quizzes" />}>
@@ -38,111 +45,125 @@ export function DashboardPage() {
         </Button>
       </div>
 
-      {sessionsLoading ? null : activeSessions.length > 0 ? (
-        <section className="mt-8 space-y-3">
-          {activeSessions.map((session) => (
-            <div
-              key={session.id}
-              className="rounded-xl border border-primary/25 bg-primary/5 p-5"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-display text-lg font-semibold">
-                      {session.status === "LIVE"
-                        ? "Live session in progress"
-                        : "Waiting room open"}
-                    </h2>
-                    <SessionStatusBadge status={session.status} />
+      {quizzesLoading ? (
+        <p className="mt-8 text-sm text-muted-foreground">Loading...</p>
+      ) : (
+        <dl className="mt-8 grid gap-3 sm:grid-cols-3">
+          <Stat label="Total quizzes" value={quizzes.length} />
+          <Stat label="Drafts" value={drafts} />
+          <Stat label="Published" value={published} />
+        </dl>
+      )}
+
+      <section className="mt-8">
+        <h2 className="font-display text-lg font-semibold">Live quiz</h2>
+        {sessionsLoading ? (
+          <p className="mt-3 text-sm text-muted-foreground">Loading...</p>
+        ) : activeSessions.length > 0 ? (
+          <ul className="mt-4 space-y-3">
+            {activeSessions.map((session) => (
+              <li
+                key={session.id}
+                className="rounded-xl border border-primary/25 bg-primary/5 p-5"
+              >
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium text-text-primary">
+                        {session.quizTitle}
+                      </p>
+                      <SessionStatusBadge status={session.status} />
+                    </div>
+                    <p className="mt-1 text-sm text-text-secondary">
+                      Room code{" "}
+                      <span className="font-mono font-semibold">
+                        {session.roomCode}
+                      </span>
+                      {" · "}
+                      {session.participantCount}{" "}
+                      {session.participantCount === 1 ? "player" : "players"}
+                    </p>
                   </div>
-                  <p className="mt-1 font-medium text-text-primary">
-                    {session.quizTitle}
-                  </p>
-                  <p className="mt-1 text-sm text-text-secondary">
-                    Room code{" "}
-                    <span className="font-mono font-semibold">
-                      {session.roomCode}
-                    </span>
-                    {" · "}
-                    {session.participantCount}{" "}
-                    {session.participantCount === 1 ? "player" : "players"}
-                  </p>
+                  <Button
+                    nativeButton={false}
+                    render={
+                      <Link href={`/dashboard/sessions/${session.id}`} />
+                    }
+                  >
+                    {session.status === "LIVE"
+                      ? "Return to control room"
+                      : "Open control room"}
+                  </Button>
                 </div>
-                <Button
-                  nativeButton={false}
-                  render={
-                    <Link href={`/dashboard/sessions/${session.id}`} />
-                  }
-                >
-                  {session.status === "LIVE"
-                    ? "Return to control room"
-                    : "Open control room"}
-                </Button>
-              </div>
-            </div>
-          ))}
-        </section>
-      ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="mt-4 rounded-xl border border-dashed border-border bg-surface px-5 py-8 text-center">
+            <p className="font-medium text-text-primary">No live quiz running</p>
+            <p className="mt-1 text-sm text-text-secondary">
+              Start a session from a published quiz when you&apos;re ready to go
+              live. It will show up here.
+            </p>
+            <Button
+              className="mt-4"
+              nativeButton={false}
+              render={<Link href="/dashboard/quizzes" />}
+            >
+              Go to quizzes
+            </Button>
+          </div>
+        )}
+      </section>
 
       {isLoading ? (
-        <p className="mt-8 text-sm text-muted-foreground">Loading quizzes...</p>
+        <p className="mt-10 text-sm text-muted-foreground">Loading...</p>
       ) : (
-        <>
-          <dl className="mt-8 grid gap-3 sm:grid-cols-3">
-            <Stat label="Total quizzes" value={quizzes.length} />
-            <Stat label="Drafts" value={drafts} />
-            <Stat label="Published" value={published} />
-          </dl>
-
-          <section className="mt-10">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-lg font-semibold">Recent</h2>
-              <Link
-                href="/dashboard/quizzes"
-                className="text-sm font-medium text-primary hover:underline"
-              >
-                View all
-              </Link>
-            </div>
-            {recent.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border px-5 py-10 text-center">
-                <p className="font-medium text-text-primary">No quizzes yet</p>
-                <p className="mt-1 text-sm text-text-secondary">
-                  Create your first quiz and add a couple of questions.
+        <section className="mt-10">
+            <h2 className="font-display text-lg font-semibold">
+              Recent hosted events
+            </h2>
+            {recentHostedEvents.length === 0 ? (
+              <div className="mt-4 rounded-xl border border-dashed border-border px-5 py-10 text-center">
+                <p className="font-medium text-text-primary">
+                  No hosted events yet
                 </p>
-                <Button
-                  className="mt-4"
-                  nativeButton={false}
-                  render={<Link href="/dashboard/quizzes/new" />}
-                >
-                  Create a quiz
-                </Button>
+                <p className="mt-1 text-sm text-text-secondary">
+                  When you finish a live session, it will appear here with the
+                  date you hosted it.
+                </p>
               </div>
             ) : (
-              <ul className="divide-y divide-border rounded-xl border border-border bg-surface">
-                {recent.map((quiz) => (
-                  <li key={quiz.id}>
+              <ul className="mt-4 divide-y divide-border rounded-xl overflow-hidden border border-border bg-surface">
+                {recentHostedEvents.map((session) => (
+                  <li key={session.id}>
                     <Link
-                      href={`/dashboard/quizzes/${quiz.id}`}
+                      href={`/dashboard/quizzes/${session.quizId}`}
                       className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-surface-raised"
                     >
                       <div>
                         <p className="font-medium text-text-primary">
-                          {quiz.title}
+                          {session.quizTitle}
                         </p>
                         <p className="text-sm text-text-secondary">
-                          {quiz.questionCount}{" "}
-                          {quiz.questionCount === 1 ? "question" : "questions"}
+                          {session.participantCount}{" "}
+                          {session.participantCount === 1
+                            ? "player"
+                            : "players"}
                         </p>
                       </div>
-                      <StatusBadge status={quiz.status} />
+                      <time
+                        dateTime={getHostedDateIso(session)}
+                        className="shrink-0 text-sm text-text-secondary"
+                      >
+                        {formatHostedDate(session)}
+                      </time>
                     </Link>
                   </li>
                 ))}
               </ul>
             )}
-          </section>
-        </>
+        </section>
       )}
     </main>
   );
@@ -157,4 +178,20 @@ function Stat({ label, value }: { label: string; value: number }) {
       </dd>
     </div>
   );
+}
+
+function getHostedDateIso(session: Session) {
+  return session.liveStartedAt ?? session.finishedAt ?? session.createdAt;
+}
+
+function formatHostedDate(session: Session) {
+  const date = new Date(getHostedDateIso(session));
+
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
