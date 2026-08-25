@@ -87,7 +87,7 @@ export function SessionControlPage({ sessionId }: SessionControlPageProps) {
         href={`/dashboard/quizzes/${session.quizId}`}
         className="text-sm font-medium text-primary hover:underline"
       >
-        Back to quiz
+        Back to event
       </Link>
 
       <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
@@ -112,7 +112,7 @@ export function SessionControlPage({ sessionId }: SessionControlPageProps) {
               onClick={handleStart}
               disabled={startSession.isPending}
             >
-              {startSession.isPending ? "Starting..." : "Start quiz"}
+              {startSession.isPending ? "Starting..." : "Start event"}
             </Button>
           ) : null}
           {session.status === "WAITING" || session.status === "LIVE" ? (
@@ -131,7 +131,7 @@ export function SessionControlPage({ sessionId }: SessionControlPageProps) {
               variant="outline"
               onClick={() => router.push(`/dashboard/quizzes/${session.quizId}`)}
             >
-              Back to quiz
+              Back to event
             </Button>
           ) : null}
         </div>

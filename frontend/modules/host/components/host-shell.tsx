@@ -41,7 +41,7 @@ export function HostShell({ children }: { children: React.ReactNode }) {
                 href="/dashboard/quizzes"
                 active={pathname.startsWith("/dashboard/quizzes")}
               >
-                Quizzes
+                Events
               </NavLink>
             </nav>
           </div>

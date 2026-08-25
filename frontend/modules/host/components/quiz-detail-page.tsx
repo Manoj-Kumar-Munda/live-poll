@@ -151,7 +151,7 @@ export function QuizDetailPage({ quizId }: QuizDetailPageProps) {
   if (isLoading) {
     return (
       <main className="mx-auto max-w-6xl px-5 py-10 text-sm text-muted-foreground sm:px-8">
-        Loading quiz...
+        Loading event...
       </main>
     );
   }
@@ -159,12 +159,12 @@ export function QuizDetailPage({ quizId }: QuizDetailPageProps) {
   if (isError || !quiz) {
     return (
       <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
-        <p className="text-sm text-text-secondary">Quiz not found.</p>
+        <p className="text-sm text-text-secondary">Event not found.</p>
         <Link
           href="/dashboard/quizzes"
           className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
         >
-          Back to quizzes
+          Back to events
         </Link>
       </main>
     );
@@ -176,7 +176,7 @@ export function QuizDetailPage({ quizId }: QuizDetailPageProps) {
         href="/dashboard/quizzes"
         className="text-sm font-medium text-primary hover:underline"
       >
-        Back to quizzes
+        Back to events
       </Link>
 
       <div className="mt-4 flex flex-wrap items-start justify-between gap-4">

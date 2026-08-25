@@ -98,7 +98,7 @@ export function SessionPage({ sessionId }: SessionPageProps) {
           <p className="mt-2 text-sm text-text-secondary">
             {session.participantCount}{" "}
             {session.participantCount === 1 ? "player" : "players"} in the
-            room. The quiz starts when the host is ready.
+            room. The event starts when the host is ready.
           </p>
         </section>
       ) : null}
@@ -106,7 +106,7 @@ export function SessionPage({ sessionId }: SessionPageProps) {
       {session.status === "LIVE" && !activeQuestion && !questionResults ? (
         <section className="mt-10 rounded-xl border border-border bg-surface p-8 text-center">
           <p className="font-display text-xl font-semibold">
-            {lastEnded ? "Waiting for the next question" : "Quiz in progress"}
+            {lastEnded ? "Waiting for the next question" : "Event in progress"}
           </p>
           <p className="mt-2 text-sm text-text-secondary">
             {lastEnded

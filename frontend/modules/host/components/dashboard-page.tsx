@@ -37,11 +37,11 @@ export function DashboardPage() {
             Dashboard
           </h1>
           <p className="mt-2 max-w-xl text-sm text-text-secondary">
-            Manage your quizzes and launch live events.
+            Manage and launch live events.
           </p>
         </div>
         <Button nativeButton={false} render={<Link href="/dashboard/quizzes" />}>
-          Manage quizzes
+          Manage events
         </Button>
       </div>
 
@@ -49,14 +49,14 @@ export function DashboardPage() {
         <p className="mt-8 text-sm text-muted-foreground">Loading...</p>
       ) : (
         <dl className="mt-8 grid gap-3 sm:grid-cols-3">
-          <Stat label="Total quizzes" value={quizzes.length} />
+          <Stat label="Total events" value={quizzes.length} />
           <Stat label="Drafts" value={drafts} />
           <Stat label="Published" value={published} />
         </dl>
       )}
 
       <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold">Live quiz</h2>
+        <h2 className="font-display text-lg font-semibold">Live event</h2>
         {sessionsLoading ? (
           <p className="mt-3 text-sm text-muted-foreground">Loading...</p>
         ) : activeSessions.length > 0 ? (
@@ -100,9 +100,9 @@ export function DashboardPage() {
           </ul>
         ) : (
           <div className="mt-4 rounded-xl border border-dashed border-border bg-surface px-5 py-8 text-center">
-            <p className="font-medium text-text-primary">No live quiz running</p>
+            <p className="font-medium text-text-primary">No live event running</p>
             <p className="mt-1 text-sm text-text-secondary">
-              Start a session from a published quiz when you&apos;re ready to go
+              Start a session from a published event when you&apos;re ready to go
               live. It will show up here.
             </p>
             <Button
@@ -110,7 +110,7 @@ export function DashboardPage() {
               nativeButton={false}
               render={<Link href="/dashboard/quizzes" />}
             >
-              Go to quizzes
+              Go to events
             </Button>
           </div>
         )}

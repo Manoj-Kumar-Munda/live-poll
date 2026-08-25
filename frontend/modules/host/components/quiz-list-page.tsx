@@ -24,14 +24,14 @@ export function QuizListPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-bold tracking-tight">
-            Quizzes
+            Events
           </h1>
           <p className="mt-2 text-sm text-text-secondary">
             Create a draft, add questions, then publish.
           </p>
         </div>
         <Button nativeButton={false} render={<Link href="/dashboard/quizzes/new" />}>
-          New quiz
+          New event
         </Button>
       </div>
 
@@ -53,13 +53,13 @@ export function QuizListPage() {
         <p className="mt-6 text-sm text-muted-foreground">Loading...</p>
       ) : quizzes.length === 0 ? (
         <div className="mt-6 rounded-xl border border-dashed border-border px-5 py-10 text-center">
-          <p className="text-sm text-text-secondary">No quizzes in this filter.</p>
+          <p className="text-sm text-text-secondary">No events in this filter.</p>
           <Button
             className="mt-4"
             nativeButton={false}
             render={<Link href="/dashboard/quizzes/new" />}
           >
-            Create a quiz
+            Create an event
           </Button>
         </div>
       ) : (

@@ -53,12 +53,12 @@ export function QuizCreatePage() {
         href="/dashboard/quizzes"
         className="text-sm font-medium text-primary hover:underline"
       >
-        Back to quizzes
+        Back to events
       </Link>
 
       <div className="mt-4">
         <h1 className="font-display text-3xl font-bold tracking-tight">
-          New quiz
+          New event
         </h1>
         <p className="mt-2 text-sm text-text-secondary">
           Start with a title and defaults. You can add questions on the next
