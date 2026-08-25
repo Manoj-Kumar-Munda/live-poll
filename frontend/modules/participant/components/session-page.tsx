@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SessionStatusBadge } from "@/components/session-status-badge";
 import { LiveQuestionPanel } from "@/components/live-question-panel";
+import { QuestionResultsPanel } from "@/components/question-results-panel";
 import { useLiveQuestion } from "@/shared/hooks/use-live-question";
 import {
   useLeaveSession,
@@ -26,6 +27,7 @@ export function SessionPage({ sessionId }: SessionPageProps) {
   const {
     activeQuestion,
     lastEnded,
+    questionResults,
     submittedAnswer,
     isSubmitting,
     submitAnswer,
@@ -101,7 +103,7 @@ export function SessionPage({ sessionId }: SessionPageProps) {
         </section>
       ) : null}
 
-      {session.status === "LIVE" && !activeQuestion ? (
+      {session.status === "LIVE" && !activeQuestion && !questionResults ? (
         <section className="mt-10 rounded-xl border border-border bg-surface p-8 text-center">
           <p className="font-display text-xl font-semibold">
             {lastEnded ? "Waiting for the next question" : "Quiz in progress"}
@@ -112,6 +114,14 @@ export function SessionPage({ sessionId }: SessionPageProps) {
               : "The host will launch the first question soon."}
           </p>
         </section>
+      ) : null}
+
+      {questionResults ? (
+        <QuestionResultsPanel
+          results={questionResults}
+          mode="participant"
+          yourAnswer={submittedAnswer}
+        />
       ) : null}
 
       {activeQuestion ? (

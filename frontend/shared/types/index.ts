@@ -8,6 +8,7 @@ export type {
   ParticipantStatus,
   QuestionAnsweredPayload,
   QuestionEndedPayload,
+  QuestionResultsPayload,
   QuestionStartedPayload,
   QuestionType,
   Session,

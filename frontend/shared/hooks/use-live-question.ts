@@ -2,12 +2,18 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { connectSocket, getSocket } from "@/lib/socket";
-import type { QuestionEndedPayload, QuestionStartedPayload } from "@/shared/types";
+import type {
+  QuestionEndedPayload,
+  QuestionResultsPayload,
+  QuestionStartedPayload,
+} from "@/shared/types";
 
 export function useLiveQuestion(sessionId: string | undefined) {
   const [activeQuestion, setActiveQuestion] =
     useState<QuestionStartedPayload | null>(null);
   const [lastEnded, setLastEnded] = useState<QuestionEndedPayload | null>(null);
+  const [questionResults, setQuestionResults] =
+    useState<QuestionResultsPayload | null>(null);
   const [submittedAnswer, setSubmittedAnswer] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const activeQuestionRef = useRef<QuestionStartedPayload | null>(null);
@@ -36,6 +42,7 @@ export function useLiveQuestion(sessionId: string | undefined) {
 
       setActiveQuestion(payload);
       setLastEnded(null);
+      setQuestionResults(null);
 
       if (!isSameQuestion) {
         submittedAnswerRef.current = null;
@@ -66,6 +73,14 @@ export function useLiveQuestion(sessionId: string | undefined) {
       setIsSubmitting(false);
     }
 
+    function onResults(payload: QuestionResultsPayload) {
+      if (payload.sessionId !== sessionId) {
+        return;
+      }
+
+      setQuestionResults(payload);
+    }
+
     function onError() {
       isSubmittingRef.current = false;
       setIsSubmitting(false);
@@ -74,12 +89,14 @@ export function useLiveQuestion(sessionId: string | undefined) {
     socket.on("question:started", onStarted);
     socket.on("question:ended", onEnded);
     socket.on("question:answered", onAnswered);
+    socket.on("question:results", onResults);
     socket.on("session:error", onError);
 
     return () => {
       socket.off("question:started", onStarted);
       socket.off("question:ended", onEnded);
       socket.off("question:answered", onAnswered);
+      socket.off("question:results", onResults);
       socket.off("session:error", onError);
     };
   }, [sessionId]);
@@ -105,6 +122,7 @@ export function useLiveQuestion(sessionId: string | undefined) {
   return {
     activeQuestion,
     lastEnded,
+    questionResults,
     submittedAnswer,
     isSubmitting,
     launchQuestion,

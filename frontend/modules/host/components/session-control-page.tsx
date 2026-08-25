@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SessionStatusBadge } from "@/components/session-status-badge";
 import { LiveQuestionPanel } from "@/components/live-question-panel";
+import { QuestionResultsPanel } from "@/components/question-results-panel";
 import { useLiveQuestion } from "@/shared/hooks/use-live-question";
 import {
   useEndSession,
@@ -28,6 +29,7 @@ export function SessionControlPage({ sessionId }: SessionControlPageProps) {
   const {
     activeQuestion,
     lastEnded,
+    questionResults,
     launchQuestion,
     endQuestion,
     hasActiveQuestion,
@@ -202,14 +204,18 @@ export function SessionControlPage({ sessionId }: SessionControlPageProps) {
               End question early
             </Button>
           </div>
-          {lastEnded && !activeQuestion ? (
+          {lastEnded && !activeQuestion && !questionResults ? (
             <p className="mt-3 text-sm text-text-secondary">
               Question {lastEnded.index + 1} ended (
-              {lastEnded.reason === "timer" ? "time up" : "host ended"}). Results
-              and answers come in the next slice.
+              {lastEnded.reason === "timer" ? "time up" : "host ended"}).
+              Calculating results...
             </p>
           ) : null}
         </section>
+      ) : null}
+
+      {questionResults ? (
+        <QuestionResultsPanel results={questionResults} mode="host" />
       ) : null}
 
       {activeQuestion ? (

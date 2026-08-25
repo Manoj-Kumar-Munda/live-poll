@@ -76,6 +76,21 @@ export type QuestionAnsweredPayload = {
   value: string;
 };
 
+export type OptionResult = {
+  option: string;
+  count: number;
+  percent: number;
+};
+
+export type QuestionResultsPayload = {
+  sessionId: string;
+  index: number;
+  question: LiveQuestion;
+  optionResults: OptionResult[];
+  correctAnswer?: string;
+  totalAnswers: number;
+};
+
 export type ParticipantSessionItem = Session & {
   participantStatus: ParticipantStatus;
   score: number;
