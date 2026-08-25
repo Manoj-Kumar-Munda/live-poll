@@ -2,15 +2,23 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { SessionStatusBadge } from "@/components/session-status-badge";
 import { useQuizzes } from "../api/use-quizzes";
+import { useSessions } from "../api/use-sessions";
 import { StatusBadge } from "./status-badge";
 
 export function DashboardPage() {
-  const { data: quizzes = [], isLoading } = useQuizzes();
+  const { data: quizzes = [], isLoading: quizzesLoading } = useQuizzes();
+  const { data: sessions = [], isLoading: sessionsLoading } = useSessions();
+
+  const activeSessions = sessions.filter(
+    (session) => session.status === "WAITING" || session.status === "LIVE",
+  );
 
   const drafts = quizzes.filter((quiz) => quiz.status === "DRAFT").length;
   const published = quizzes.filter((quiz) => quiz.status === "PUBLISHED").length;
   const recent = quizzes.slice(0, 5);
+  const isLoading = quizzesLoading || sessionsLoading;
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
@@ -21,14 +29,60 @@ export function DashboardPage() {
             Tonight&apos;s set list
           </h1>
           <p className="mt-2 max-w-xl text-sm text-text-secondary">
-            Draft a quiz, add questions, publish when you&apos;re ready. Live
-            sessions come next.
+            Draft a quiz, publish when you&apos;re ready, then run a live session
+            from the control room.
           </p>
         </div>
         <Button nativeButton={false} render={<Link href="/dashboard/quizzes" />}>
           Manage quizzes
         </Button>
       </div>
+
+      {sessionsLoading ? null : activeSessions.length > 0 ? (
+        <section className="mt-8 space-y-3">
+          {activeSessions.map((session) => (
+            <div
+              key={session.id}
+              className="rounded-xl border border-primary/25 bg-primary/5 p-5"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-display text-lg font-semibold">
+                      {session.status === "LIVE"
+                        ? "Live session in progress"
+                        : "Waiting room open"}
+                    </h2>
+                    <SessionStatusBadge status={session.status} />
+                  </div>
+                  <p className="mt-1 font-medium text-text-primary">
+                    {session.quizTitle}
+                  </p>
+                  <p className="mt-1 text-sm text-text-secondary">
+                    Room code{" "}
+                    <span className="font-mono font-semibold">
+                      {session.roomCode}
+                    </span>
+                    {" · "}
+                    {session.participantCount}{" "}
+                    {session.participantCount === 1 ? "player" : "players"}
+                  </p>
+                </div>
+                <Button
+                  nativeButton={false}
+                  render={
+                    <Link href={`/dashboard/sessions/${session.id}`} />
+                  }
+                >
+                  {session.status === "LIVE"
+                    ? "Return to control room"
+                    : "Open control room"}
+                </Button>
+              </div>
+            </div>
+          ))}
+        </section>
+      ) : null}
 
       {isLoading ? (
         <p className="mt-8 text-sm text-muted-foreground">Loading quizzes...</p>

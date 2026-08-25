@@ -285,3 +285,5 @@ A user who joins a specific session.
 ---
 
 **Document Status:** Ready for technical design & implementation planning.
+
+**UI Inspiration:** https://www.mentimeter.com/features/live-polling
