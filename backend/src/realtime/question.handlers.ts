@@ -2,6 +2,8 @@ import type { Socket } from "socket.io";
 import { ApiError } from "@/shared/utils/api-error.js";
 import { submitAnswerSchema } from "@/modules/session/answer.schema.js";
 import { getUserAnswerForActiveQuestion, submitAnswer } from "@/modules/session/answer.service.js";
+import { buildQuestionResults } from "@/modules/session/question.results.service.js";
+import { Session } from "@/modules/session/session.model.js";
 import {
   endCurrentQuestion,
   launchNextQuestion,
@@ -17,6 +19,7 @@ import {
 import type {
   ClientToServerEvents,
   QuestionEndedPayload,
+  QuestionResultsPayload,
   QuestionStartedPayload,
   ServerToClientEvents,
   SocketData,
@@ -51,11 +54,28 @@ export function broadcastQuestionEnded(payload: QuestionEndedPayload) {
   io.to(sessionRoomName(payload.sessionId)).emit("question:ended", payload);
 }
 
+export function broadcastQuestionResults(payload: QuestionResultsPayload) {
+  const io = getSocketServer();
+  io.to(sessionRoomName(payload.sessionId)).emit("question:results", payload);
+}
+
+async function emitQuestionResults(sessionId: string, questionIndex: number) {
+  const results = await buildQuestionResults(sessionId, questionIndex);
+  if (results) {
+    broadcastQuestionResults(results);
+  }
+}
+
+async function handleQuestionEnd(sessionId: string, reason: QuestionEndedPayload["reason"]) {
+  const payload = await endCurrentQuestion(sessionId, reason);
+  broadcastQuestionEnded(payload);
+  await emitQuestionResults(sessionId, payload.index);
+  await broadcastSessionState(sessionId);
+}
+
 async function handleQuestionTimerEnd(sessionId: string) {
   try {
-    const payload = await endCurrentQuestion(sessionId, "timer");
-    broadcastQuestionEnded(payload);
-    await broadcastSessionState(sessionId);
+    await handleQuestionEnd(sessionId, "timer");
   } catch {
     clearQuestionTimer(sessionId);
   }
@@ -83,6 +103,24 @@ export async function emitActiveQuestionToSocket(
         value: existingAnswer.value,
       });
     }
+    return;
+  }
+
+  const results = await (async () => {
+    const session = await Session.findById(sessionId).exec();
+    if (
+      !session ||
+      session.currentQuestionIndex < 0 ||
+      session.questionEndsAt
+    ) {
+      return null;
+    }
+
+    return buildQuestionResults(sessionId, session.currentQuestionIndex);
+  })();
+
+  if (results) {
+    socket.emit("question:results", results);
   }
 }
 
@@ -123,9 +161,7 @@ export function registerQuestionHandlers(socket: QuestionSocket) {
       }
 
       clearQuestionTimer(sessionId);
-      const payload = await endCurrentQuestion(sessionId, "host");
-      broadcastQuestionEnded(payload);
-      await broadcastSessionState(sessionId);
+      await handleQuestionEnd(sessionId, "host");
     } catch (error) {
       socket.emit("session:error", { message: socketErrorMessage(error) });
     }
