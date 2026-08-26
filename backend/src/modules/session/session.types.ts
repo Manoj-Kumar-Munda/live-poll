@@ -8,6 +8,7 @@ export type SessionParticipantResponse = {
   displayName: string;
   status: ParticipantStatus;
   score: number;
+  finalRank: number | null;
   joinedAt: string;
 };
 
@@ -32,6 +33,7 @@ export type SessionDetailResponse = SessionResponse & {
   role: "host" | "participant";
   participants: SessionParticipantResponse[];
   myScore?: number;
+  myRank?: number | null;
   myQuestionsAnswered?: number;
 };
 
@@ -43,6 +45,7 @@ export type SessionRoomState = SessionResponse & {
 export type ParticipantSessionItem = SessionResponse & {
   participantStatus: ParticipantStatus;
   score: number;
+  rank: number | null;
   questionsAnswered: number;
 };
 
@@ -89,4 +92,17 @@ export type QuestionResultsPayload = {
   optionResults: OptionResult[];
   correctAnswer?: string;
   totalAnswers: number;
+};
+
+export type LeaderboardEntry = {
+  userId: string;
+  displayName: string;
+  score: number;
+  rank: number;
+};
+
+export type LeaderboardUpdatedPayload = {
+  sessionId: string;
+  entries: LeaderboardEntry[];
+  final: boolean;
 };

@@ -21,6 +21,7 @@ const sessionParticipantSchema = new Schema(
       required: true,
     },
     score: { type: Number, default: 0, min: 0 },
+    finalRank: { type: Number, default: null, min: 1 },
     joinedAt: { type: Date, default: Date.now, required: true },
   },
   { timestamps: true },
