@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LivePoll — Real-time Quizzes & Polling",
+  title: "LivePoll | Real-time Quizzes & Polling",
   description:
     "Create live quiz sessions, join with a room code, and compete in real time.",
 };
