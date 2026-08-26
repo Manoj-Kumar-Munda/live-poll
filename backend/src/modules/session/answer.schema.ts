@@ -5,6 +5,7 @@ export const submitAnswerSchema = z.object({
     .string({ error: "Answer is required" })
     .trim()
     .min(1, "Answer is required"),
+  sessionId: z.string().optional(),
 });
 
 export type SubmitAnswerInput = z.infer<typeof submitAnswerSchema>;

@@ -2,22 +2,21 @@ import type { QuestionSubdocument } from "@/modules/quiz/question.model.js";
 import mongoose from "mongoose";
 import { Quiz } from "@/modules/quiz/quiz.model.js";
 import { PARTICIPANT_STATUS, QUESTION_TYPE } from "@/types/quiz.types.js";
+import type { QuestionType } from "@/types/quiz.types.js";
 import { SESSION_STATUS } from "@/types/session.types.js";
 import { ApiError } from "@/shared/utils/api-error.js";
 import { Answer } from "./answer.model.js";
 import { SessionParticipant } from "./participant.model.js";
 import { isWithinAnswerWindow } from "./session.constants.js";
 import { Session, type SessionDocument } from "./session.model.js";
+import { normalizeAnswerValue } from "./answer.normalize.js";
 
 export type SubmittedAnswer = {
   index: number;
   value: string;
   questionId: string;
+  questionType: QuestionType;
 };
-
-function normalizeAnswerValue(value: string) {
-  return value.trim().toLowerCase();
-}
 
 function validateAnswerValue(
   question: QuestionSubdocument,
@@ -27,7 +26,10 @@ function validateAnswerValue(
     throw new ApiError(400, "Answer is required");
   }
 
-  if (question.type === QUESTION_TYPE.OPEN_TEXT) {
+  const isOpenText =
+    question.type === QUESTION_TYPE.OPEN_TEXT || question.maxLength != null;
+
+  if (isOpenText) {
     const maxLength = question.maxLength ?? 80;
     if (normalizedValue.length > maxLength) {
       throw new ApiError(
@@ -129,6 +131,7 @@ export async function submitAnswer(
     index,
     value,
     questionId: question._id.toString(),
+    questionType: question.type as QuestionType,
   };
 }
 
@@ -151,6 +154,7 @@ export async function getUserAnswerForQuestion(
     index: answer.questionIndex,
     value: answer.value,
     questionId: answer.questionId.toString(),
+    questionType: answer.questionType as QuestionType,
   };
 }
 

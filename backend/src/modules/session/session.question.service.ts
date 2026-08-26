@@ -52,8 +52,8 @@ function toLiveQuestion(
     base.options = question.options;
   }
 
-  if (question.type === QUESTION_TYPE.OPEN_TEXT && question.maxLength != null) {
-    base.maxLength = question.maxLength;
+  if (question.type === QUESTION_TYPE.OPEN_TEXT) {
+    base.maxLength = question.maxLength ?? 80;
   }
 
   return base;
