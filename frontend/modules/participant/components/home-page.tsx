@@ -12,6 +12,7 @@ function formatQuestionsAnswered(count: number) {
 function formatPlayedSummary(session: {
   questionsAnswered: number;
   score: number;
+  rank: number | null;
   finishedAt: string | null;
   participantStatus: string;
 }) {
@@ -19,6 +20,10 @@ function formatPlayedSummary(session: {
 
   if (session.score > 0) {
     parts.push(`${session.score} pts`);
+  }
+
+  if (session.rank != null) {
+    parts.push(`Rank #${session.rank}`);
   }
 
   if (session.finishedAt) {

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SessionStatusBadge } from "@/components/session-status-badge";
 import { LiveQuestionPanel } from "@/components/live-question-panel";
+import { LeaderboardPanel } from "@/components/leaderboard-panel";
 import { QuestionResultsPanel } from "@/components/question-results-panel";
 import { useLiveQuestion } from "@/shared/hooks/use-live-question";
 import {
@@ -30,6 +31,7 @@ export function SessionControlPage({ sessionId }: SessionControlPageProps) {
     activeQuestion,
     lastEnded,
     questionResults,
+    leaderboard,
     launchQuestion,
     endQuestion,
     hasActiveQuestion,
@@ -216,6 +218,13 @@ export function SessionControlPage({ sessionId }: SessionControlPageProps) {
 
       {questionResults ? (
         <QuestionResultsPanel results={questionResults} mode="host" />
+      ) : null}
+
+      {leaderboard ? (
+        <LeaderboardPanel
+          entries={leaderboard.entries}
+          final={leaderboard.final}
+        />
       ) : null}
 
       {activeQuestion ? (

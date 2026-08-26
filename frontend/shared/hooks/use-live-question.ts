@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { connectSocket, getSocket } from "@/lib/socket";
 import type {
+  LeaderboardUpdatedPayload,
   QuestionEndedPayload,
   QuestionResultsPayload,
   QuestionStartedPayload,
@@ -14,6 +15,8 @@ export function useLiveQuestion(sessionId: string | undefined) {
   const [lastEnded, setLastEnded] = useState<QuestionEndedPayload | null>(null);
   const [questionResults, setQuestionResults] =
     useState<QuestionResultsPayload | null>(null);
+  const [leaderboard, setLeaderboard] =
+    useState<LeaderboardUpdatedPayload | null>(null);
   const [submittedAnswer, setSubmittedAnswer] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const activeQuestionRef = useRef<QuestionStartedPayload | null>(null);
@@ -43,6 +46,7 @@ export function useLiveQuestion(sessionId: string | undefined) {
       setActiveQuestion(payload);
       setLastEnded(null);
       setQuestionResults(null);
+      setLeaderboard(null);
 
       if (!isSameQuestion) {
         submittedAnswerRef.current = null;
@@ -81,6 +85,14 @@ export function useLiveQuestion(sessionId: string | undefined) {
       setQuestionResults(payload);
     }
 
+    function onLeaderboard(payload: LeaderboardUpdatedPayload) {
+      if (payload.sessionId !== sessionId) {
+        return;
+      }
+
+      setLeaderboard(payload);
+    }
+
     function onError() {
       isSubmittingRef.current = false;
       setIsSubmitting(false);
@@ -90,6 +102,7 @@ export function useLiveQuestion(sessionId: string | undefined) {
     socket.on("question:ended", onEnded);
     socket.on("question:answered", onAnswered);
     socket.on("question:results", onResults);
+    socket.on("leaderboard:updated", onLeaderboard);
     socket.on("session:error", onError);
 
     return () => {
@@ -97,6 +110,7 @@ export function useLiveQuestion(sessionId: string | undefined) {
       socket.off("question:ended", onEnded);
       socket.off("question:answered", onAnswered);
       socket.off("question:results", onResults);
+      socket.off("leaderboard:updated", onLeaderboard);
       socket.off("session:error", onError);
     };
   }, [sessionId]);
@@ -123,6 +137,7 @@ export function useLiveQuestion(sessionId: string | undefined) {
     activeQuestion,
     lastEnded,
     questionResults,
+    leaderboard,
     submittedAnswer,
     isSubmitting,
     launchQuestion,

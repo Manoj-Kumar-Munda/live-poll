@@ -4,9 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SessionStatusBadge } from "@/components/session-status-badge";
+import { LeaderboardPanel } from "@/components/leaderboard-panel";
 import { LiveQuestionPanel } from "@/components/live-question-panel";
 import { QuestionResultsPanel } from "@/components/question-results-panel";
 import { useLiveQuestion } from "@/shared/hooks/use-live-question";
+import { authClient } from "@/lib/auth-client";
+import type { LeaderboardUpdatedPayload, SessionParticipant } from "@/shared/types";
 import {
   useLeaveSession,
   useParticipantSession,
@@ -21,6 +24,7 @@ type SessionPageProps = {
 export function SessionPage({ sessionId }: SessionPageProps) {
   const router = useRouter();
   const { data: session, isLoading, isError } = useParticipantSession(sessionId);
+  const { data: authSession } = authClient.useSession();
   const leaveSession = useLeaveSession(sessionId);
 
   useSessionRoom(sessionId, participantSessionKeys.detail(sessionId));
@@ -28,10 +32,17 @@ export function SessionPage({ sessionId }: SessionPageProps) {
     activeQuestion,
     lastEnded,
     questionResults,
+    leaderboard,
     submittedAnswer,
     isSubmitting,
     submitAnswer,
   } = useLiveQuestion(sessionId);
+
+  const displayLeaderboard =
+    leaderboard ??
+    (session
+      ? buildLeaderboardFromParticipants(session.participants, session.id)
+      : null);
 
   async function handleLeave() {
     try {
@@ -124,6 +135,14 @@ export function SessionPage({ sessionId }: SessionPageProps) {
         />
       ) : null}
 
+      {displayLeaderboard ? (
+        <LeaderboardPanel
+          entries={displayLeaderboard.entries}
+          final={displayLeaderboard.final}
+          highlightUserId={authSession?.user.id}
+        />
+      ) : null}
+
       {activeQuestion ? (
         <LiveQuestionPanel
           question={activeQuestion.question}
@@ -142,8 +161,12 @@ export function SessionPage({ sessionId }: SessionPageProps) {
           <p className="font-display text-xl font-semibold">Session ended</p>
           <p className="mt-2 text-sm text-text-secondary">
             You answered {session.myQuestionsAnswered ?? 0}{" "}
-            {(session.myQuestionsAnswered ?? 0) === 1 ? "question" : "questions"}.
-            Thanks for playing.
+            {(session.myQuestionsAnswered ?? 0) === 1 ? "question" : "questions"}
+            {session.myScore != null && session.myScore > 0
+              ? ` · ${session.myScore} pts`
+              : null}
+            {session.myRank != null ? ` · Rank #${session.myRank}` : null}
+            . Thanks for playing.
           </p>
           <Link
             href="/home"
@@ -155,4 +178,29 @@ export function SessionPage({ sessionId }: SessionPageProps) {
       ) : null}
     </main>
   );
+}
+
+function buildLeaderboardFromParticipants(
+  participants: SessionParticipant[],
+  sessionId: string,
+): LeaderboardUpdatedPayload | null {
+  const entries = participants
+    .filter((participant) => participant.finalRank != null)
+    .sort((left, right) => left.finalRank! - right.finalRank!)
+    .map((participant) => ({
+      userId: participant.userId,
+      displayName: participant.displayName,
+      score: participant.score,
+      rank: participant.finalRank!,
+    }));
+
+  if (entries.length === 0) {
+    return null;
+  }
+
+  return {
+    sessionId,
+    entries,
+    final: true,
+  };
 }

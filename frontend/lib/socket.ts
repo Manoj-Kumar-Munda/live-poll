@@ -1,5 +1,6 @@
 import { io, type Socket } from "socket.io-client";
 import type {
+  LeaderboardUpdatedPayload,
   QuestionAnsweredPayload,
   QuestionEndedPayload,
   QuestionResultsPayload,
@@ -29,6 +30,7 @@ export type ServerToClientEvents = {
   "question:ended": (payload: QuestionEndedPayload) => void;
   "question:answered": (payload: QuestionAnsweredPayload) => void;
   "question:results": (payload: QuestionResultsPayload) => void;
+  "leaderboard:updated": (payload: LeaderboardUpdatedPayload) => void;
 };
 
 export type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
