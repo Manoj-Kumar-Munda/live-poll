@@ -1,5 +1,17 @@
 import { api } from "@/lib/api";
-import type { Session, SessionDetail, SessionStatus } from "@/shared/types";
+import type {
+  HostDashboardStats,
+  Session,
+  SessionDetail,
+  SessionStatus,
+} from "@/shared/types";
+
+export async function getHostDashboardStats() {
+  const { data } = await api.get<{ stats: HostDashboardStats }>(
+    "/api/sessions/stats",
+  );
+  return data.stats;
+}
 
 export async function listSessions(filters?: {
   quizId?: string;

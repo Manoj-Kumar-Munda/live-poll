@@ -4,11 +4,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SessionStatusBadge } from "@/components/session-status-badge";
 import type { Session } from "@/shared/types";
-import { useQuizzes } from "../api/use-quizzes";
-import { useSessions } from "../api/use-sessions";
+import { useHostDashboardStats, useSessions } from "../api/use-sessions";
 
 export function DashboardPage() {
-  const { data: quizzes = [], isLoading: quizzesLoading } = useQuizzes();
+  const { data: stats, isLoading: statsLoading } = useHostDashboardStats();
   const { data: sessions = [], isLoading: sessionsLoading } = useSessions();
 
   const activeSessions = sessions.filter(
@@ -24,9 +23,7 @@ export function DashboardPage() {
     )
     .slice(0, 5);
 
-  const drafts = quizzes.filter((quiz) => quiz.status === "DRAFT").length;
-  const published = quizzes.filter((quiz) => quiz.status === "PUBLISHED").length;
-  const isLoading = quizzesLoading || sessionsLoading;
+  const isLoading = statsLoading || sessionsLoading;
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
@@ -45,13 +42,16 @@ export function DashboardPage() {
         </Button>
       </div>
 
-      {quizzesLoading ? (
+      {statsLoading ? (
         <p className="mt-8 text-sm text-muted-foreground">Loading...</p>
       ) : (
         <dl className="mt-8 grid gap-3 sm:grid-cols-3">
-          <Stat label="Total events" value={quizzes.length} />
-          <Stat label="Drafts" value={drafts} />
-          <Stat label="Published" value={published} />
+          <Stat label="Total events hosted" value={stats?.totalEventsHosted ?? 0} />
+          <Stat label="Total participants" value={stats?.totalParticipants ?? 0} />
+          <Stat
+            label="Avg. per event"
+            value={stats?.avgParticipantsPerEvent ?? 0}
+          />
         </dl>
       )}
 

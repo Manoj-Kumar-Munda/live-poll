@@ -3,6 +3,7 @@
 export type UserRole = "host" | "participant";
 
 export type {
+  HostDashboardStats,
   LeaderboardEntry,
   LeaderboardUpdatedPayload,
   LiveQuestion,

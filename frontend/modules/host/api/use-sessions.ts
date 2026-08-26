@@ -15,6 +15,13 @@ export function useSessions(filters?: {
   });
 }
 
+export function useHostDashboardStats() {
+  return useQuery({
+    queryKey: sessionKeys.stats(),
+    queryFn: () => sessionApi.getHostDashboardStats(),
+  });
+}
+
 export function useSession(sessionId: string) {
   return useQuery({
     queryKey: sessionKeys.detail(sessionId),
@@ -27,6 +34,7 @@ function useInvalidateSessions() {
 
   return (sessionId?: string) => {
     queryClient.invalidateQueries({ queryKey: sessionKeys.lists() });
+    queryClient.invalidateQueries({ queryKey: sessionKeys.stats() });
     if (sessionId) {
       queryClient.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) });
     }
