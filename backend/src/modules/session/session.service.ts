@@ -14,6 +14,10 @@ import {
 } from "./session.constants.js";
 import { SessionParticipant, type SessionParticipantDocument } from "./participant.model.js";
 import { countUserAnswersBySession, countUserAnswersForSession } from "./answer.service.js";
+import {
+  getRankForUser,
+  rankParticipants,
+} from "./leaderboard.service.js";
 import { Session, type SessionDocument } from "./session.model.js";
 import type {
   CreateSessionInput,
@@ -66,6 +70,7 @@ function toParticipantResponse(
     displayName: participant.displayName,
     status: participant.status as ParticipantStatus,
     score: participant.score,
+    finalRank: participant.finalRank ?? null,
     joinedAt: participant.joinedAt.toISOString(),
   };
 }
@@ -181,7 +186,25 @@ async function buildSessionDetail(
     const membership = participants.find(
       (participant) => participant.userId === participantUserId,
     );
+    const rankEntries = rankParticipants(
+      participants
+        .filter(
+          (participant) =>
+            participant.status === PARTICIPANT_STATUS.ACTIVE ||
+            participant.status === PARTICIPANT_STATUS.FINISHED,
+        )
+        .map((participant) => ({
+          userId: participant.userId,
+          displayName: participant.displayName,
+          score: participant.score,
+          joinedAt: new Date(participant.joinedAt),
+        })),
+    );
+
     detail.myScore = membership?.score ?? 0;
+    detail.myRank =
+      membership?.finalRank ??
+      getRankForUser(rankEntries, participantUserId);
     detail.myQuestionsAnswered = await countUserAnswersForSession(
       participantUserId,
       session._id.toString(),
@@ -324,6 +347,7 @@ export async function listParticipantSessions(
       ...base,
       participantStatus: membership.status as ParticipantStatus,
       score: membership.score,
+      rank: membership.finalRank ?? null,
       questionsAnswered:
         answerCountBySessionId.get(session._id.toString()) ?? 0,
     });
@@ -469,6 +493,19 @@ export async function endSession(
     { sessionId, status: PARTICIPANT_STATUS.ACTIVE },
     { $set: { status: PARTICIPANT_STATUS.FINISHED } },
   ).exec();
+
+  try {
+    const { finalizeLeaderboard } = await import("./leaderboard.service.js");
+    const { broadcastLeaderboardUpdated } = await import(
+      "@/realtime/question.handlers.js"
+    );
+    const payload = await finalizeLeaderboard(sessionId);
+    if (payload) {
+      broadcastLeaderboardUpdated(payload);
+    }
+  } catch {
+    // Socket layer may not be initialized in tests.
+  }
 
   try {
     const { clearQuestionTimer } = await import("@/realtime/question.timer.js");

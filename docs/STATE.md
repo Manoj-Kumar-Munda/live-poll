@@ -106,6 +106,8 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | Session rooms | ✅ | `session:join` / `session:state`; REST mutations broadcast |
 | Question launch / timers | ✅ | `question:launch`, server `questionEndsAt`, auto-end timer |
 | Answer submission | ✅ | `question:answer` → immediate DB write; `question:answered` ack; 400ms grace |
+| Question results | ✅ | `question:results` for MCQ/POLL after each question |
+| Scoring + leaderboard | ✅ | MCQ `bulkWrite` on question end; in-memory leaderboard; `finalRank` on session end |
 
 **Files:** `backend/src/realtime/{socket.server,socket.auth,socket.types,session.handlers,question.handlers,session.room,index}.ts`
 
@@ -152,10 +154,10 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 ## Not implemented (next up per PRD)
 
-- [ ] **Question results** — reveal correct answer, vote %, word cloud after each question
+- [ ] **Question results** — ~~reveal correct answer, vote %~~ ✅ MCQ/POLL; OPEN_TEXT pending
 - [ ] **Answer collection** — ~~immediate writes on submit~~ ✅ done via `question:answer`
-- [ ] **Participant** — ~~answer UI~~ ✅; results, leaderboard pending
-- [ ] **Leaderboard** — in-memory per session, batch score updates
+- [ ] **Participant** — ~~answer UI~~ ✅; ~~results~~ ✅ MCQ/POLL; leaderboard ✅
+- [ ] **Leaderboard** — ~~in-memory per session, batch score updates~~ ✅
 - [ ] **Public published list** — `GET /api/quizzes/published`
 - [ ] **Frontend browse** — consume `/api/quizzes/published` + live badges (needs sessions)
 - [ ] **Participant history / stats** on `/home`
@@ -166,6 +168,7 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 | Date | Change |
 |------|--------|
+| 2026-08-25 | MCQ scoring + in-memory leaderboard; `leaderboard:updated`; `finalRank` persisted on session end |
 | 2026-08-20 | Answer submission via `question:answer` socket; Answer collection; interactive participant UI |
 | 2026-08-20 | Question launch + server timers (`question:started` / `question:ended`, 400ms grace constant) |
 | 2026-08-17 | Socket.IO server on shared HTTP port; cookie auth on connect |

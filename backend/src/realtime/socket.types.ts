@@ -1,6 +1,7 @@
 import type { Session } from "@/lib/auth.js";
 import type { UserRole } from "@/modules/auth/types.js";
 import type {
+  LeaderboardUpdatedPayload,
   QuestionAnsweredPayload,
   QuestionEndedPayload,
   QuestionResultsPayload,
@@ -41,8 +42,9 @@ export type ServerToClientEvents = {
   "question:ended": (payload: QuestionEndedPayload) => void;
   "question:answered": (payload: QuestionAnsweredPayload) => void;
   "question:results": (payload: QuestionResultsPayload) => void;
+  "leaderboard:updated": (payload: LeaderboardUpdatedPayload) => void;
 };
 
 export type SocketData = SocketSessionData;
 
-export type { QuestionAnsweredPayload, QuestionEndedPayload, QuestionResultsPayload, QuestionStartedPayload };
+export type { LeaderboardUpdatedPayload, QuestionAnsweredPayload, QuestionEndedPayload, QuestionResultsPayload, QuestionStartedPayload };

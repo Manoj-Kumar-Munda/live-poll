@@ -3,7 +3,13 @@ import { ApiError } from "@/shared/utils/api-error.js";
 import { submitAnswerSchema } from "@/modules/session/answer.schema.js";
 import { getUserAnswerForActiveQuestion, submitAnswer } from "@/modules/session/answer.service.js";
 import { buildQuestionResults } from "@/modules/session/question.results.service.js";
+import {
+  getLeaderboardPayload,
+  rebuildLeaderboard,
+} from "@/modules/session/leaderboard.service.js";
+import { scoreMcqQuestion } from "@/modules/session/score.service.js";
 import { Session } from "@/modules/session/session.model.js";
+import { SESSION_STATUS } from "@/types/session.types.js";
 import {
   endCurrentQuestion,
   launchNextQuestion,
@@ -19,6 +25,7 @@ import {
 import type {
   ClientToServerEvents,
   QuestionEndedPayload,
+  LeaderboardUpdatedPayload,
   QuestionResultsPayload,
   QuestionStartedPayload,
   ServerToClientEvents,
@@ -59,6 +66,11 @@ export function broadcastQuestionResults(payload: QuestionResultsPayload) {
   io.to(sessionRoomName(payload.sessionId)).emit("question:results", payload);
 }
 
+export function broadcastLeaderboardUpdated(payload: LeaderboardUpdatedPayload) {
+  const io = getSocketServer();
+  io.to(sessionRoomName(payload.sessionId)).emit("leaderboard:updated", payload);
+}
+
 async function emitQuestionResults(sessionId: string, questionIndex: number) {
   const results = await buildQuestionResults(sessionId, questionIndex);
   if (results) {
@@ -66,10 +78,20 @@ async function emitQuestionResults(sessionId: string, questionIndex: number) {
   }
 }
 
+async function emitLeaderboard(sessionId: string, final = false) {
+  const payload = await getLeaderboardPayload(sessionId, final);
+  if (payload) {
+    broadcastLeaderboardUpdated(payload);
+  }
+}
+
 async function handleQuestionEnd(sessionId: string, reason: QuestionEndedPayload["reason"]) {
   const payload = await endCurrentQuestion(sessionId, reason);
   broadcastQuestionEnded(payload);
+  await scoreMcqQuestion(sessionId, payload.index);
   await emitQuestionResults(sessionId, payload.index);
+  await rebuildLeaderboard(sessionId);
+  await emitLeaderboard(sessionId);
   await broadcastSessionState(sessionId);
 }
 
@@ -121,6 +143,17 @@ export async function emitActiveQuestionToSocket(
 
   if (results) {
     socket.emit("question:results", results);
+  }
+
+  const session = await Session.findById(sessionId).exec();
+  if (session) {
+    const leaderboard = await getLeaderboardPayload(
+      sessionId,
+      session.status === SESSION_STATUS.FINISHED,
+    );
+    if (leaderboard) {
+      socket.emit("leaderboard:updated", leaderboard);
+    }
   }
 }
 
