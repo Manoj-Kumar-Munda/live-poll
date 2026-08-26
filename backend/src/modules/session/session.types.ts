@@ -85,11 +85,37 @@ export type OptionResult = {
   percent: number;
 };
 
+export type WordCloudTerm = {
+  key: string;
+  label: string;
+  count: number;
+};
+
+export type WordResult = {
+  key: string;
+  label: string;
+  count: number;
+};
+
+export type WordCloudUpdatedPayload = {
+  sessionId: string;
+  index: number;
+  term: WordCloudTerm;
+  isNew: boolean;
+};
+
+export type WordCloudSnapshotPayload = {
+  sessionId: string;
+  index: number;
+  terms: WordCloudTerm[];
+};
+
 export type QuestionResultsPayload = {
   sessionId: string;
   index: number;
   question: LiveQuestion;
-  optionResults: OptionResult[];
+  optionResults?: OptionResult[];
+  wordResults?: WordResult[];
   correctAnswer?: string;
   totalAnswers: number;
 };
