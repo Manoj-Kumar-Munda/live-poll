@@ -543,3 +543,5 @@ export async function leaveSession(
   await emitSessionRoomUpdate(sessionId);
   return buildSessionDetail(session, "participant", userId);
 }
+
+export { getHostDashboardStats } from "./host-dashboard-stats.service.js";

@@ -106,3 +106,9 @@ export type LeaderboardUpdatedPayload = {
   entries: LeaderboardEntry[];
   final: boolean;
 };
+
+export type HostDashboardStats = {
+  totalEventsHosted: number;
+  totalParticipants: number;
+  avgParticipantsPerEvent: number;
+};

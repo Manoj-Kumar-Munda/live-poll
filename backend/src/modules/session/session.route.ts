@@ -3,6 +3,7 @@ import { requireAuth, requireRole } from "@/modules/auth/middleware.js";
 import {
   createSession,
   endSession,
+  getHostDashboardStats,
   getSessionById,
   joinSession,
   leaveSession,
@@ -19,6 +20,7 @@ const router = Router();
 
 router.post("/join", ...participantOnly, joinSession);
 router.get("/mine", ...participantOnly, listMySessions);
+router.get("/stats", ...hostOnly, getHostDashboardStats);
 router.get("/", ...hostOnly, listSessions);
 router.post("/", ...hostOnly, createSession);
 router.get("/:sessionId", ...anyAuth, getSessionById);

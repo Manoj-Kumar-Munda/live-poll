@@ -245,6 +245,22 @@ Host and participant routes. Cookie session required.
 
 Host only. Optional query: `quizId`, `status` (`WAITING` | `LIVE` | `FINISHED`).
 
+### `GET /api/sessions/stats`
+
+Host only. Aggregated dashboard metrics for the current host:
+
+```json
+{
+  "stats": {
+    "totalEventsHosted": 5,
+    "totalParticipants": 42,
+    "avgParticipantsPerEvent": 8
+  }
+}
+```
+
+`totalParticipants` counts joined players (`ACTIVE` or `FINISHED`) across all hosted sessions. `avgParticipantsPerEvent` is `totalParticipants / totalEventsHosted`, rounded. Computed in one MongoDB aggregation (`$match` on `hostId` + `$facet`); participant lookups use `{ sessionId, status }` index.
+
 ### `POST /api/sessions`
 
 Host only. Body: `{ "quizId": "..." }`. Quiz must be `PUBLISHED`. Returns session in `WAITING` with a 6-character room code.

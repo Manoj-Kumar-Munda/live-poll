@@ -33,6 +33,18 @@ export const listMySessions = asyncHandler(async (req, res) => {
   );
 });
 
+export const getHostDashboardStats = asyncHandler(async (req, res) => {
+  const stats = await sessionService.getHostDashboardStats(req.user!.id);
+
+  res.status(200).json(
+    new ApiResponse({
+      statusCode: 200,
+      message: "Host dashboard stats fetched",
+      data: { stats },
+    }),
+  );
+});
+
 export const createSession = asyncHandler(async (req, res) => {
   const input = createSessionSchema.parse(req.body);
   const session = await sessionService.createSession(req.user!.id, input);

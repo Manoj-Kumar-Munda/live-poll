@@ -28,6 +28,7 @@ const sessionParticipantSchema = new Schema(
 );
 
 sessionParticipantSchema.index({ sessionId: 1, userId: 1 }, { unique: true });
+sessionParticipantSchema.index({ sessionId: 1, status: 1 });
 
 export type SessionParticipantDocument = InferSchemaType<
   typeof sessionParticipantSchema
