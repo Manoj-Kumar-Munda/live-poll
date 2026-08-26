@@ -7,6 +7,7 @@ import { SessionStatusBadge } from "@/components/session-status-badge";
 import { LeaderboardPanel } from "@/components/leaderboard-panel";
 import { LiveQuestionPanel } from "@/components/live-question-panel";
 import { QuestionResultsPanel } from "@/components/question-results-panel";
+import { WordCloudPanel } from "@/components/word-cloud-panel";
 import { useLiveQuestion } from "@/shared/hooks/use-live-question";
 import { authClient } from "@/lib/auth-client";
 import type { LeaderboardUpdatedPayload, SessionParticipant } from "@/shared/types";
@@ -33,9 +34,13 @@ export function SessionPage({ sessionId }: SessionPageProps) {
     lastEnded,
     questionResults,
     leaderboard,
+    wordCloudTerms,
+    wordCloudQuestionKey,
+    highlightedWordKey,
     submittedAnswer,
     isSubmitting,
     submitAnswer,
+    isOpenTextActive,
   } = useLiveQuestion(sessionId);
 
   const displayLeaderboard =
@@ -153,6 +158,19 @@ export function SessionPage({ sessionId }: SessionPageProps) {
           submittedValue={submittedAnswer}
           onSubmit={submitAnswer}
           isSubmitting={isSubmitting}
+        />
+      ) : null}
+
+      {isOpenTextActive ? (
+        <WordCloudPanel
+          terms={wordCloudTerms}
+          questionKey={wordCloudQuestionKey}
+          mode="live"
+          highlightedKey={highlightedWordKey}
+          answerCount={wordCloudTerms.reduce(
+            (total, term) => total + term.count,
+            0,
+          )}
         />
       ) : null}
 

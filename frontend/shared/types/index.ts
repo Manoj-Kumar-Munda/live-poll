@@ -19,4 +19,8 @@ export type {
   SessionParticipant,
   SessionRoomState,
   SessionStatus,
+  WordCloudSnapshotPayload,
+  WordCloudTerm,
+  WordCloudUpdatedPayload,
+  WordResult,
 } from "./session";

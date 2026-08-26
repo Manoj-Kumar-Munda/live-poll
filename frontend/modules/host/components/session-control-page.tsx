@@ -7,6 +7,7 @@ import { SessionStatusBadge } from "@/components/session-status-badge";
 import { LiveQuestionPanel } from "@/components/live-question-panel";
 import { LeaderboardPanel } from "@/components/leaderboard-panel";
 import { QuestionResultsPanel } from "@/components/question-results-panel";
+import { WordCloudPanel } from "@/components/word-cloud-panel";
 import { useLiveQuestion } from "@/shared/hooks/use-live-question";
 import {
   useEndSession,
@@ -32,9 +33,12 @@ export function SessionControlPage({ sessionId }: SessionControlPageProps) {
     lastEnded,
     questionResults,
     leaderboard,
+    wordCloudTerms,
+    wordCloudQuestionKey,
     launchQuestion,
     endQuestion,
     hasActiveQuestion,
+    isOpenTextActive,
   } = useLiveQuestion(sessionId);
 
   async function handleStart() {
@@ -233,6 +237,18 @@ export function SessionControlPage({ sessionId }: SessionControlPageProps) {
           endsAt={activeQuestion.endsAt}
           serverNow={activeQuestion.serverNow}
           index={activeQuestion.index}
+        />
+      ) : null}
+
+      {isOpenTextActive ? (
+        <WordCloudPanel
+          terms={wordCloudTerms}
+          questionKey={wordCloudQuestionKey}
+          mode="live"
+          answerCount={wordCloudTerms.reduce(
+            (total, term) => total + term.count,
+            0,
+          )}
         />
       ) : null}
     </main>

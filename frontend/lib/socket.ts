@@ -6,6 +6,8 @@ import type {
   QuestionResultsPayload,
   QuestionStartedPayload,
   SessionRoomState,
+  WordCloudSnapshotPayload,
+  WordCloudUpdatedPayload,
 } from "@/shared/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
@@ -15,7 +17,7 @@ export type ClientToServerEvents = {
   "session:leave": () => void;
   "question:launch": () => void;
   "question:end": () => void;
-  "question:answer": (payload: { value: string }) => void;
+  "question:answer": (payload: { value: string; sessionId?: string }) => void;
 };
 
 export type ServerToClientEvents = {
@@ -31,6 +33,8 @@ export type ServerToClientEvents = {
   "question:answered": (payload: QuestionAnsweredPayload) => void;
   "question:results": (payload: QuestionResultsPayload) => void;
   "leaderboard:updated": (payload: LeaderboardUpdatedPayload) => void;
+  "wordcloud:updated": (payload: WordCloudUpdatedPayload) => void;
+  "wordcloud:snapshot": (payload: WordCloudSnapshotPayload) => void;
 };
 
 export type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;

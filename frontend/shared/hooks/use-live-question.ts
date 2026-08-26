@@ -7,7 +7,29 @@ import type {
   QuestionEndedPayload,
   QuestionResultsPayload,
   QuestionStartedPayload,
+  WordCloudSnapshotPayload,
+  WordCloudTerm,
+  WordCloudUpdatedPayload,
 } from "@/shared/types";
+
+function sortWordCloudTerms(terms: WordCloudTerm[]) {
+  return [...terms].sort((left, right) => {
+    if (right.count !== left.count) {
+      return right.count - left.count;
+    }
+
+    return left.label.localeCompare(right.label);
+  });
+}
+
+function applyWordCloudUpdate(
+  terms: WordCloudTerm[],
+  payload: WordCloudUpdatedPayload,
+): WordCloudTerm[] {
+  const next = new Map(terms.map((term) => [term.key, term]));
+  next.set(payload.term.key, payload.term);
+  return sortWordCloudTerms([...next.values()]);
+}
 
 export function useLiveQuestion(sessionId: string | undefined) {
   const [activeQuestion, setActiveQuestion] =
@@ -17,6 +39,7 @@ export function useLiveQuestion(sessionId: string | undefined) {
     useState<QuestionResultsPayload | null>(null);
   const [leaderboard, setLeaderboard] =
     useState<LeaderboardUpdatedPayload | null>(null);
+  const [wordCloudTerms, setWordCloudTerms] = useState<WordCloudTerm[]>([]);
   const [submittedAnswer, setSubmittedAnswer] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const activeQuestionRef = useRef<QuestionStartedPayload | null>(null);
@@ -49,6 +72,7 @@ export function useLiveQuestion(sessionId: string | undefined) {
       setLeaderboard(null);
 
       if (!isSameQuestion) {
+        setWordCloudTerms([]);
         submittedAnswerRef.current = null;
         isSubmittingRef.current = false;
         setSubmittedAnswer(null);
@@ -83,6 +107,15 @@ export function useLiveQuestion(sessionId: string | undefined) {
       }
 
       setQuestionResults(payload);
+      if (payload.wordResults) {
+        setWordCloudTerms(
+          payload.wordResults.map((term) => ({
+            key: term.key,
+            label: term.label,
+            count: term.count,
+          })),
+        );
+      }
     }
 
     function onLeaderboard(payload: LeaderboardUpdatedPayload) {
@@ -91,6 +124,22 @@ export function useLiveQuestion(sessionId: string | undefined) {
       }
 
       setLeaderboard(payload);
+    }
+
+    function onWordCloudUpdated(payload: WordCloudUpdatedPayload) {
+      if (payload.sessionId !== sessionId) {
+        return;
+      }
+
+      setWordCloudTerms((current) => applyWordCloudUpdate(current, payload));
+    }
+
+    function onWordCloudSnapshot(payload: WordCloudSnapshotPayload) {
+      if (payload.sessionId !== sessionId) {
+        return;
+      }
+
+      setWordCloudTerms(sortWordCloudTerms(payload.terms));
     }
 
     function onError() {
@@ -103,6 +152,8 @@ export function useLiveQuestion(sessionId: string | undefined) {
     socket.on("question:answered", onAnswered);
     socket.on("question:results", onResults);
     socket.on("leaderboard:updated", onLeaderboard);
+    socket.on("wordcloud:updated", onWordCloudUpdated);
+    socket.on("wordcloud:snapshot", onWordCloudSnapshot);
     socket.on("session:error", onError);
 
     return () => {
@@ -111,6 +162,8 @@ export function useLiveQuestion(sessionId: string | undefined) {
       socket.off("question:answered", onAnswered);
       socket.off("question:results", onResults);
       socket.off("leaderboard:updated", onLeaderboard);
+      socket.off("wordcloud:updated", onWordCloudUpdated);
+      socket.off("wordcloud:snapshot", onWordCloudSnapshot);
       socket.off("session:error", onError);
     };
   }, [sessionId]);
@@ -128,16 +181,38 @@ export function useLiveQuestion(sessionId: string | undefined) {
       return;
     }
 
+    const trimmed = value.trim();
+    if (!trimmed || !sessionId) {
+      return;
+    }
+
     isSubmittingRef.current = true;
     setIsSubmitting(true);
-    getSocket().emit("question:answer", { value });
-  }, []);
+    connectSocket().emit("question:answer", {
+      value: trimmed,
+      sessionId,
+    });
+  }, [sessionId]);
+
+  const isOpenTextActive =
+    activeQuestion?.question.type === "OPEN_TEXT" ? activeQuestion : null;
+
+  const wordCloudQuestionKey = isOpenTextActive
+    ? `${sessionId}-${isOpenTextActive.index}`
+    : questionResults?.question.type === "OPEN_TEXT"
+      ? `${sessionId}-${questionResults.index}-results`
+      : "idle";
+
+  const highlightedWordKey = submittedAnswer?.trim().toLowerCase() ?? null;
 
   return {
     activeQuestion,
     lastEnded,
     questionResults,
     leaderboard,
+    wordCloudTerms,
+    wordCloudQuestionKey,
+    highlightedWordKey,
     submittedAnswer,
     isSubmitting,
     launchQuestion,
@@ -145,5 +220,6 @@ export function useLiveQuestion(sessionId: string | undefined) {
     submitAnswer,
     hasActiveQuestion: activeQuestion !== null,
     hasSubmittedAnswer: submittedAnswer !== null,
+    isOpenTextActive,
   };
 }
