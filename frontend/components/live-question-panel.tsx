@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import type { LiveQuestion } from "@/shared/types";
 import { QuestionCountdown } from "./question-countdown";
 
@@ -58,9 +57,7 @@ export function LiveQuestionPanel({
     onSubmit(option);
   }
 
-  function handleOpenTextSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
+  function submitOpenText() {
     if (!isAnswerMode || !onSubmit || hasSubmitted || isSubmitting || !canAnswer) {
       return;
     }
@@ -71,6 +68,20 @@ export function LiveQuestionPanel({
     }
 
     onSubmit(trimmed);
+  }
+
+  function handleOpenTextSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    submitOpenText();
+  }
+
+  function handleOpenTextKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "Enter" || event.shiftKey) {
+      return;
+    }
+
+    event.preventDefault();
+    submitOpenText();
   }
 
   const inputDisabled =
@@ -126,19 +137,22 @@ export function LiveQuestionPanel({
             <textarea
               value={hasSubmitted ? submittedValue ?? "" : openTextValue}
               onChange={(event) => setOpenTextValue(event.target.value)}
-              maxLength={question.maxLength}
+              onKeyDown={handleOpenTextKeyDown}
+              maxLength={question.maxLength ?? 80}
               rows={3}
               disabled={inputDisabled}
               placeholder="Type your answer..."
               className="w-full resize-none rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none ring-primary/30 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
             />
             {!hasSubmitted ? (
-              <Button
-                type="submit"
+              <button
+                type="button"
                 disabled={inputDisabled || openTextValue.trim().length === 0}
+                onClick={submitOpenText}
+                className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80 disabled:pointer-events-none disabled:opacity-50"
               >
                 {isSubmitting ? "Submitting..." : "Submit answer"}
-              </Button>
+              </button>
             ) : null}
           </form>
         ) : question.maxLength != null ? (
@@ -150,7 +164,9 @@ export function LiveQuestionPanel({
 
       {isAnswerMode && hasSubmitted ? (
         <p className="mt-4 text-sm font-medium text-primary">
-          Answer recorded. Waiting for results...
+          {question.type === "OPEN_TEXT"
+            ? "Answer recorded. Watch it appear in the cloud below."
+            : "Answer recorded. Waiting for results..."}
         </p>
       ) : null}
 
