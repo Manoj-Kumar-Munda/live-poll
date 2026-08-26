@@ -9,12 +9,18 @@ import {
 } from "@/modules/session/leaderboard.service.js";
 import { scoreMcqQuestion } from "@/modules/session/score.service.js";
 import { Session } from "@/modules/session/session.model.js";
+import { QUESTION_TYPE } from "@/types/quiz.types.js";
 import { SESSION_STATUS } from "@/types/session.types.js";
 import {
   endCurrentQuestion,
   launchNextQuestion,
 } from "@/modules/session/session.question.service.js";
 import { getSessionById } from "@/modules/session/session.service.js";
+import {
+  clearWordCloud,
+  getWordCloudSnapshot,
+  recordWordCloudAnswer,
+} from "@/modules/session/wordcloud.service.js";
 import { broadcastSessionState } from "./session.handlers.js";
 import { sessionRoomName } from "./session.room.js";
 import { getSocketServer } from "./socket.server.js";
@@ -30,6 +36,8 @@ import type {
   QuestionStartedPayload,
   ServerToClientEvents,
   SocketData,
+  WordCloudSnapshotPayload,
+  WordCloudUpdatedPayload,
 } from "./socket.types.js";
 
 type QuestionSocket = Socket<
@@ -42,6 +50,14 @@ type QuestionSocket = Socket<
 function socketErrorMessage(error: unknown) {
   if (error instanceof ApiError) {
     return error.message;
+  }
+
+  if (error instanceof Error && "issues" in error) {
+    const issues = (error as { issues?: { message?: string }[] }).issues;
+    const first = issues?.find((issue) => issue.message)?.message;
+    if (first) {
+      return first;
+    }
   }
 
   if (error instanceof Error) {
@@ -69,6 +85,18 @@ export function broadcastQuestionResults(payload: QuestionResultsPayload) {
 export function broadcastLeaderboardUpdated(payload: LeaderboardUpdatedPayload) {
   const io = getSocketServer();
   io.to(sessionRoomName(payload.sessionId)).emit("leaderboard:updated", payload);
+}
+
+export function broadcastWordCloudUpdated(payload: WordCloudUpdatedPayload) {
+  const io = getSocketServer();
+  io.to(sessionRoomName(payload.sessionId)).emit("wordcloud:updated", payload);
+}
+
+export function emitWordCloudSnapshot(
+  socket: QuestionSocket,
+  payload: WordCloudSnapshotPayload,
+) {
+  socket.emit("wordcloud:snapshot", payload);
 }
 
 async function emitQuestionResults(sessionId: string, questionIndex: number) {
@@ -125,6 +153,15 @@ export async function emitActiveQuestionToSocket(
         value: existingAnswer.value,
       });
     }
+
+    if (payload.question.type === QUESTION_TYPE.OPEN_TEXT) {
+      emitWordCloudSnapshot(socket, {
+        sessionId,
+        index: payload.index,
+        terms: getWordCloudSnapshot(sessionId, payload.index),
+      });
+    }
+
     return;
   }
 
@@ -171,6 +208,7 @@ export function registerQuestionHandlers(socket: QuestionSocket) {
       }
 
       const payload = await launchNextQuestion(socket.data.user.id, sessionId);
+      clearWordCloud(sessionId, payload.index);
       scheduleQuestionEnd(sessionId, new Date(payload.endsAt), () =>
         handleQuestionTimerEnd(sessionId),
       );
@@ -202,7 +240,9 @@ export function registerQuestionHandlers(socket: QuestionSocket) {
 
   socket.on("question:answer", async (payload) => {
     try {
-      const sessionId = socket.data.liveSessionId;
+      const { value, sessionId: payloadSessionId } =
+        submitAnswerSchema.parse(payload);
+      const sessionId = socket.data.liveSessionId ?? payloadSessionId;
       if (!sessionId) {
         throw new ApiError(400, "Join the session room first");
       }
@@ -212,7 +252,6 @@ export function registerQuestionHandlers(socket: QuestionSocket) {
         throw new ApiError(403, "Only participants can submit answers");
       }
 
-      const { value } = submitAnswerSchema.parse(payload);
       const result = await submitAnswer(socket.data.user.id, sessionId, value);
 
       socket.emit("question:answered", {
@@ -220,6 +259,20 @@ export function registerQuestionHandlers(socket: QuestionSocket) {
         index: result.index,
         value: result.value,
       });
+
+      if (result.questionType === QUESTION_TYPE.OPEN_TEXT) {
+        const { term, isNew } = recordWordCloudAnswer(
+          sessionId,
+          result.index,
+          value,
+        );
+        broadcastWordCloudUpdated({
+          sessionId,
+          index: result.index,
+          term,
+          isNew,
+        });
+      }
     } catch (error) {
       socket.emit("session:error", { message: socketErrorMessage(error) });
     }

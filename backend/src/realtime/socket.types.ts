@@ -7,6 +7,8 @@ import type {
   QuestionResultsPayload,
   QuestionStartedPayload,
   SessionRoomState,
+  WordCloudSnapshotPayload,
+  WordCloudUpdatedPayload,
 } from "@/modules/session/session.types.js";
 
 export type SocketUser = {
@@ -27,7 +29,7 @@ export type ClientToServerEvents = {
   "session:leave": () => void;
   "question:launch": () => void;
   "question:end": () => void;
-  "question:answer": (payload: { value: string }) => void;
+  "question:answer": (payload: { value: string; sessionId?: string }) => void;
 };
 
 export type ServerToClientEvents = {
@@ -43,8 +45,10 @@ export type ServerToClientEvents = {
   "question:answered": (payload: QuestionAnsweredPayload) => void;
   "question:results": (payload: QuestionResultsPayload) => void;
   "leaderboard:updated": (payload: LeaderboardUpdatedPayload) => void;
+  "wordcloud:updated": (payload: WordCloudUpdatedPayload) => void;
+  "wordcloud:snapshot": (payload: WordCloudSnapshotPayload) => void;
 };
 
 export type SocketData = SocketSessionData;
 
-export type { LeaderboardUpdatedPayload, QuestionAnsweredPayload, QuestionEndedPayload, QuestionResultsPayload, QuestionStartedPayload };
+export type { LeaderboardUpdatedPayload, QuestionAnsweredPayload, QuestionEndedPayload, QuestionResultsPayload, QuestionStartedPayload, WordCloudSnapshotPayload, WordCloudUpdatedPayload };
