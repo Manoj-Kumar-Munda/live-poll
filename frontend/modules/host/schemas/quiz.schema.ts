@@ -61,16 +61,24 @@ export const questionFormSchema = z
       .trim()
       .min(1, "Prompt is required")
       .max(500, "Prompt must be 500 characters or fewer"),
-    options: z.array(optionSchema),
+    options: z.array(z.string()),
     correctAnswer: z.string(),
-    maxLength: requiredInt("Character limit", 1, 500),
+    maxLength: z.number(),
   })
   .superRefine((value, ctx) => {
     if (value.type === "OPEN_TEXT") {
+      const maxLengthResult = requiredInt("Character limit", 1, 500).safeParse(
+        value.maxLength,
+      );
+      if (!maxLengthResult.success) {
+        for (const issue of maxLengthResult.error.issues) {
+          ctx.addIssue({ ...issue, path: ["maxLength"] });
+        }
+      }
       return;
     }
 
-    const min = value.type === "MCQ" ? 2 : 2;
+    const min = 2;
     const max = value.type === "MCQ" ? 4 : 6;
 
     if (value.options.length < min) {
@@ -89,8 +97,20 @@ export const questionFormSchema = z
       });
     }
 
-    const normalized = value.options.map((option) => option.toLowerCase());
-    if (new Set(normalized).size !== normalized.length) {
+    const normalized: string[] = [];
+    for (let index = 0; index < value.options.length; index += 1) {
+      const optionResult = optionSchema.safeParse(value.options[index]);
+      if (!optionResult.success) {
+        for (const issue of optionResult.error.issues) {
+          ctx.addIssue({ ...issue, path: ["options", index] });
+        }
+        continue;
+      }
+
+      normalized.push(optionResult.data.toLowerCase());
+    }
+
+    if (normalized.length > 0 && new Set(normalized).size !== normalized.length) {
       ctx.addIssue({
         code: "custom",
         path: ["options"],

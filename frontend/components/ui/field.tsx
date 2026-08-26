@@ -80,36 +80,67 @@ function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
   )
 }
 
+function flattenFieldErrors(
+  errors?: Array<{ message?: string } | undefined> | { message?: string } | undefined,
+): Array<{ message?: string } | undefined> {
+  if (!errors) {
+    return [];
+  }
+
+  if (Array.isArray(errors)) {
+    return errors.flatMap((error) => {
+      if (Array.isArray(error)) {
+        return error;
+      }
+
+      if (error && typeof error === "object" && "message" in error) {
+        return [error];
+      }
+
+      return [];
+    });
+  }
+
+  if (typeof errors === "object" && "message" in errors && errors.message) {
+    return [errors];
+  }
+
+  return Object.values(errors).flatMap((error) =>
+    flattenFieldErrors(error as { message?: string } | undefined),
+  );
+}
+
 function FieldError({
   className,
   children,
   errors,
   ...props
 }: React.ComponentProps<"div"> & {
-  errors?: Array<{ message?: string } | undefined>
+  errors?: Array<{ message?: string } | undefined> | { message?: string };
 }) {
   const content = useMemo(() => {
     if (children) {
-      return children
+      return children;
     }
 
-    if (!errors?.length) {
-      return null
+    const flatErrors = flattenFieldErrors(errors);
+    if (!flatErrors.length) {
+      return null;
     }
 
     const uniqueErrors = [
-      ...new Map(errors.map((error) => [error?.message, error])).values(),
-    ]
+      ...new Map(flatErrors.map((error) => [error?.message, error])).values(),
+    ];
 
     if (uniqueErrors.length === 1) {
-      return uniqueErrors[0]?.message
+      return uniqueErrors[0]?.message;
     }
 
     return uniqueErrors
       .map((error) => error?.message)
       .filter(Boolean)
-      .join(" ")
-  }, [children, errors])
+      .join(" ");
+  }, [children, errors]);
 
   if (!content) {
     return null

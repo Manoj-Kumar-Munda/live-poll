@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, type FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -70,6 +70,24 @@ export function toQuestionInput(values: QuestionFormValues): QuestionInput {
   };
 }
 
+function getOptionsGroupError(
+  optionsErrors: FieldErrors<QuestionFormValues>["options"],
+) {
+  if (!optionsErrors || Array.isArray(optionsErrors)) {
+    return [];
+  }
+
+  if (optionsErrors.message) {
+    return [{ message: optionsErrors.message }];
+  }
+
+  if (optionsErrors.root?.message) {
+    return [{ message: optionsErrors.root.message }];
+  }
+
+  return [];
+}
+
 type QuestionFormProps = {
   question?: Question;
   submitLabel: string;
@@ -132,29 +150,34 @@ export function QuestionForm({
           <div className="space-y-2">
             <FieldLabel>Options</FieldLabel>
             {(optionValues ?? []).map((_, index) => (
-              <div key={index} className="flex gap-2">
-                <Input
-                  placeholder={`Option ${index + 1}`}
-                  aria-invalid={!!form.formState.errors.options?.[index]}
-                  {...form.register(`options.${index}`)}
+              <div key={index} className="space-y-1">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder={`Option ${index + 1}`}
+                    aria-invalid={!!form.formState.errors.options?.[index]}
+                    {...form.register(`options.${index}`)}
+                  />
+                  {(optionValues?.length ?? 0) > 2 ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() =>
+                        form.setValue(
+                          "options",
+                          (optionValues ?? []).filter((_, i) => i !== index),
+                        )
+                      }
+                    >
+                      Remove
+                    </Button>
+                  ) : null}
+                </div>
+                <FieldError
+                  errors={[form.formState.errors.options?.[index]]}
                 />
-                {(optionValues?.length ?? 0) > 2 ? (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() =>
-                      form.setValue(
-                        "options",
-                        (optionValues ?? []).filter((_, i) => i !== index),
-                      )
-                    }
-                  >
-                    Remove
-                  </Button>
-                ) : null}
               </div>
             ))}
-            <FieldError errors={[form.formState.errors.options]} />
+            <FieldError errors={getOptionsGroupError(form.formState.errors.options)} />
             {(optionValues?.length ?? 0) < maxOptions ? (
               <Button
                 type="button"
