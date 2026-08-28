@@ -301,6 +301,27 @@ Host only. Aggregated dashboard metrics for the current host:
 
 Host only. Body: `{ "quizId": "..." }`. Quiz must be `PUBLISHED`. Returns session in `WAITING` with a 6-character room code.
 
+### `GET /api/sessions/mine`
+
+Participant only. Returns sessions the user has joined, with per-session `score`, `rank`, and `questionsAnswered`.
+
+### `GET /api/sessions/mine/stats`
+
+Participant only. Aggregated history across finished sessions:
+
+```json
+{
+  "stats": {
+    "totalQuizzesPlayed": 4,
+    "totalScore": 80,
+    "bestRank": 2,
+    "totalQuestionsAnswered": 18
+  }
+}
+```
+
+`totalQuizzesPlayed` counts finished sessions the user joined. `bestRank` is the lowest `finalRank` achieved (null if none). `totalQuestionsAnswered` counts all submitted answers.
+
 ### `POST /api/sessions/join`
 
 Participant only (registered account). Body: `{ "roomCode": "ABCDEF" }`. Session must be `WAITING`.
@@ -335,4 +356,4 @@ Guest participant and answer records are purged when the host ends the session.
 
 ## Not implemented
 
-- Participant `/home` aggregate stats
+- Host past sessions list on quiz detail page

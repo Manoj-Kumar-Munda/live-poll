@@ -85,6 +85,7 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | POST | `/api/sessions/guest-join` | — | ✅ | Name + email + room code; sets guest cookie |
 | POST | `/api/sessions/guest-logout` | — | ✅ | Clears guest cookie |
 | GET | `/api/sessions/mine` | participant | ✅ | Sessions joined; includes `score`, `questionsAnswered` |
+| GET | `/api/sessions/mine/stats` | participant | ✅ | Aggregate stats: quizzes played, points, best rank, questions answered |
 | GET | `/api/sessions/:sessionId` | host or joined participant | ✅ | Detail + participant list |
 | POST | `/api/sessions/:sessionId/start` | host | ✅ | `WAITING` → `LIVE` |
 | POST | `/api/sessions/:sessionId/end` | host | ✅ | → `FINISHED` |
@@ -124,7 +125,7 @@ Living record of what exists in the codebase. Update this file when a feature sh
 |------|-------|-----------|
 | `/` | `RedirectIfAuthenticated` | ✅ Landing |
 | `/login`, `/register` | `(auth)/layout` redirects if logged in | ✅ Forms wired to better-auth |
-| `/home` | `RequireAuth` participant | ✅ Quick join + session list |
+| `/home` | `RequireAuth` participant | ✅ Quick join + session list + stats |
 | `/join` | `RequireAuth` participant | ✅ Room code join |
 | `/session/[sessionId]` | `RequireAuth` participant | ✅ Join, waiting room, live answer UI |
 | `/dashboard` | `RequireAuth` host | ✅ Overview + recent quizzes |
@@ -153,20 +154,17 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 - Public browse (`/quizzes`) — `GET /api/quizzes/published`
 - Guest join on `/quizzes` and `/join` (no account required)
+- Participant home stats — `GET /api/sessions/mine/stats`
 
 ### Not wired to backend APIs yet
 
-- Participant aggregate stats on `/home`
+- _(none)_
 
 ---
 
 ## Not implemented (next up per PRD)
 
-- [ ] **Question results** — ~~reveal correct answer, vote %~~ ✅ MCQ/POLL/OPEN_TEXT word cloud
-- [ ] **Answer collection** — ~~immediate writes on submit~~ ✅ done via `question:answer`
-- [ ] **Participant** — ~~answer UI~~ ✅; ~~results~~ ✅ all types; leaderboard ✅
-- [ ] **Leaderboard** — ~~in-memory per session, batch score updates~~ ✅
-- [ ] **Participant history / stats** on `/home`
+- [ ] **Host past sessions per quiz** — API supports `?quizId`; quiz detail UI pending
 
 ---
 
@@ -174,6 +172,7 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 | Date | Change |
 |------|--------|
+| 2026-08-28 | Participant home stats (`GET /api/sessions/mine/stats`, stat cards on `/home`) |
 | 2026-08-28 | Public browse (`GET /api/quizzes/published`, `/quizzes` UI); guest join (name + email + room code); global session labels Join now / In progress; guest data purged on session end |
 | 2026-08-26 | OPEN_TEXT live word cloud (`wordcloud:updated` / `wordcloud:snapshot`); `@isoterik/react-word-cloud` UI with adaptive font scaling |
 | 2026-08-25 | MCQ scoring + in-memory leaderboard; `leaderboard:updated`; `finalRank` persisted on session end |
