@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { QuestionResultsPanel } from "@/components/question-results-panel";
 import { WordCloudPanel } from "@/components/word-cloud-panel";
 import { useLiveQuestion } from "@/shared/hooks/use-live-question";
 import { authClient } from "@/lib/auth-client";
+import { clearGuestSession } from "@/lib/guest-session";
 import type { LeaderboardUpdatedPayload, SessionParticipant } from "@/shared/types";
 import {
   useLeaveSession,
@@ -26,6 +28,7 @@ export function SessionPage({ sessionId }: SessionPageProps) {
   const router = useRouter();
   const { data: session, isLoading, isError } = useParticipantSession(sessionId);
   const { data: authSession } = authClient.useSession();
+  const isGuest = !authSession?.user;
   const leaveSession = useLeaveSession(sessionId);
 
   useSessionRoom(sessionId, participantSessionKeys.detail(sessionId));
@@ -49,9 +52,24 @@ export function SessionPage({ sessionId }: SessionPageProps) {
       ? buildLeaderboardFromParticipants(session.participants, session.id)
       : null);
 
+  const highlightUserId = session?.viewerUserId ?? authSession?.user.id;
+
+  useEffect(() => {
+    if (!isGuest || session?.status !== "FINISHED") {
+      return;
+    }
+
+    void clearGuestSession();
+  }, [isGuest, session?.status]);
+
   async function handleLeave() {
     try {
       await leaveSession.mutateAsync();
+      if (isGuest) {
+        await clearGuestSession();
+        router.push("/quizzes");
+        return;
+      }
       router.push("/home");
     } catch {
       // Toast handled globally.
@@ -71,10 +89,10 @@ export function SessionPage({ sessionId }: SessionPageProps) {
       <main className="mx-auto max-w-6xl px-5 py-12 sm:px-8">
         <p className="text-sm text-text-secondary">Session not found.</p>
         <Link
-          href="/home"
+          href={isGuest ? "/quizzes" : "/home"}
           className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
         >
-          Back to home
+          {isGuest ? "Browse quizzes" : "Back to home"}
         </Link>
       </main>
     );
@@ -144,7 +162,7 @@ export function SessionPage({ sessionId }: SessionPageProps) {
         <LeaderboardPanel
           entries={displayLeaderboard.entries}
           final={displayLeaderboard.final}
-          highlightUserId={authSession?.user.id}
+          highlightUserId={highlightUserId}
         />
       ) : null}
 
@@ -186,11 +204,16 @@ export function SessionPage({ sessionId }: SessionPageProps) {
             {session.myRank != null ? ` · Rank #${session.myRank}` : null}
             . Thanks for playing.
           </p>
+          {isGuest ? (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Your results are not saved. Create an account to keep a history.
+            </p>
+          ) : null}
           <Link
-            href="/home"
+            href={isGuest ? "/quizzes" : "/home"}
             className="mt-6 inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
           >
-            Back to home
+            {isGuest ? "Browse more quizzes" : "Back to home"}
           </Link>
         </section>
       ) : null}

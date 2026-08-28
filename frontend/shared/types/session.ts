@@ -37,6 +37,7 @@ export type SessionDetail = Session & {
   myScore?: number;
   myRank?: number | null;
   myQuestionsAnswered?: number;
+  viewerUserId?: string;
 };
 
 export type SessionRoomState = Session & {

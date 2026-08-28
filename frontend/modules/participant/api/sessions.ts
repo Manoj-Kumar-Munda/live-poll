@@ -16,6 +16,26 @@ export async function joinSession(roomCode: string) {
   return data.session;
 }
 
+export async function guestJoinSession(input: {
+  name: string;
+  email: string;
+  roomCode: string;
+}) {
+  const { data } = await api.post<{ session: SessionDetail }>(
+    "/api/sessions/guest-join",
+    {
+      name: input.name.trim(),
+      email: input.email.trim(),
+      roomCode: input.roomCode.trim().toUpperCase(),
+    },
+  );
+  return data.session;
+}
+
+export async function guestLogout() {
+  await api.post("/api/sessions/guest-logout");
+}
+
 export async function getSession(sessionId: string) {
   const { data } = await api.get<{ session: SessionDetail }>(
     `/api/sessions/${sessionId}`,

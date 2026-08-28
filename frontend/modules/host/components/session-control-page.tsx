@@ -106,8 +106,7 @@ export function SessionControlPage({ sessionId }: SessionControlPageProps) {
           </div>
           <p className="mt-2 text-sm text-text-secondary">
             {session.participantCount}{" "}
-            {session.participantCount === 1 ? "player" : "players"} in the
-            waiting room
+            {session.participantCount === 1 ? "player" : "players"} joined
           </p>
         </div>
 

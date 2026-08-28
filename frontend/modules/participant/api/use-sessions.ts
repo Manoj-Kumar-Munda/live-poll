@@ -33,6 +33,24 @@ export function useJoinSession() {
   });
 }
 
+export function useGuestJoinSession() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: {
+      name: string;
+      email: string;
+      roomCode: string;
+    }) => sessionApi.guestJoinSession(input),
+    onSuccess: (session) => {
+      queryClient.setQueryData(
+        participantSessionKeys.detail(session.id),
+        session,
+      );
+    },
+  });
+}
+
 export function useLeaveSession(sessionId: string) {
   const queryClient = useQueryClient();
 

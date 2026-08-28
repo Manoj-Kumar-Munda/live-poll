@@ -2,8 +2,8 @@ import { cn } from "@/lib/utils";
 import type { SessionStatus } from "@/shared/types";
 
 const LABELS: Record<SessionStatus, string> = {
-  WAITING: "Waiting room",
-  LIVE: "Live",
+  WAITING: "Join now",
+  LIVE: "In progress",
   FINISHED: "Finished",
 };
 

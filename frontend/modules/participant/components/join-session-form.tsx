@@ -5,15 +5,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { FieldGroup } from "@/components/ui/field";
 import { applyApiErrorsToForm } from "@/lib/errors";
 import { useJoinSession } from "../api/use-sessions";
+import { RoomCodeField } from "./room-code-field";
 
 const joinSchema = z.object({
   roomCode: z
@@ -58,19 +53,10 @@ export function JoinSessionForm({
       noValidate
     >
       <FieldGroup>
-        <Field data-invalid={!!form.formState.errors.roomCode}>
-          <FieldLabel htmlFor="room-code">Room code</FieldLabel>
-          <Input
-            id="room-code"
-            placeholder="ABCDEF"
-            autoComplete="off"
-            className="font-mono uppercase tracking-[0.3em]"
-            maxLength={6}
-            aria-invalid={!!form.formState.errors.roomCode}
-            {...form.register("roomCode")}
-          />
-          <FieldError errors={[form.formState.errors.roomCode]} />
-        </Field>
+        <RoomCodeField
+          error={form.formState.errors.roomCode}
+          registration={form.register("roomCode")}
+        />
       </FieldGroup>
 
       <Button

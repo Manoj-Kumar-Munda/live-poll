@@ -2,7 +2,10 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
+import { getSession } from "@/modules/participant/api/sessions";
+import { participantSessionKeys } from "@/modules/participant/api/session-keys";
 import { pathForRole } from "../utils/helpers";
 
 export function RedirectIfAuthenticated() {
@@ -57,4 +60,70 @@ export function RequireAuth({ role, children }: RequireAuthProps) {
   }
 
   return children;
+}
+
+type RequireParticipantOrGuestProps = {
+  sessionId: string;
+  children: React.ReactNode;
+};
+
+export function RequireParticipantOrGuest({
+  sessionId,
+  children,
+}: RequireParticipantOrGuestProps) {
+  const router = useRouter();
+  const { data: authSession, isPending: authPending } = authClient.useSession();
+  const isGuestProbe = !authPending && !authSession?.user;
+
+  const {
+    isLoading: guestLoading,
+    isError: guestError,
+    isSuccess: guestSuccess,
+  } = useQuery({
+    queryKey: participantSessionKeys.detail(sessionId),
+    queryFn: () => getSession(sessionId),
+    enabled: isGuestProbe,
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (authPending) {
+      return;
+    }
+
+    if (authSession?.user) {
+      if (authSession.user.role !== "participant") {
+        router.replace(pathForRole(authSession.user.role));
+      }
+      return;
+    }
+
+    if (!guestLoading && guestError) {
+      router.replace("/quizzes");
+    }
+  }, [
+    authPending,
+    authSession,
+    guestError,
+    guestLoading,
+    router,
+  ]);
+
+  if (authPending || (isGuestProbe && guestLoading)) {
+    return (
+      <main className="flex min-h-svh items-center justify-center text-sm text-muted-foreground">
+        Loading...
+      </main>
+    );
+  }
+
+  if (authSession?.user?.role === "participant") {
+    return children;
+  }
+
+  if (isGuestProbe && guestSuccess) {
+    return children;
+  }
+
+  return null;
 }

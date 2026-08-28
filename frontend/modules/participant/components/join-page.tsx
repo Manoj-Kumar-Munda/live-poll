@@ -1,6 +1,6 @@
 "use client";
 
-import { JoinSessionForm } from "./join-session-form";
+import { JoinForm } from "./join-form";
 
 export function JoinPage() {
   return (
@@ -11,11 +11,11 @@ export function JoinPage() {
             Join a session
           </h1>
           <p className="mt-2 text-sm text-text-secondary">
-            Enter the room code from your host to join the waiting room.
+            Enter the room code from your host to join the session.
           </p>
         </div>
 
-        <JoinSessionForm className="mt-8" />
+        <JoinForm className="mt-8" />
       </div>
     </main>
   );
