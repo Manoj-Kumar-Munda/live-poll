@@ -613,3 +613,4 @@ export async function leaveSession(
 }
 
 export { getHostDashboardStats } from "./host-dashboard-stats.service.js";
+export { getParticipantHomeStats } from "./participant-home-stats.service.js";

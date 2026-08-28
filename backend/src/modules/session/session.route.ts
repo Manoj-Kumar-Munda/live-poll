@@ -8,6 +8,7 @@ import {
   createSession,
   endSession,
   getHostDashboardStats,
+  getParticipantHomeStats,
   getSessionById,
   guestJoinSession,
   guestLogout,
@@ -26,6 +27,7 @@ const router = Router();
 router.post("/guest-join", guestJoinSession);
 router.post("/guest-logout", guestLogout);
 router.post("/join", ...participantOnly, joinSession);
+router.get("/mine/stats", ...participantOnly, getParticipantHomeStats);
 router.get("/mine", ...participantOnly, listMySessions);
 router.get("/stats", ...hostOnly, getHostDashboardStats);
 router.get("/", ...hostOnly, listSessions);

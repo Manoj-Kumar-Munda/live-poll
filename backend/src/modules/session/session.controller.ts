@@ -52,6 +52,18 @@ export const getHostDashboardStats = asyncHandler(async (req, res) => {
   );
 });
 
+export const getParticipantHomeStats = asyncHandler(async (req, res) => {
+  const stats = await sessionService.getParticipantHomeStats(req.user!.id);
+
+  res.status(200).json(
+    new ApiResponse({
+      statusCode: 200,
+      message: "Participant home stats fetched",
+      data: { stats },
+    }),
+  );
+});
+
 export const createSession = asyncHandler(async (req, res) => {
   const input = createSessionSchema.parse(req.body);
   const session = await sessionService.createSession(req.user!.id, input);
