@@ -11,6 +11,13 @@ export function useMySessions() {
   });
 }
 
+export function useParticipantHomeStats() {
+  return useQuery({
+    queryKey: participantSessionKeys.stats(),
+    queryFn: () => sessionApi.getParticipantHomeStats(),
+  });
+}
+
 export function useParticipantSession(sessionId: string) {
   return useQuery({
     queryKey: participantSessionKeys.detail(sessionId),
@@ -29,6 +36,7 @@ export function useJoinSession() {
         session,
       );
       queryClient.invalidateQueries({ queryKey: participantSessionKeys.mine() });
+      queryClient.invalidateQueries({ queryKey: participantSessionKeys.stats() });
     },
   });
 }

@@ -7,6 +7,7 @@ export type {
   LeaderboardEntry,
   LeaderboardUpdatedPayload,
   LiveQuestion,
+  ParticipantHomeStats,
   ParticipantSessionItem,
   ParticipantStatus,
   QuestionAnsweredPayload,

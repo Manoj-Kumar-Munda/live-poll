@@ -145,3 +145,10 @@ export type HostDashboardStats = {
   totalParticipants: number;
   avgParticipantsPerEvent: number;
 };
+
+export type ParticipantHomeStats = {
+  totalQuizzesPlayed: number;
+  totalScore: number;
+  bestRank: number | null;
+  totalQuestionsAnswered: number;
+};

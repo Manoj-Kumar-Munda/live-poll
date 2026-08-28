@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { SessionStatusBadge } from "@/components/session-status-badge";
-import { useMySessions } from "../api/use-sessions";
+import { useMySessions, useParticipantHomeStats } from "../api/use-sessions";
 import { JoinSessionForm } from "./join-session-form";
 
 function formatQuestionsAnswered(count: number) {
@@ -39,6 +39,7 @@ function formatPlayedSummary(session: {
 
 export function ParticipantHomePage() {
   const { data: sessions = [], isLoading } = useMySessions();
+  const { data: stats, isLoading: statsLoading } = useParticipantHomeStats();
 
   const activeSessions = sessions.filter(
     (session) =>
@@ -60,6 +61,27 @@ export function ParticipantHomePage() {
           Join a room code or jump back into a session you&apos;re already in.
         </p>
       </div>
+
+      {statsLoading ? (
+        <p className="mt-8 text-sm text-muted-foreground">Loading stats...</p>
+      ) : (
+        <dl className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <Stat
+            label="Quizzes played"
+            value={stats?.totalQuizzesPlayed ?? 0}
+          />
+          <Stat
+            label="Best rank"
+            value={
+              stats?.bestRank != null ? `#${stats.bestRank}` : "—"
+            }
+          />
+          <Stat
+            label="Questions answered"
+            value={stats?.totalQuestionsAnswered ?? 0}
+          />
+        </dl>
+      )}
 
       <section className="mt-8 rounded-xl border border-border bg-surface p-5">
         <h2 className="font-display text-lg font-semibold">Quick join</h2>
@@ -125,5 +147,22 @@ export function ParticipantHomePage() {
         </section>
       ) : null}
     </main>
+  );
+}
+
+function Stat({
+  label,
+  value,
+}: {
+  label: string;
+  value: number | string;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-surface px-5 py-4">
+      <dt className="text-sm text-text-secondary">{label}</dt>
+      <dd className="mt-1 font-display text-2xl font-bold tabular-nums">
+        {value}
+      </dd>
+    </div>
   );
 }
