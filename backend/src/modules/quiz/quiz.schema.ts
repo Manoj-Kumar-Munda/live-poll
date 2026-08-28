@@ -1,6 +1,7 @@
 import { z } from "zod";
 import mongoose from "mongoose";
 import { QUESTION_TYPE, QUIZ_STATUS } from "@/types/quiz.types.js";
+import { SESSION_STATUS } from "@/types/session.types.js";
 import { QUESTION_LIMITS, QUIZ_LIMITS } from "./quiz.constants.js";
 function isValidMongoObjectId(value: string): boolean {
   if (!/^[a-f\d]{24}$/i.test(value)) {
@@ -83,6 +84,18 @@ export const listQuizzesQuerySchema = z.object({
 });
 
 export type ListQuizzesQuery = z.infer<typeof listQuizzesQuerySchema>;
+
+export const listPublishedQuizzesQuerySchema = z.object({
+  status: z
+    .enum([SESSION_STATUS.WAITING, SESSION_STATUS.LIVE], {
+      error: "Status must be WAITING or LIVE",
+    })
+    .optional(),
+});
+
+export type ListPublishedQuizzesQuery = z.infer<
+  typeof listPublishedQuizzesQuerySchema
+>;
 
 export const getQuizByIdSchema = z.object({
   id: quizIdSchema,

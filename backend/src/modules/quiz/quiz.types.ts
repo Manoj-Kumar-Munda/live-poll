@@ -27,3 +27,21 @@ export type QuestionResponse = {
 export type QuizDetailResponse = QuizResponse & {
   questions: QuestionResponse[];
 };
+
+export type PublishedQuizLiveSession = {
+  sessionId: string;
+  status: "WAITING" | "LIVE";
+  participantCount: number;
+};
+
+export type PublishedQuizResponse = {
+  id: string;
+  title: string;
+  description: string | null;
+  questionCount: number;
+  timeLimitSeconds: number;
+  pointsPerQuestion: number;
+  hostName: string;
+  updatedAt: string;
+  liveSession: PublishedQuizLiveSession;
+};

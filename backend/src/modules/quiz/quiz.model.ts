@@ -45,6 +45,7 @@ const quizSchema = new Schema(
 );
 
 quizSchema.index({ ownerId: 1, status: 1 });
+quizSchema.index({ status: 1, updatedAt: -1 });
 
 export type QuizDocument = InferSchemaType<typeof quizSchema> & {
   _id: mongoose.Types.ObjectId;

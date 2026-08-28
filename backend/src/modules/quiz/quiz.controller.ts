@@ -6,6 +6,7 @@ import {
   createQuizSchema,
   deleteQuizByIdSchema,
   getQuizByIdSchema,
+  listPublishedQuizzesQuerySchema,
   listQuizzesQuerySchema,
   questionOnQuizParamsSchema,
   quizActionParamsSchema,
@@ -13,6 +14,20 @@ import {
   updateQuizFieldsSchema,
 } from "./quiz.schema.js";
 import * as quizService from "./quiz.service.js";
+import { listPublishedQuizzes } from "./published-quiz.service.js";
+
+export const listPublishedQuizzesHandler = asyncHandler(async (req, res) => {
+  const query = listPublishedQuizzesQuerySchema.parse(req.query);
+  const quizzes = await listPublishedQuizzes(query);
+
+  res.status(200).json(
+    new ApiResponse({
+      statusCode: 200,
+      message: "Published quizzes fetched",
+      data: { quizzes },
+    }),
+  );
+});
 
 export const listQuizzes = asyncHandler(async (req, res) => {
   const query = listQuizzesQuerySchema.parse(req.query);

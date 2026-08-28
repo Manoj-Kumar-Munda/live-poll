@@ -7,6 +7,7 @@ import {
   deleteQuestion,
   deleteQuizById,
   getQuizById,
+  listPublishedQuizzesHandler,
   listQuizzes,
   publishQuiz,
   updateQuestion,
@@ -16,6 +17,7 @@ import {
 const hostOnly = [requireAuth, requireRole("host")] as const;
 
 const router = Router();
+router.get("/published", listPublishedQuizzesHandler);
 router.get("/", ...hostOnly, listQuizzes);
 router.post("/", ...hostOnly, createQuiz);
 router.post("/:quizId/questions", ...hostOnly, addQuestion);
