@@ -35,6 +35,7 @@ export type SessionDetailResponse = SessionResponse & {
   myScore?: number;
   myRank?: number | null;
   myQuestionsAnswered?: number;
+  viewerUserId?: string;
 };
 
 /** Broadcast to everyone in a session socket room (no per-user role). */

@@ -37,6 +37,13 @@ export const joinSessionSchema = z.object({
   roomCode: roomCodeSchema,
 });
 
+export const guestJoinSessionSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(100),
+  email: z.string().trim().email("Enter a valid email").max(254),
+  roomCode: roomCodeSchema,
+});
+
 export type CreateSessionInput = z.infer<typeof createSessionSchema>;
 export type ListSessionsQuery = z.infer<typeof listSessionsQuerySchema>;
 export type JoinSessionInput = z.infer<typeof joinSessionSchema>;
+export type GuestJoinSessionInput = z.infer<typeof guestJoinSessionSchema>;

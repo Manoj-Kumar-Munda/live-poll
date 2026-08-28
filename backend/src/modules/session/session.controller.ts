@@ -1,7 +1,14 @@
 import { ApiResponse } from "@/shared/utils/api-response.js";
 import { asyncHandler } from "@/shared/utils/async-handler.js";
 import {
+  assertGuestSessionAccess,
+  clearGuestCookie,
+  requireAuthOrGuest,
+  setGuestCookie,
+} from "@/modules/auth/guest-auth.js";
+import {
   createSessionSchema,
+  guestJoinSessionSchema,
   joinSessionSchema,
   listSessionsQuerySchema,
   sessionIdParamsSchema,
@@ -60,6 +67,7 @@ export const createSession = asyncHandler(async (req, res) => {
 
 export const getSessionById = asyncHandler(async (req, res) => {
   const { sessionId } = sessionIdParamsSchema.parse(req.params);
+  assertGuestSessionAccess(req, sessionId);
   const session = await sessionService.getSessionById(
     req.user!.id,
     sessionId,
@@ -70,6 +78,32 @@ export const getSessionById = asyncHandler(async (req, res) => {
       statusCode: 200,
       message: "Session fetched",
       data: { session },
+    }),
+  );
+});
+
+export const guestJoinSession = asyncHandler(async (req, res) => {
+  const input = guestJoinSessionSchema.parse(req.body);
+  const { session, guest } = await sessionService.guestJoinSession(input);
+  await setGuestCookie(res, guest);
+
+  res.status(200).json(
+    new ApiResponse({
+      statusCode: 200,
+      message: "Joined session",
+      data: { session },
+    }),
+  );
+});
+
+export const guestLogout = asyncHandler(async (_req, res) => {
+  clearGuestCookie(res);
+
+  res.status(200).json(
+    new ApiResponse({
+      statusCode: 200,
+      message: "Guest session cleared",
+      data: null,
     }),
   );
 });
@@ -120,6 +154,7 @@ export const endSession = asyncHandler(async (req, res) => {
 
 export const leaveSession = asyncHandler(async (req, res) => {
   const { sessionId } = sessionIdParamsSchema.parse(req.params);
+  assertGuestSessionAccess(req, sessionId);
   const session = await sessionService.leaveSession(req.user!.id, sessionId);
 
   res.status(200).json(

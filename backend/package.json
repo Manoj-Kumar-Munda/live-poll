@@ -17,9 +17,11 @@
   "type": "module",
   "dependencies": {
     "better-auth": "^1.6.27",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "jose": "^6.2.10",
     "mongodb": "^7.5.0",
     "mongoose": "^9.9.2",
     "resend": "^6.19.0",
@@ -28,6 +30,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^20.19.37",

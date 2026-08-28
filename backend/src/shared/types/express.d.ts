@@ -5,6 +5,8 @@ declare global {
     interface Request {
       session?: Session;
       user?: Session["user"];
+      isGuest?: boolean;
+      guestSessionId?: string;
     }
   }
 }

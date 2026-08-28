@@ -1,4 +1,5 @@
 import { createServer, type Server as HttpServer } from "node:http";
+import cookieParser from "cookie-parser";
 import type { Express } from "express";
 import { Server } from "socket.io";
 import { env } from "@/config/env.js";
@@ -36,6 +37,8 @@ export function createSocketServer(app: Express): {
       credentials: true,
     },
   });
+
+  io.engine.use(cookieParser());
 
   io.use(authenticateSocket);
 

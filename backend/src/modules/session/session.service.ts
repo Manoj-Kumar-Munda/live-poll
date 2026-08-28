@@ -1,4 +1,5 @@
 import { randomInt } from "node:crypto";
+import { createGuestUserId } from "@/modules/auth/guest-auth.js";
 import { Quiz } from "@/modules/quiz/quiz.model.js";
 import { QUIZ_STATUS } from "@/types/quiz.types.js";
 import {
@@ -21,6 +22,7 @@ import {
 import { Session, type SessionDocument } from "./session.model.js";
 import type {
   CreateSessionInput,
+  GuestJoinSessionInput,
   JoinSessionInput,
   ListSessionsQuery,
 } from "./session.schema.js";
@@ -209,6 +211,7 @@ async function buildSessionDetail(
       participantUserId,
       session._id.toString(),
     );
+    detail.viewerUserId = participantUserId;
   }
 
   return detail;
@@ -383,30 +386,85 @@ export async function joinSession(
   displayName: string,
   input: JoinSessionInput,
 ): Promise<SessionDetailResponse> {
-  const session = await Session.findOne({
+  return joinSessionAsParticipant({
+    userId,
+    displayName,
     roomCode: input.roomCode,
-    status: SESSION_STATUS.WAITING,
+    isGuest: false,
+  });
+}
+
+export async function guestJoinSession(
+  input: GuestJoinSessionInput,
+): Promise<{
+  session: SessionDetailResponse;
+  guest: {
+    sub: string;
+    name: string;
+    email: string;
+    sessionId: string;
+  };
+}> {
+  const userId = createGuestUserId();
+  const session = await joinSessionAsParticipant({
+    userId,
+    displayName: input.name,
+    email: input.email,
+    roomCode: input.roomCode,
+    isGuest: true,
+  });
+
+  return {
+    session,
+    guest: {
+      sub: userId,
+      name: input.name.trim(),
+      email: input.email.trim(),
+      sessionId: session.id,
+    },
+  };
+}
+
+async function joinSessionAsParticipant(options: {
+  userId: string;
+  displayName: string;
+  email?: string;
+  roomCode: string;
+  isGuest: boolean;
+}): Promise<SessionDetailResponse> {
+  const session = await Session.findOne({
+    roomCode: options.roomCode,
   }).exec();
 
   if (!session) {
+    throw new ApiError(404, "No session found for that code");
+  }
+
+  if (session.status === SESSION_STATUS.LIVE) {
+    throw new ApiError(400, "This session has already started");
+  }
+
+  if (session.status !== SESSION_STATUS.WAITING) {
     throw new ApiError(404, "No waiting room found for that code");
   }
 
   assertSessionActive(session as SessionDocument);
 
-  if (session.hostId === userId) {
+  if (session.hostId === options.userId) {
     throw new ApiError(400, "Hosts cannot join their own session as a participant");
   }
 
-  const name = displayName.trim() || "Player";
+  const name = options.displayName.trim() || "Player";
 
   const participant = await SessionParticipant.findOneAndUpdate(
-    { sessionId: session._id, userId },
+    { sessionId: session._id, userId: options.userId },
     {
       $setOnInsert: {
         sessionId: session._id,
-        userId,
+        userId: options.userId,
         displayName: name,
+        email: options.email ?? null,
+        isGuest: options.isGuest,
         status: PARTICIPANT_STATUS.ACTIVE,
         score: 0,
         joinedAt: new Date(),
@@ -418,12 +476,15 @@ export async function joinSession(
   if (participant && participant.status === PARTICIPANT_STATUS.QUIT) {
     participant.status = PARTICIPANT_STATUS.ACTIVE;
     participant.displayName = name;
+    if (options.email) {
+      participant.email = options.email;
+    }
     participant.joinedAt = new Date();
     await participant.save();
   }
 
   await emitSessionRoomUpdate(session._id.toString());
-  return buildSessionDetail(session as SessionDocument, "participant", userId);
+  return buildSessionDetail(session as SessionDocument, "participant", options.userId);
 }
 
 export async function startSession(
@@ -505,6 +566,13 @@ export async function endSession(
     }
   } catch {
     // Socket layer may not be initialized in tests.
+  }
+
+  try {
+    const { purgeGuestSessionData } = await import("./guest-cleanup.service.js");
+    await purgeGuestSessionData(sessionId);
+  } catch {
+    // Cleanup is best-effort when persistence layer is unavailable in tests.
   }
 
   try {

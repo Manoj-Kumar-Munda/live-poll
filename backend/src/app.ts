@@ -1,4 +1,5 @@
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import express from "express";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "@/lib/auth.js";
@@ -27,6 +28,7 @@ app.all("/api/auth/{*splat}", toNodeHandler(auth));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });

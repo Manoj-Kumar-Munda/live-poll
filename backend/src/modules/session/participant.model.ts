@@ -13,6 +13,8 @@ const sessionParticipantSchema = new Schema(
       index: true,
     },
     userId: { type: String, required: true, index: true },
+    email: { type: String, default: null, trim: true, maxlength: 254 },
+    isGuest: { type: Boolean, default: false, required: true },
     displayName: { type: String, required: true, trim: true, maxlength: 100 },
     status: {
       type: String,
