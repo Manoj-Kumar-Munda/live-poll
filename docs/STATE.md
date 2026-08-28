@@ -1,6 +1,6 @@
 # Implementation State
 
-**Last updated:** 2026-08-17
+**Last updated:** 2026-08-28
 
 Living record of what exists in the codebase. Update this file when a feature ships. Product intent remains in [PRD.md](PRD.md).
 
@@ -15,9 +15,9 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | Auth (frontend) | ✅ login, register, session gates |
 | Quiz CRUD (backend) | ✅ host CRUD, questions, publish, archive |
 | Quiz UI (frontend) | ✅ host list, editor, publish |
-| Sessions / realtime | 🔶 REST sessions; Socket.IO auth wired |
-| Participant live flow | 🔶 join + answer UI; OPEN_TEXT word cloud live |
-| Public browse API wired | ❌ page stub only |
+| Sessions / realtime | ✅ REST + Socket.IO live flow |
+| Participant live flow | ✅ join, answers, leaderboard, word cloud |
+| Public browse + guest join | ✅ `/quizzes` + `GET /api/quizzes/published` + guest join |
 
 ---
 
@@ -67,7 +67,7 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | DELETE | `/api/quizzes/:id/questions/:questionId` | host | ✅ | **DRAFT only** |
 | POST | `/api/quizzes/:id/publish` | host | ✅ | Requires ≥1 question; locks edits |
 | POST | `/api/quizzes/:id/archive` | host | ✅ | `PUBLISHED` → `ARCHIVED` |
-| GET | `/api/quizzes/published` | — | ❌ | Public list |
+| GET | `/api/quizzes/published` | — | ✅ | Active `WAITING`/`LIVE` sessions only; optional `?status` |
 
 **Quiz model:** `pointsPerQuestion` (default 10), `durationPerQuestion` stored in ms; API uses `timeLimitSeconds`. Status: `DRAFT` \| `PUBLISHED` \| `ARCHIVED`.
 
@@ -82,6 +82,8 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | GET | `/api/sessions` | host | ✅ | Optional `?quizId`, `?status=WAITING\|LIVE\|FINISHED` |
 | POST | `/api/sessions` | host | ✅ | Start session on **PUBLISHED** quiz; generates 6-char room code |
 | POST | `/api/sessions/join` | participant | ✅ | Join by `roomCode` while `WAITING` |
+| POST | `/api/sessions/guest-join` | — | ✅ | Name + email + room code; sets guest cookie |
+| POST | `/api/sessions/guest-logout` | — | ✅ | Clears guest cookie |
 | GET | `/api/sessions/mine` | participant | ✅ | Sessions joined; includes `score`, `questionsAnswered` |
 | GET | `/api/sessions/:sessionId` | host or joined participant | ✅ | Detail + participant list |
 | POST | `/api/sessions/:sessionId/start` | host | ✅ | `WAITING` → `LIVE` |
@@ -129,7 +131,7 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | `/dashboard/quizzes` | `RequireAuth` host | ✅ List, filter, create |
 | `/dashboard/quizzes/[id]` | `RequireAuth` host | ✅ Edit draft / view published |
 | `/dashboard/sessions/[sessionId]` | `RequireAuth` host | ✅ Control room (socket live updates) |
-| `/quizzes` | — | 🔶 Stub |
+| `/quizzes` | — | ✅ Browse active sessions + guest join form |
 
 Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
@@ -147,9 +149,14 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 - `modules/host/` — dashboard, quiz list, quiz editor, session control room
 - `modules/participant/` — join by room code, waiting room
 
+### Wired to backend
+
+- Public browse (`/quizzes`) — `GET /api/quizzes/published`
+- Guest join on `/quizzes` and `/join` (no account required)
+
 ### Not wired to backend APIs yet
 
-- Public browse (`/quizzes`)
+- Participant aggregate stats on `/home`
 
 ---
 
@@ -159,8 +166,6 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 - [ ] **Answer collection** — ~~immediate writes on submit~~ ✅ done via `question:answer`
 - [ ] **Participant** — ~~answer UI~~ ✅; ~~results~~ ✅ all types; leaderboard ✅
 - [ ] **Leaderboard** — ~~in-memory per session, batch score updates~~ ✅
-- [ ] **Public published list** — `GET /api/quizzes/published`
-- [ ] **Frontend browse** — consume `/api/quizzes/published` + live badges (needs sessions)
 - [ ] **Participant history / stats** on `/home`
 
 ---
@@ -169,6 +174,7 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 | Date | Change |
 |------|--------|
+| 2026-08-28 | Public browse (`GET /api/quizzes/published`, `/quizzes` UI); guest join (name + email + room code); global session labels Join now / In progress; guest data purged on session end |
 | 2026-08-26 | OPEN_TEXT live word cloud (`wordcloud:updated` / `wordcloud:snapshot`); `@isoterik/react-word-cloud` UI with adaptive font scaling |
 | 2026-08-25 | MCQ scoring + in-memory leaderboard; `leaderboard:updated`; `finalRank` persisted on session end |
 | 2026-08-20 | Answer submission via `question:answer` socket; Answer collection; interactive participant UI |

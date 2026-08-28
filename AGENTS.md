@@ -69,7 +69,8 @@ Validation errors: `400` with `errors: [{ path, message }]`.
 |------|------|--------|
 | `/` | public | Landing (placeholder nav uses session) |
 | `/login`, `/register` | public | Auth forms wired to better-auth |
-| `/quizzes` | public | Browse stub |
+| `/quizzes` | public | Browse active sessions + guest join |
+| `/join` | public | Join by room code (registered or guest) |
 | `/home`, `/join`, `/session/[id]` | participant | Join + waiting room (live Q&A pending) |
 | `/dashboard`, `/dashboard/quizzes/*`, `/dashboard/sessions/*` | host | Quiz list/editor + session control room |
 
@@ -81,8 +82,8 @@ See [`docs/API.md`](docs/API.md). Mount points in `backend/src/app.ts`:
 - `ALL /api/auth/*` — better-auth
 - `GET /api/docs` — Swagger UI
 - `/api/users` — profile
-- `/api/quizzes` — host quiz CRUD, questions, publish, archive
-- `/api/sessions` — room codes, join, start/end session
+- `/api/quizzes` — host quiz CRUD, questions, publish, archive; `GET /published` public browse
+- `/api/sessions` — room codes, join, guest-join, start/end
 
 ## When you finish a feature
 

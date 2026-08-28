@@ -81,6 +81,42 @@ Body: `{ name: string }` (1–100 chars).
 | `DELETE` | `/api/quizzes/:id/questions/:questionId` | Delete a question — **DRAFT only** |
 | `POST` | `/api/quizzes/:id/publish` | `DRAFT` → `PUBLISHED`; requires ≥1 question |
 | `POST` | `/api/quizzes/:id/archive` | `PUBLISHED` → `ARCHIVED` |
+| `GET` | `/api/quizzes/published` | Public browse — active `WAITING`/`LIVE` sessions only |
+
+### `GET /api/quizzes/published`
+
+No auth. Lists published quizzes that have an active (`WAITING` or `LIVE`) non-expired session.
+
+Optional query: `?status=WAITING|LIVE`
+
+Success `200`:
+
+```json
+{
+  "success": true,
+  "data": {
+    "quizzes": [
+      {
+        "id": "...",
+        "title": "...",
+        "description": null,
+        "questionCount": 5,
+        "timeLimitSeconds": 30,
+        "pointsPerQuestion": 10,
+        "hostName": "Alex",
+        "updatedAt": "...",
+        "liveSession": {
+          "sessionId": "...",
+          "status": "WAITING",
+          "participantCount": 3
+        }
+      }
+    ]
+  }
+}
+```
+
+Room codes are not included in the response.
 
 ### `GET /api/quizzes`
 
@@ -267,11 +303,19 @@ Host only. Body: `{ "quizId": "..." }`. Quiz must be `PUBLISHED`. Returns sessio
 
 ### `POST /api/sessions/join`
 
-Participant only. Body: `{ "roomCode": "ABCDEF" }`. Session must be `WAITING`.
+Participant only (registered account). Body: `{ "roomCode": "ABCDEF" }`. Session must be `WAITING`.
+
+### `POST /api/sessions/guest-join`
+
+No auth. Body: `{ "name": "...", "email": "...", "roomCode": "ABCDEF" }`. Session must be `WAITING`. Sets `livepoll_guest` httpOnly cookie for session access.
+
+### `POST /api/sessions/guest-logout`
+
+Clears the guest session cookie.
 
 ### `GET /api/sessions/:sessionId`
 
-Host (owner) or joined participant. Returns session detail and participant list.
+Host (owner), registered joined participant, or guest with valid cookie for that session. Returns session detail and participant list. Participant responses include `viewerUserId`, `myScore`, `myRank`, `myQuestionsAnswered`.
 
 ### `POST /api/sessions/:sessionId/start`
 
@@ -283,14 +327,12 @@ Host only. Ends session (`FINISHED`).
 
 ### `POST /api/sessions/:sessionId/leave`
 
-Participant only. Marks participant as `QUIT`.
+Registered participant or guest. Marks participant as `QUIT`.
+
+Guest participant and answer records are purged when the host ends the session.
 
 ---
 
 ## Not implemented
 
-- `GET /api/quizzes/published`
-- Socket.IO live question flow
-- Answers / `QuizAttempt`
-- Leaderboard persist (`QuizResult`)
-- Participant history / stats
+- Participant `/home` aggregate stats
