@@ -1,98 +1,66 @@
-import { Monitor, Users } from "lucide-react";
+import { LineChart, Share2, Sparkles } from "lucide-react";
+import { SectionIntro } from "@/components/marketing/section-intro";
 
-const hostSteps = [
-  "Create a quiz and add questions",
-  "Publish and start a session",
-  "Share the room code",
-  "Launch questions and control the flow",
-];
-
-const participantSteps = [
-  "Enter the room code",
-  "Wait in the lobby until the host starts",
-  "Answer within the countdown",
-  "See results and your rank",
+const steps = [
+  {
+    title: "Ask a question",
+    description:
+      "Create a quiz, pick MCQ, poll, or open text, and publish when you are ready to go live.",
+    icon: Sparkles,
+  },
+  {
+    title: "Share the code",
+    description:
+      "Start a session and give your group the 6-character room code. They join from any device.",
+    icon: Share2,
+  },
+  {
+    title: "See results live",
+    description:
+      "Launch questions one by one. Percentages, word clouds, and leaderboard updates appear instantly.",
+    icon: LineChart,
+  },
 ];
 
 export function HowItWorks() {
   return (
     <section
-      className="border-t border-border/60 py-16 sm:py-24"
+      className="marketing-band border-t border-border/60 py-16 sm:py-24"
       aria-labelledby="how-heading"
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
-        <h2
+        <SectionIntro
           id="how-heading"
-          className="mb-12 font-display text-2xl font-bold tracking-tight text-text-primary sm:text-3xl"
-        >
-          Two roles. One session.
-        </h2>
+          eyebrow="How it works"
+          title="From question to live results in minutes"
+          description="Hosts control the pace. Participants answer on their own screens. Everyone sees the same outcome when time is up."
+          align="center"
+          className="mb-12"
+        />
 
-        <div className="grid gap-8 lg:grid-cols-2">
-          <div className="rounded-2xl border border-border bg-surface p-6 shadow-[0_1px_2px_rgba(17,24,39,0.04)] sm:p-8">
-            <div className="mb-6 flex items-center gap-3">
-              <span
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-electric/15 text-electric"
-                aria-hidden="true"
-              >
-                <Monitor size={18} aria-hidden />
-              </span>
-              <div>
-                <h3 className="font-display text-lg font-semibold text-text-primary">
-                  Host
-                </h3>
-                <p className="text-sm text-text-muted">Create and control</p>
+        <ol className="grid gap-6 md:grid-cols-3">
+          {steps.map((step, index) => (
+            <li
+              key={step.title}
+              className="relative rounded-2xl border border-border bg-surface p-6 shadow-[0_1px_2px_rgba(23,26,43,0.04)]"
+            >
+              <div className="mb-5 flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <step.icon size={20} aria-hidden />
+                </span>
+                <span className="font-mono text-sm font-semibold tabular-nums text-primary">
+                  {index + 1}
+                </span>
               </div>
-            </div>
-            <ol className="space-y-4">
-              {hostSteps.map((step, i) => (
-                <li key={step} className="flex gap-4">
-                  <span
-                    className="font-mono text-sm tabular-nums text-electric"
-                    aria-hidden="true"
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className="text-sm leading-relaxed text-text-secondary">
-                    {step}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          <div className="rounded-2xl border border-border bg-surface p-6 shadow-[0_1px_2px_rgba(17,24,39,0.04)] sm:p-8">
-            <div className="mb-6 flex items-center gap-3">
-              <span
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-spotlight/15 text-spotlight"
-                aria-hidden="true"
-              >
-                <Users size={18} aria-hidden />
-              </span>
-              <div>
-                <h3 className="font-display text-lg font-semibold text-text-primary">
-                  Participant
-                </h3>
-                <p className="text-sm text-text-muted">Join and compete</p>
-              </div>
-            </div>
-            <ol className="space-y-4">
-              {participantSteps.map((step, i) => (
-                <li key={step} className="flex gap-4">
-                  <span
-                    className="font-mono text-sm tabular-nums text-spotlight"
-                    aria-hidden="true"
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className="text-sm leading-relaxed text-text-secondary">
-                    {step}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
+              <h3 className="font-display text-lg font-semibold text-text-primary">
+                {step.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-text-secondary">
+                {step.description}
+              </p>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );

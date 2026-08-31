@@ -10,7 +10,7 @@ const options = [
 export function LivePreview() {
   return (
     <div
-      className="relative w-full max-w-md rounded-2xl border border-border bg-surface p-5 shadow-[0_24px_48px_-18px_rgba(17,24,39,0.28)] sm:p-6"
+      className="relative w-full max-w-md rounded-3xl border border-border bg-surface p-5 shadow-[0_24px_48px_-18px_rgba(23,26,43,0.28)] sm:p-6"
       aria-hidden="true"
     >
       <div className="mb-5 flex items-center justify-between">
