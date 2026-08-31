@@ -24,7 +24,7 @@ export function RoomCodeField({
         id={id}
         placeholder="ABCDEF"
         autoComplete="off"
-        className="font-mono uppercase tracking-[0.3em]"
+        className="h-10 text-center font-mono text-lg uppercase tracking-[0.35em] text-text-primary"
         maxLength={6}
         aria-invalid={!!error}
         {...registration}

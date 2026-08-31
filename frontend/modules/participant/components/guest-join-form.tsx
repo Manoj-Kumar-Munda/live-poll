@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { applyApiErrorsToForm } from "@/lib/errors";
 import { useGuestJoinSession } from "../api/use-sessions";
 import { RoomCodeField } from "./room-code-field";
+import { cn } from "@/lib/utils";
 
 const guestJoinSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -69,7 +70,7 @@ export function GuestJoinForm({
 
   return (
     <form
-      className={className}
+      className={cn(className, "w-full ")}
       onSubmit={form.handleSubmit(handleSubmit)}
       noValidate
     >
@@ -106,7 +107,7 @@ export function GuestJoinForm({
 
       <Button
         type="submit"
-        className="mt-4 w-full sm:w-auto"
+        className="mt-4 w-full rounded-full"
         disabled={form.formState.isSubmitting || guestJoinSession.isPending}
       >
         {guestJoinSession.isPending ? "Joining..." : submitLabel}

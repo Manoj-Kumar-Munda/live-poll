@@ -61,7 +61,7 @@ export function JoinSessionForm({
 
       <Button
         type="submit"
-        className="mt-4 w-full sm:w-auto"
+        className="mt-4 w-full rounded-full"
         disabled={form.formState.isSubmitting || joinSession.isPending}
       >
         {joinSession.isPending ? "Joining..." : submitLabel}
