@@ -67,7 +67,7 @@ export function QuizCreatePage() {
       </div>
 
       <form
-        className="mt-8 max-w-xl rounded-xl border border-border bg-surface p-5"
+        className="mt-8 mx-auto rounded-xl border border-border bg-surface p-5 sm:p-8 md:p-10"
         onSubmit={form.handleSubmit(onCreate)}
         noValidate
       >

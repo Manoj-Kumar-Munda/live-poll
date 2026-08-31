@@ -29,15 +29,20 @@ export function DashboardPage() {
     <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-primary">Host</p>
-          <h1 className="font-display text-3xl font-bold tracking-tight text-text-primary">
+          <p className="text-sm font-semibold text-primary">Host</p>
+          <h1 className="mt-1 font-display text-3xl font-bold tracking-tight text-text-primary">
             Dashboard
           </h1>
-          <p className="mt-2 max-w-xl text-sm text-text-secondary">
-            Manage and launch live events.
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-text-secondary">
+            Launch live events, share room codes, and control questions in real
+            time.
           </p>
         </div>
-        <Button nativeButton={false} render={<Link href="/dashboard/quizzes" />}>
+        <Button
+          nativeButton={false}
+          render={<Link href="/dashboard/quizzes" />}
+          className="rounded-full"
+        >
           Manage events
         </Button>
       </div>
@@ -171,7 +176,7 @@ export function DashboardPage() {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-border bg-surface px-5 py-4">
+    <div className="rounded-2xl border border-border bg-surface px-5 py-4">
       <dt className="text-sm text-text-secondary">{label}</dt>
       <dd className="mt-1 font-display text-2xl font-bold tabular-nums">
         {value}

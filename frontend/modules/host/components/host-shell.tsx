@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/brand-logo";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
@@ -19,20 +20,9 @@ export function HostShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-svh bg-stage">
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5 sm:px-8">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
           <div className="flex items-center gap-6">
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 font-display text-lg font-bold tracking-tight"
-            >
-              <span
-                className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground"
-                aria-hidden="true"
-              >
-                LP
-              </span>
-              LivePoll
-            </Link>
+            <BrandLogo href="/dashboard" />
             <nav className="hidden items-center gap-1 sm:flex" aria-label="Host">
               <NavLink href="/dashboard" active={pathname === "/dashboard"}>
                 Overview

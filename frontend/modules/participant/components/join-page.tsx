@@ -1,22 +1,36 @@
 "use client";
 
+import { Suspense } from "react";
+import { LandingNav } from "@/modules/landing/components/nav";
+import { LandingFooter } from "@/modules/landing/components/footer";
 import { JoinForm } from "./join-form";
 
 export function JoinPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center px-5">
-      <div className="w-full max-w-sm">
-        <div className="text-center">
-          <h1 className="font-display text-2xl font-bold text-text-primary">
-            Join a session
-          </h1>
-          <p className="mt-2 text-sm text-text-secondary">
-            Enter the room code from your host to join the session.
-          </p>
-        </div>
+    <>
+      <LandingNav />
+      <main className="hero-glow min-h-svh flex  flex-col">
+        <div className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center px-5 py-16 sm:px-8">
+          <div className="my-4">
+            <h1 className="font-display text-lg font-bold tracking-tight text-text-primary sm:text-4xl">
+             Join the event
+            </h1>
+            <p className="text-sm leading-relaxed text-text-secondary">
+              Enter the event code to join the event.
+            </p>
+          </div>
 
-        <JoinForm className="mt-8" />
-      </div>
-    </main>
+          <div className="join-card rounded-2xl p-6 sm:p-8">
+            <Suspense
+              fallback={
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              }
+            >
+              <JoinForm />
+            </Suspense>
+          </div>
+        </div>
+      </main>
+    </>
   );
 }
