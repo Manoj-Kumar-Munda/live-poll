@@ -3,17 +3,17 @@
 @import "shadcn/tailwind.css";
 
 :root {
-  --stage: #ffffff;
+  --stage: #f6f7fc;
   --surface: #ffffff;
-  --surface-raised: #f9fafb;
-  --border: oklch(0.923 0.003 48.717);
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
-  --electric: #3a3af4;
-  --electric-deep: #2f2fe0;
-  --electric-glow: rgba(58, 58, 244, 0.28);
-  --spotlight: #7c6cf7;
+  --surface-raised: #eef0f8;
+  --border: #e2e5f0;
+  --text-primary: #171a2b;
+  --text-secondary: #5c6378;
+  --text-muted: #8b92a8;
+  --electric: #5755d9;
+  --electric-deep: #4543c4;
+  --electric-glow: rgba(87, 85, 217, 0.32);
+  --spotlight: #8b7cf6;
   --signal: #16a34a;
   --signal-glow: rgba(22, 163, 74, 0.22);
   --danger: #ef4444;
@@ -26,7 +26,7 @@
   --card-foreground: oklch(0.147 0.004 49.25);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.147 0.004 49.25);
-  --primary: #3a3af4;
+  --primary: #5755d9;
   --primary-foreground: #ffffff;
   --secondary: oklch(0.967 0.001 286.375);
   --secondary-foreground: oklch(0.21 0.006 285.885);
@@ -36,7 +36,7 @@
   --accent-foreground: oklch(0.216 0.006 56.043);
   --destructive: oklch(0.577 0.245 27.325);
   --input: oklch(0.923 0.003 48.717);
-  --ring: #3a3af4;
+  --ring: #5755d9;
   --chart-1: oklch(0.809 0.105 251.813);
   --chart-2: oklch(0.623 0.214 259.815);
   --chart-3: oklch(0.546 0.245 262.881);
@@ -69,9 +69,9 @@
   --color-signal: var(--signal);
   --color-danger: var(--danger);
   --font-sans: var(--font-sans);
-  --font-display: var(--font-geist-sans);
+  --font-display: var(--font-display);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -112,7 +112,11 @@
 body {
   background: var(--stage);
   color: var(--text-primary);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
 }
 
 .pressable {
@@ -249,15 +253,31 @@ body {
 .hero-glow {
   background:
     radial-gradient(
-      ellipse 70% 55% at 80% 0%,
-      rgba(58, 58, 244, 0.1) 0%,
-      transparent 62%
+      ellipse 80% 60% at 75% -10%,
+      rgba(87, 85, 217, 0.14) 0%,
+      transparent 65%
     ),
     radial-gradient(
-      ellipse 45% 40% at 8% 90%,
-      rgba(124, 108, 247, 0.08) 0%,
+      ellipse 50% 45% at 5% 100%,
+      rgba(139, 124, 246, 0.1) 0%,
       transparent 58%
     );
+}
+
+.marketing-band {
+  background: linear-gradient(
+    180deg,
+    rgba(87, 85, 217, 0.06) 0%,
+    rgba(87, 85, 217, 0) 100%
+  );
+}
+
+.join-card {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow:
+    0 1px 2px rgba(23, 26, 43, 0.04),
+    0 24px 48px -28px rgba(87, 85, 217, 0.35);
 }
 
 @media (prefers-reduced-motion: reduce) {
