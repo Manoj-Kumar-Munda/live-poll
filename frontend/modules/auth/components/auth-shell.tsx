@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { LivePreview } from "@/modules/landing/components/live-preview";
 
 type AuthShellProps = {
   title: string;
@@ -51,9 +50,6 @@ export function AuthShell({
               {panelSubtitle}
             </p>
           ) : null}
-          <div className="mt-10 scale-[0.92] origin-top-left">
-            <LivePreview />
-          </div>
         </div>
       </aside>
     </div>
