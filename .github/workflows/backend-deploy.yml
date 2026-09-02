@@ -27,37 +27,6 @@ jobs:
             set -e
             REPO_DIR="$HOME/live-poll"
             echo "Repository directory: $REPO_DIR"
+            echo whoami
 
-            if [ -d "$REPO_DIR/.git" ]; then
-              echo "Pulling latest changes..."
-              git -C "$REPO_DIR" pull origin master
-            else
-              echo "Cloning repository..."
-              rm -rf "$REPO_DIR"
-              git clone ${{ secrets.REPO_URL }} "$REPO_DIR"
-            fi
-
-            cd "$REPO_DIR/backend"
-
-            echo "Creating .env file..."
-            if [ ! -f .env ]; then
-              echo "File does not exist, creating..."
-              touch .env
-            fi
-
-            echo "NODE_ENV=production" > .env
-            echo "PORT=${{ secrets.PORT }}" >> .env
-            echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
-            echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
-            echo "BETTER_AUTH_URL=${{ secrets.BETTER_AUTH_URL }}" >> .env
-            echo "CLIENT_URL=${{ secrets.CLIENT_URL }}" >> .env
-            echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> .env
-            echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" >> .env
-            echo "RESEND_FROM_EMAIL=${{ secrets.RESEND_FROM_EMAIL }}" >> .env
-
-            chmod 600 .env
-
-            npm ci
-            npm run build
-            pm2 startOrReload ecosystem.config.cjs --env production
-            pm2 save
+        
