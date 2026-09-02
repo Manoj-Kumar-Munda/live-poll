@@ -26,17 +26,13 @@ jobs:
           script: |
             set -e
 
-            if [ -d "live-poll" ]; then
-              echo "Pulling latest changes..."
-              cd "live-poll"
-              git pull origin master
-            else
-              echo "Cloning repository..."
-              git clone ${{ secrets.REPO_URL }}
-            fi
-            
+
+            echo "Cloning repository..."
+            git clone ${{ secrets.REPO_URL }}
+
+
             cd "live-poll/backend"
-          
+
             echo "Creating .env file..."
             if [ ! -f .env ]; then
               echo "File does not exist, creating..."
@@ -59,6 +55,3 @@ jobs:
             npm run build
             pm2 startOrReload ecosystem.config.cjs --env production
             pm2 save
-
-
-        
