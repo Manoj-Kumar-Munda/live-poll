@@ -111,7 +111,7 @@ export function Features() {
           {highlights.map((item) => (
             <article
               key={item.title}
-              className="rounded-2xl border border-primary/10 bg-primary/[0.03] p-6"
+              className="rounded-2xl border border-primary/10 bg-primary/3 p-6"
             >
               <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <item.icon size={22} strokeWidth={1.75} aria-hidden />

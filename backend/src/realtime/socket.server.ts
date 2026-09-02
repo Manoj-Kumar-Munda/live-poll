@@ -33,7 +33,7 @@ export function createSocketServer(app: Express): {
 
   io = new Server(httpServer, {
     cors: {
-      origin: env.CORS_ORIGIN ?? env.CLIENT_URL,
+      origin: env.CLIENT_URL,
       credentials: true,
     },
   });
