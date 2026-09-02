@@ -24,14 +24,36 @@ jobs:
           envs: PORT,MONGODB_URI,BETTER_AUTH_SECRET,BETTER_AUTH_URL,CLIENT_URL,CORS_ORIGIN,RESEND_API_KEY,RESEND_FROM_EMAIL
           script_stop: true
           script: |
-            set -e
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
+            if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
+              echo "Installing Node.js and npm..."
+              if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+                curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
+                . "$NVM_DIR/nvm.sh"
+              fi
+              nvm install 24
+            else
+              echo "Node.js $(node -v) and npm $(npm -v) already installed"
+            fi
 
-            echo "Cloning repository..."
-            git clone ${{ secrets.REPO_URL }}
+            if ! command -v pm2 >/dev/null 2>&1; then
+              echo "Installing PM2 for current user..."
+              npm install -g pm2
+            else
+              echo "PM2 $(pm2 -v) already installed"
+            fi
 
-
-            cd "live-poll/backend"
+            if [ -d "live-poll/backend" ]; then
+              echo "Repository exists, pulling latest changes..."
+              cd live-poll/backend
+              git pull origin master
+            else
+              echo "Cloning repository..."
+              git clone ${{ secrets.REPO_URL }}
+              cd live-poll/backend
+            fi
 
             echo "Creating .env file..."
             if [ ! -f .env ]; then
