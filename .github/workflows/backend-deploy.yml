@@ -27,6 +27,6 @@ jobs:
             set -e
             REPO_DIR="$HOME/live-poll"
             echo "Repository directory: $REPO_DIR"
-            whoami
+            echo "User: $(whoami)"
 
         
