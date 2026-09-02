@@ -24,6 +24,7 @@ jobs:
           envs: PORT,MONGODB_URI,BETTER_AUTH_SECRET,BETTER_AUTH_URL,CLIENT_URL,CORS_ORIGIN,RESEND_API_KEY,RESEND_FROM_EMAIL
           script_stop: true
           script: |
+            set -e
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
