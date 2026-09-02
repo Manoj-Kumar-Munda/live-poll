@@ -25,16 +25,16 @@ jobs:
           script_stop: true
           script: |
             set -e
-            REPO_DIR=/opt/live-poll
+            REPO_DIR="$HOME/live-poll"
             echo "Repository directory: $REPO_DIR"
 
-            if [ -d "$REPO_DIR" ]; then
+            if [ -d "$REPO_DIR/.git" ]; then
               echo "Pulling latest changes..."
-              cd "$REPO_DIR"
-              git pull origin master
+              git -C "$REPO_DIR" pull origin master
             else
               echo "Cloning repository..."
-              git clone ${{ secrets.REPO_URL }}
+              rm -rf "$REPO_DIR"
+              git clone ${{ secrets.REPO_URL }} "$REPO_DIR"
             fi
 
             cd "$REPO_DIR/backend"
