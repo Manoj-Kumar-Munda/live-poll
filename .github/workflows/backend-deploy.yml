@@ -16,15 +16,6 @@ jobs:
     steps:
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v1.2.0
-        env:
-          PORT: ${{ secrets.PORT }}
-          MONGODB_URI: ${{ secrets.MONGODB_URI }}
-          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
-          BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
-          CLIENT_URL: ${{ secrets.CLIENT_URL }}
-          CORS_ORIGIN: ${{ secrets.CORS_ORIGIN }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USERNAME }}
@@ -46,18 +37,22 @@ jobs:
 
             cd "$REPO_DIR/backend"
 
-            {
-              printf '%s\n' \
-                "NODE_ENV=production" \
-                "PORT=${PORT}" \
-                "MONGODB_URI=${MONGODB_URI}" \
-                "BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}" \
-                "BETTER_AUTH_URL=${BETTER_AUTH_URL}" \
-                "CLIENT_URL=${CLIENT_URL}" \
-                "CORS_ORIGIN=${CORS_ORIGIN}" \
-                "RESEND_API_KEY=${RESEND_API_KEY}" \
-                "RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL}"
-            } > .env
+            echo "Creating .env file..."
+            if [ ! -f .env ]; then
+              echo "File does not exist, creating..."
+              touch .env
+            fi
+
+            echo "NODE_ENV=production" > .env
+            echo "PORT=${{ secrets.PORT }}" >> .env
+            echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
+            echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
+            echo "BETTER_AUTH_URL=${{ secrets.BETTER_AUTH_URL }}" >> .env
+            echo "CLIENT_URL=${{ secrets.CLIENT_URL }}" >> .env
+            echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> .env
+            echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" >> .env
+            echo "RESEND_FROM_EMAIL=${{ secrets.RESEND_FROM_EMAIL }}" >> .env
+
             chmod 600 .env
 
             npm ci
