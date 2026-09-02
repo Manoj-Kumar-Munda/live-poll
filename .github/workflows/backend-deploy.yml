@@ -1,0 +1,93 @@
+name: Backend Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-deploy.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build and deploy backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install and build
+        working-directory: backend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Package backend release
+        run: |
+          tar -czf backend-release.tar.gz \
+            -C backend \
+            dist package.json package-lock.json ecosystem.config.cjs
+
+      - name: Upload to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USERNAME }}
+          password: ${{ secrets.REMOTE_PASSWORD }}
+          port: ${{ secrets.REMOTE_PORT }}
+          source: backend-release.tar.gz
+          target: /tmp
+          overwrite: true
+
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          PORT: ${{ secrets.PORT }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
+          CLIENT_URL: ${{ secrets.CLIENT_URL }}
+          CORS_ORIGIN: ${{ secrets.CORS_ORIGIN }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USERNAME }}
+          password: ${{ secrets.REMOTE_PASSWORD }}
+          port: ${{ secrets.REMOTE_PORT }}
+          envs: PROD_PORT,MONGODB_URI,BETTER_AUTH_SECRET,BETTER_AUTH_URL,CLIENT_URL,CORS_ORIGIN,RESEND_API_KEY,RESEND_FROM_EMAIL
+          script_stop: true
+          script: |
+            set -euo pipefail
+            APP_DIR=/opt/livepoll-backend
+
+            mkdir -p "$APP_DIR"
+            tar -xzf /tmp/backend-release.tar.gz -C "$APP_DIR"
+            rm -f /tmp/backend-release.tar.gz
+            cd "$APP_DIR"
+
+            {
+              printf '%s\n' \
+                "NODE_ENV=production" \
+                "PORT=${PROD_PORT}" \
+                "MONGODB_URI=${MONGODB_URI}" \
+                "BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}" \
+                "BETTER_AUTH_URL=${BETTER_AUTH_URL}" \
+                "CLIENT_URL=${CLIENT_URL}" \
+                "CORS_ORIGIN=${CORS_ORIGIN}" \
+                "RESEND_API_KEY=${RESEND_API_KEY}" \
+                "RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL}"
+            } > .env
+            chmod 600 .env
+
+            npm ci --omit=dev
+            pm2 startOrReload ecosystem.config.cjs --env production
+            pm2 save
