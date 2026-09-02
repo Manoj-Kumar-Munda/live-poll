@@ -14,6 +14,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Test SSH connection
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USERNAME }}
+          password: ${{ secrets.REMOTE_PASSWORD }}
+          port: ${{ secrets.REMOTE_PORT }}
+          script_stop: true
+          request_pty: true
+          script: |
+            set -x
+            echo "SSH OK"
+            echo "user=$(whoami) home=$HOME pwd=$(pwd)"
+            command -v git || echo "WARN: git missing"
+            command -v node || echo "WARN: node missing"
+            command -v npm || echo "WARN: npm missing"
+            command -v pm2 || echo "WARN: pm2 missing"
+
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -21,60 +39,64 @@ jobs:
           username: ${{ secrets.REMOTE_USERNAME }}
           password: ${{ secrets.REMOTE_PASSWORD }}
           port: ${{ secrets.REMOTE_PORT }}
-          envs: PORT,MONGODB_URI,BETTER_AUTH_SECRET,BETTER_AUTH_URL,CLIENT_URL,CORS_ORIGIN,RESEND_API_KEY,RESEND_FROM_EMAIL
+          command_timeout: 30m
+          debug: true
+          request_pty: true
           script_stop: true
           script: |
-            set -e
+            set -ex
+            echo "=== Deploy started ==="
+            echo "user=$(whoami) home=$HOME pwd=$(pwd)"
+
+            REPO_DIR="$HOME/live-poll"
+            REPO_URL="https://github.com/${{ github.repository }}.git"
+            echo "repo_dir=$REPO_DIR repo_url=$REPO_URL"
+
             export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-
-            if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
-              echo "Installing Node.js and npm..."
-              if [ ! -s "$NVM_DIR/nvm.sh" ]; then
-                curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
-                . "$NVM_DIR/nvm.sh"
-              fi
-              nvm install 24
-            else
-              echo "Node.js $(node -v) and npm $(npm -v) already installed"
+            if [ -s "$NVM_DIR/nvm.sh" ]; then
+              . "$NVM_DIR/nvm.sh"
             fi
 
-            if ! command -v pm2 >/dev/null 2>&1; then
-              echo "Installing PM2 for current user..."
-              npm install -g pm2
-            else
-              echo "PM2 $(pm2 -v) already installed"
-            fi
+            command -v git >/dev/null 2>&1 || { echo "ERROR: git is not installed"; exit 1; }
+            command -v node >/dev/null 2>&1 || { echo "ERROR: node is not installed"; exit 1; }
+            command -v npm >/dev/null 2>&1 || { echo "ERROR: npm is not installed"; exit 1; }
+            command -v pm2 >/dev/null 2>&1 || { echo "ERROR: pm2 is not installed (npm install -g pm2)"; exit 1; }
 
-            if [ -d "live-poll/backend" ]; then
-              echo "Repository exists, pulling latest changes..."
-              cd live-poll/backend
-              git pull origin master
+            echo "node=$(node -v) npm=$(npm -v) pm2=$(pm2 -v)"
+
+            if [ -d "$REPO_DIR/.git" ]; then
+              echo "Pulling latest changes..."
+              git -C "$REPO_DIR" pull origin master
             else
               echo "Cloning repository..."
-              git clone ${{ secrets.REPO_URL }}
-              cd live-poll/backend
+              rm -rf "$REPO_DIR"
+              git clone "$REPO_URL" "$REPO_DIR"
             fi
 
-            echo "Creating .env file..."
-            if [ ! -f .env ]; then
-              echo "File does not exist, creating..."
-              touch .env
-            fi
+            cd "$REPO_DIR/backend"
+            echo "backend_dir=$(pwd)"
 
-            echo "NODE_ENV=production" > .env
-            echo "PORT=${{ secrets.PORT }}" >> .env
-            echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
-            echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
-            echo "BETTER_AUTH_URL=${{ secrets.BETTER_AUTH_URL }}" >> .env
-            echo "CLIENT_URL=${{ secrets.CLIENT_URL }}" >> .env
-            echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> .env
-            echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" >> .env
-            echo "RESEND_FROM_EMAIL=${{ secrets.RESEND_FROM_EMAIL }}" >> .env
-
+            {
+              echo "NODE_ENV=production"
+              echo "PORT=${{ secrets.PORT }}"
+              echo "MONGODB_URI=${{ secrets.MONGODB_URI }}"
+              echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}"
+              echo "BETTER_AUTH_URL=${{ secrets.BETTER_AUTH_URL }}"
+              echo "CLIENT_URL=${{ secrets.CLIENT_URL }}"
+              echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}"
+              echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}"
+              echo "RESEND_FROM_EMAIL=${{ secrets.RESEND_FROM_EMAIL }}"
+            } > .env
             chmod 600 .env
 
+            echo "Installing dependencies..."
             npm ci
+
+            echo "Building..."
             npm run build
+
+            echo "Restarting PM2..."
             pm2 startOrReload ecosystem.config.cjs --env production
             pm2 save
+
+            echo "=== Deploy finished ==="
