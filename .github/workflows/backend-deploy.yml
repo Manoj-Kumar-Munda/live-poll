@@ -25,8 +25,6 @@ jobs:
           request_pty: true
           script: |
             set -x
-            echo "SSH OK"
-            echo "user=$(whoami) home=$HOME pwd=$(pwd)"
             command -v git || echo "WARN: git missing"
             command -v node || echo "WARN: node missing"
             command -v npm || echo "WARN: npm missing"
@@ -46,7 +44,6 @@ jobs:
           script: |
             set -ex
             echo "=== Deploy started ==="
-            echo "user=$(whoami) home=$HOME pwd=$(pwd)"
 
             REPO_DIR="$HOME/live-poll"
             REPO_URL="https://github.com/${{ github.repository }}.git"
@@ -62,7 +59,6 @@ jobs:
             command -v npm >/dev/null 2>&1 || { echo "ERROR: npm is not installed"; exit 1; }
             command -v pm2 >/dev/null 2>&1 || { echo "ERROR: pm2 is not installed (npm install -g pm2)"; exit 1; }
 
-            echo "node=$(node -v) npm=$(npm -v) pm2=$(pm2 -v)"
 
             if [ -d "$REPO_DIR/.git" ]; then
               echo "Pulling latest changes..."
@@ -74,7 +70,6 @@ jobs:
             fi
 
             cd "$REPO_DIR/backend"
-            echo "backend_dir=$(pwd)"
 
             {
               echo "NODE_ENV=production"

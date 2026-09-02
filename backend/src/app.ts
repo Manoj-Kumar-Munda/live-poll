@@ -17,12 +17,13 @@ import sessionRouter from "@/modules/session/session.route.js";
 
 const app = express();
 
-app.use(
-  cors({
-    origin: env.CORS_ORIGIN ?? env.CLIENT_URL,
-    credentials: true,
-  }),
-);
+console.log(env.CLIENT_URL);
+
+const corsConfig = {
+  origin: env.CLIENT_URL.toString(),
+  credentials: true,
+};
+app.use(cors(corsConfig));
 
 app.all("/api/auth/{*splat}", toNodeHandler(auth));
 
