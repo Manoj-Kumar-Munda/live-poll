@@ -5,7 +5,7 @@ All JSON responses use the `ApiResponse` envelope unless noted.
 
 Interactive docs: [Swagger UI](http://localhost:4000/api/docs) · [openapi.json](http://localhost:4000/api/docs/openapi.json)
 
-Swagger covers the implemented HTTP routes (health, users, quiz CRUD + add question). Auth stays at `/api/auth/*` (better-auth, not listed as OpenAPI operations).
+Swagger covers the implemented HTTP routes. Auth stays at `/api/auth/*` (better-auth, not listed as OpenAPI operations). Live question flow is Socket.IO, documented in [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Health
 
@@ -275,7 +275,7 @@ Update is enforced as DRAFT-only. Delete quiz is DRAFT-only. Publish and archive
 
 ## Sessions (`/api/sessions`)
 
-Host and participant routes. Cookie session required.
+Host and participant routes use the better-auth cookie. Guest join is unauthenticated and sets `livepoll_guest`. Guest access to a session requires that cookie and is limited to the session id inside the token.
 
 ### `GET /api/sessions`
 

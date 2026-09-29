@@ -1,6 +1,6 @@
 # Implementation State
 
-**Last updated:** 2026-08-28
+**Last updated:** 2026-09-29
 
 Living record of what exists in the codebase. Update this file when a feature ships. Product intent remains in [PRD.md](PRD.md).
 
@@ -18,6 +18,8 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | Sessions / realtime | ✅ REST + Socket.IO live flow |
 | Participant live flow | ✅ join, answers, leaderboard, word cloud |
 | Public browse + guest join | ✅ `/quizzes` + `GET /api/quizzes/published` + guest join |
+| Participant home stats | ✅ `GET /api/sessions/mine/stats` |
+| Backend deploy | ✅ GitHub Actions SSH + PM2 (`.github/workflows/backend-deploy.yml`) |
 
 ---
 
@@ -113,7 +115,9 @@ Living record of what exists in the codebase. Update this file when a feature sh
 | OPEN_TEXT word cloud | ✅ | In-memory per question; `wordcloud:updated` live; `wordcloud:snapshot` on reconnect |
 | Scoring + leaderboard | ✅ | MCQ `bulkWrite` on question end; in-memory leaderboard; `finalRank` on session end |
 
-**Files:** `backend/src/realtime/{socket.server,socket.auth,socket.types,session.handlers,question.handlers,session.room,index}.ts`
+**Files:** `backend/src/realtime/{socket.server,socket.auth,socket.types,session.handlers,question.handlers,question.timer,session.room,index}.ts`
+
+Guest auth files: `backend/src/modules/auth/{guest-token,guest-auth}.ts`. Scoring and leaderboard: `score.service.ts`, `leaderboard.service.ts`, `wordcloud.service.ts`.
 
 ---
 
@@ -125,21 +129,21 @@ Living record of what exists in the codebase. Update this file when a feature sh
 |------|-------|-----------|
 | `/` | `RedirectIfAuthenticated` | ✅ Landing |
 | `/login`, `/register` | `(auth)/layout` redirects if logged in | ✅ Forms wired to better-auth |
-| `/home` | `RequireAuth` participant | ✅ Quick join + session list + stats |
-| `/join` | `RequireAuth` participant | ✅ Room code join |
-| `/session/[sessionId]` | `RequireAuth` participant | ✅ Join, waiting room, live answer UI |
-| `/dashboard` | `RequireAuth` host | ✅ Overview + recent quizzes |
+| `/home` | `RequireAuth` participant | ✅ Quick join, session list, stats |
+| `/join` | public | ✅ Room code join (account or guest) |
+| `/session/[sessionId]` | `RequireParticipantOrGuest` | ✅ Waiting room and live answer UI |
+| `/dashboard` | `RequireAuth` host | ✅ Overview, stats, recent sessions |
 | `/dashboard/quizzes` | `RequireAuth` host | ✅ List, filter, create |
 | `/dashboard/quizzes/[id]` | `RequireAuth` host | ✅ Edit draft / view published |
 | `/dashboard/sessions/[sessionId]` | `RequireAuth` host | ✅ Control room (socket live updates) |
-| `/quizzes` | — | ✅ Browse active sessions + guest join form |
+| `/quizzes` | public | ✅ Browse active sessions + guest join |
 
 Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 ### Auth integration
 
 - `lib/auth-client.ts` — better-auth React client, cookies
-- `modules/auth/components/session-gates.tsx` — `RequireAuth`, `RedirectIfAuthenticated`
+- `modules/auth/components/session-gates.tsx` — `RequireAuth`, `RequireParticipantOrGuest`, `RedirectIfAuthenticated`
 - Login → redirect by role (`/dashboard` or `/home`)
 - Register → redirect by role (no email verification step)
 
@@ -148,7 +152,9 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 - `modules/landing/` — nav, hero, features, CTA, footer
 - `modules/auth/` — login/register pages and forms
 - `modules/host/` — dashboard, quiz list, quiz editor, session control room
-- `modules/participant/` — join by room code, waiting room
+- `modules/participant/` — join, home stats, waiting room, live answers
+- `modules/quizzes/` — public browse
+- `components/` — live question, results, leaderboard, word cloud
 
 ### Wired to backend
 
@@ -172,6 +178,8 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 | Date | Change |
 |------|--------|
+| 2026-09-29 | Docs synced with the live app: Socket.IO flow, guest auth, stats, and backend deploy |
+| 2026-09-02 | Backend deploy workflow: SSH clone on the VPS, `npm run build`, PM2 reload |
 | 2026-08-28 | Participant home stats (`GET /api/sessions/mine/stats`, stat cards on `/home`) |
 | 2026-08-28 | Public browse (`GET /api/quizzes/published`, `/quizzes` UI); guest join (name + email + room code); global session labels Join now / In progress; guest data purged on session end |
 | 2026-08-26 | OPEN_TEXT live word cloud (`wordcloud:updated` / `wordcloud:snapshot`); `@isoterik/react-word-cloud` UI with adaptive font scaling |
