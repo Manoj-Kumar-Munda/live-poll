@@ -3,13 +3,13 @@ import type { QuestionSubdocument } from "@/modules/quiz/question.model.js";
 import { QUESTION_TYPE } from "@/types/quiz.types.js";
 import { SESSION_STATUS } from "@/types/session.types.js";
 import { ApiError } from "@/shared/utils/api-error.js";
-import { Session, type SessionDocument } from "./session.model.js";
-import { isQuestionTimerActive } from "./session.constants.js";
+import { Session, type SessionDocument } from "../session.model.js";
+import { isQuestionTimerActive } from "../session.constants.js";
 import type {
   LiveQuestion,
   QuestionEndedPayload,
   QuestionStartedPayload,
-} from "./session.types.js";
+} from "../session.types.js";
 
 async function requireLiveSession(sessionId: string) {
   const session = await Session.findById(sessionId).exec();
@@ -76,7 +76,7 @@ function buildStartedPayload(
   };
 }
 
-export async function getActiveQuestionPayload(
+async function getActiveQuestionPayload(
   sessionId: string,
 ): Promise<QuestionStartedPayload | null> {
   const session = await Session.findById(sessionId).exec();
@@ -109,7 +109,7 @@ export async function getActiveQuestionPayload(
   );
 }
 
-export async function launchNextQuestion(
+async function launchNextQuestion(
   hostId: string,
   sessionId: string,
 ): Promise<QuestionStartedPayload> {
@@ -164,7 +164,7 @@ export async function launchNextQuestion(
   );
 }
 
-export async function endCurrentQuestion(
+async function endCurrentQuestion(
   sessionId: string,
   reason: QuestionEndedPayload["reason"],
 ): Promise<QuestionEndedPayload> {
@@ -197,3 +197,5 @@ export async function endCurrentQuestion(
     reason,
   };
 }
+
+export { getActiveQuestionPayload, launchNextQuestion, endCurrentQuestion };

@@ -15,7 +15,7 @@ import {
 } from "./session.schema.js";
 import * as sessionService from "./session.service.js";
 
-export const listSessions = asyncHandler(async (req, res) => {
+const listSessions = asyncHandler(async (req, res) => {
   const query = listSessionsQuerySchema.parse(req.query);
   const sessions = await sessionService.listSessions(req.user!.id, query);
 
@@ -28,7 +28,7 @@ export const listSessions = asyncHandler(async (req, res) => {
   );
 });
 
-export const listMySessions = asyncHandler(async (req, res) => {
+const listMySessions = asyncHandler(async (req, res) => {
   const sessions = await sessionService.listParticipantSessions(req.user!.id);
 
   res.status(200).json(
@@ -40,7 +40,7 @@ export const listMySessions = asyncHandler(async (req, res) => {
   );
 });
 
-export const getHostDashboardStats = asyncHandler(async (req, res) => {
+const getHostDashboardStats = asyncHandler(async (req, res) => {
   const stats = await sessionService.getHostDashboardStats(req.user!.id);
 
   res.status(200).json(
@@ -52,7 +52,7 @@ export const getHostDashboardStats = asyncHandler(async (req, res) => {
   );
 });
 
-export const getParticipantHomeStats = asyncHandler(async (req, res) => {
+const getParticipantHomeStats = asyncHandler(async (req, res) => {
   const stats = await sessionService.getParticipantHomeStats(req.user!.id);
 
   res.status(200).json(
@@ -64,7 +64,7 @@ export const getParticipantHomeStats = asyncHandler(async (req, res) => {
   );
 });
 
-export const createSession = asyncHandler(async (req, res) => {
+const createSession = asyncHandler(async (req, res) => {
   const input = createSessionSchema.parse(req.body);
   const session = await sessionService.createSession(req.user!.id, input);
 
@@ -77,7 +77,7 @@ export const createSession = asyncHandler(async (req, res) => {
   );
 });
 
-export const getSessionById = asyncHandler(async (req, res) => {
+const getSessionById = asyncHandler(async (req, res) => {
   const { sessionId } = sessionIdParamsSchema.parse(req.params);
   assertGuestSessionAccess(req, sessionId);
   const session = await sessionService.getSessionById(
@@ -94,7 +94,7 @@ export const getSessionById = asyncHandler(async (req, res) => {
   );
 });
 
-export const guestJoinSession = asyncHandler(async (req, res) => {
+const guestJoinSession = asyncHandler(async (req, res) => {
   const input = guestJoinSessionSchema.parse(req.body);
   const { session, guest } = await sessionService.guestJoinSession(input);
   await setGuestCookie(res, guest);
@@ -108,7 +108,7 @@ export const guestJoinSession = asyncHandler(async (req, res) => {
   );
 });
 
-export const guestLogout = asyncHandler(async (_req, res) => {
+const guestLogout = asyncHandler(async (_req, res) => {
   clearGuestCookie(res);
 
   res.status(200).json(
@@ -120,7 +120,7 @@ export const guestLogout = asyncHandler(async (_req, res) => {
   );
 });
 
-export const joinSession = asyncHandler(async (req, res) => {
+const joinSession = asyncHandler(async (req, res) => {
   const input = joinSessionSchema.parse(req.body);
   const displayName = req.user!.name ?? "Player";
   const session = await sessionService.joinSession(
@@ -138,7 +138,7 @@ export const joinSession = asyncHandler(async (req, res) => {
   );
 });
 
-export const startSession = asyncHandler(async (req, res) => {
+const startSession = asyncHandler(async (req, res) => {
   const { sessionId } = sessionIdParamsSchema.parse(req.params);
   const session = await sessionService.startSession(req.user!.id, sessionId);
 
@@ -151,7 +151,7 @@ export const startSession = asyncHandler(async (req, res) => {
   );
 });
 
-export const endSession = asyncHandler(async (req, res) => {
+const endSession = asyncHandler(async (req, res) => {
   const { sessionId } = sessionIdParamsSchema.parse(req.params);
   const session = await sessionService.endSession(req.user!.id, sessionId);
 
@@ -164,7 +164,7 @@ export const endSession = asyncHandler(async (req, res) => {
   );
 });
 
-export const leaveSession = asyncHandler(async (req, res) => {
+const leaveSession = asyncHandler(async (req, res) => {
   const { sessionId } = sessionIdParamsSchema.parse(req.params);
   assertGuestSessionAccess(req, sessionId);
   const session = await sessionService.leaveSession(req.user!.id, sessionId);
@@ -177,3 +177,18 @@ export const leaveSession = asyncHandler(async (req, res) => {
     }),
   );
 });
+
+export {
+  listSessions,
+  listMySessions,
+  getHostDashboardStats,
+  getParticipantHomeStats,
+  createSession,
+  getSessionById,
+  guestJoinSession,
+  guestLogout,
+  joinSession,
+  startSession,
+  endSession,
+  leaveSession,
+};

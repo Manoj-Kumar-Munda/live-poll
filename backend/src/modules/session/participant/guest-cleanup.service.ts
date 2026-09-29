@@ -1,8 +1,8 @@
-import { Answer } from "./answer.model.js";
+import { Answer } from "../answer/answer.model.js";
 import { SessionParticipant } from "./participant.model.js";
 import { isGuestUserId } from "@/modules/auth/guest-auth.js";
 
-export async function purgeGuestSessionData(sessionId: string) {
+async function purgeGuestSessionData(sessionId: string) {
   const guestParticipants = await SessionParticipant.find({
     sessionId,
     userId: { $regex: "^guest:" },
@@ -26,6 +26,8 @@ export async function purgeGuestSessionData(sessionId: string) {
   ]);
 }
 
-export function isGuestParticipantUserId(userId: string) {
+function isGuestParticipantUserId(userId: string) {
   return isGuestUserId(userId);
 }
+
+export { purgeGuestSessionData, isGuestParticipantUserId };

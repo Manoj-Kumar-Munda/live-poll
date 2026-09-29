@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const submitAnswerSchema = z.object({
+const submitAnswerSchema = z.object({
   value: z
     .string({ error: "Answer is required" })
     .trim()
@@ -8,4 +8,7 @@ export const submitAnswerSchema = z.object({
   sessionId: z.string().optional(),
 });
 
-export type SubmitAnswerInput = z.infer<typeof submitAnswerSchema>;
+type SubmitAnswerInput = z.infer<typeof submitAnswerSchema>;
+
+export { submitAnswerSchema };
+export type { SubmitAnswerInput };

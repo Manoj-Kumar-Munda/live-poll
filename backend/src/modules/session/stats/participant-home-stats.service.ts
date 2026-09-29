@@ -1,8 +1,8 @@
 import { SESSION_STATUS } from "@/types/session.types.js";
-import { Answer } from "./answer.model.js";
-import { Session } from "./session.model.js";
-import { SessionParticipant } from "./participant.model.js";
-import type { ParticipantHomeStats } from "./session.types.js";
+import { Answer } from "../answer/answer.model.js";
+import { Session } from "../session.model.js";
+import { SessionParticipant } from "../participant/participant.model.js";
+import type { ParticipantHomeStats } from "../session.types.js";
 
 type AggregationResult = {
   totalQuizzesPlayed: number;
@@ -14,7 +14,7 @@ type AggregationResult = {
  * Aggregates a registered participant's history across finished sessions.
  * Uses indexed lookups on SessionParticipant.userId and Answer.userId.
  */
-export async function getParticipantHomeStats(
+async function getParticipantHomeStats(
   userId: string,
 ): Promise<ParticipantHomeStats> {
   const [aggregated, totalQuestionsAnswered] = await Promise.all([
@@ -59,3 +59,5 @@ export async function getParticipantHomeStats(
     totalQuestionsAnswered,
   };
 }
+
+export { getParticipantHomeStats };

@@ -30,10 +30,13 @@ const answerSchema = new Schema(
 
 answerSchema.index({ sessionId: 1, userId: 1, questionId: 1 }, { unique: true });
 
-export type AnswerDocument = InferSchemaType<typeof answerSchema> & {
+type AnswerDocument = InferSchemaType<typeof answerSchema> & {
   _id: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 };
 
-export const Answer = mongoose.model("Answer", answerSchema);
+const Answer = mongoose.model("Answer", answerSchema);
+
+export { Answer };
+export type { AnswerDocument };

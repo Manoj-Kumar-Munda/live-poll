@@ -1,9 +1,9 @@
-import { Answer } from "./answer.model.js";
+import { Answer } from "../answer/answer.model.js";
 import {
   displayAnswerValue,
   normalizeAnswerValue,
-} from "./answer.normalize.js";
-import type { WordCloudTerm, WordResult } from "./session.types.js";
+} from "../answer/answer.normalize.js";
+import type { WordCloudTerm, WordResult } from "../session.types.js";
 
 const wordClouds = new Map<string, Map<string, WordCloudTerm>>();
 
@@ -21,11 +21,11 @@ function sortTerms(terms: WordCloudTerm[]): WordCloudTerm[] {
   });
 }
 
-export function clearWordCloud(sessionId: string, questionIndex: number) {
+function clearWordCloud(sessionId: string, questionIndex: number) {
   wordClouds.delete(cloudKey(sessionId, questionIndex));
 }
 
-export function clearSessionWordClouds(sessionId: string) {
+function clearSessionWordClouds(sessionId: string) {
   for (const key of wordClouds.keys()) {
     if (key.startsWith(`${sessionId}:`)) {
       wordClouds.delete(key);
@@ -33,7 +33,7 @@ export function clearSessionWordClouds(sessionId: string) {
   }
 }
 
-export function recordWordCloudAnswer(
+function recordWordCloudAnswer(
   sessionId: string,
   questionIndex: number,
   rawValue: string,
@@ -57,7 +57,7 @@ export function recordWordCloudAnswer(
   return { term, isNew: true };
 }
 
-export function getWordCloudSnapshot(
+function getWordCloudSnapshot(
   sessionId: string,
   questionIndex: number,
 ): WordCloudTerm[] {
@@ -69,7 +69,7 @@ export function getWordCloudSnapshot(
   return sortTerms([...bucket.values()]);
 }
 
-export function toWordResults(terms: WordCloudTerm[]): WordResult[] {
+function toWordResults(terms: WordCloudTerm[]): WordResult[] {
   return sortTerms(terms).map((term) => ({
     key: term.key,
     label: term.label,
@@ -77,7 +77,7 @@ export function toWordResults(terms: WordCloudTerm[]): WordResult[] {
   }));
 }
 
-export async function aggregateOpenTextResultsFromDb(
+async function aggregateOpenTextResultsFromDb(
   sessionId: string,
   questionIndex: number,
 ): Promise<WordResult[]> {
@@ -99,3 +99,12 @@ export async function aggregateOpenTextResultsFromDb(
 
   return toWordResults([...bucket.values()]);
 }
+
+export {
+  clearWordCloud,
+  clearSessionWordClouds,
+  recordWordCloudAnswer,
+  getWordCloudSnapshot,
+  toWordResults,
+  aggregateOpenTextResultsFromDb,
+};

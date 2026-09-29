@@ -1,5 +1,5 @@
 import { getAuthDb } from "@/config/db.js";
-import { SessionParticipant } from "@/modules/session/participant.model.js";
+import { SessionParticipant } from "@/modules/session/participant/participant.model.js";
 import { Session } from "@/modules/session/session.model.js";
 import { PARTICIPANT_STATUS } from "@/types/quiz.types.js";
 import { QUIZ_STATUS } from "@/types/quiz.types.js";

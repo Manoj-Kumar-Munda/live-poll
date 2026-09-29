@@ -32,7 +32,7 @@ const sessionParticipantSchema = new Schema(
 sessionParticipantSchema.index({ sessionId: 1, userId: 1 }, { unique: true });
 sessionParticipantSchema.index({ sessionId: 1, status: 1 });
 
-export type SessionParticipantDocument = InferSchemaType<
+type SessionParticipantDocument = InferSchemaType<
   typeof sessionParticipantSchema
 > & {
   _id: mongoose.Types.ObjectId;
@@ -40,7 +40,10 @@ export type SessionParticipantDocument = InferSchemaType<
   updatedAt: Date;
 };
 
-export const SessionParticipant = mongoose.model(
+const SessionParticipant = mongoose.model(
   "SessionParticipant",
   sessionParticipantSchema,
 );
+
+export { SessionParticipant };
+export type { SessionParticipantDocument };

@@ -45,10 +45,13 @@ sessionSchema.index(
   },
 );
 
-export type SessionDocument = InferSchemaType<typeof sessionSchema> & {
+type SessionDocument = InferSchemaType<typeof sessionSchema> & {
   _id: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 };
 
-export const Session = mongoose.model("Session", sessionSchema);
+const Session = mongoose.model("Session", sessionSchema);
+
+export { Session };
+export type { SessionDocument };

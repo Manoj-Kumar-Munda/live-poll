@@ -1,7 +1,7 @@
 import { PARTICIPANT_STATUS } from "@/types/quiz.types.js";
-import { SessionParticipant } from "./participant.model.js";
-import { Session } from "./session.model.js";
-import type { HostDashboardStats } from "./session.types.js";
+import { SessionParticipant } from "../participant/participant.model.js";
+import { Session } from "../session.model.js";
+import type { HostDashboardStats } from "../session.types.js";
 
 const COUNTED_PARTICIPANT_STATUSES = [
   PARTICIPANT_STATUS.ACTIVE,
@@ -19,7 +19,7 @@ type AggregationResult = {
  * - $facet counts events and sums per-session participant counts in parallel
  * - each $lookup subpipeline uses { sessionId, status } index and $count only
  */
-export async function getHostDashboardStats(
+async function getHostDashboardStats(
   hostId: string,
 ): Promise<HostDashboardStats> {
   const [result] = await Session.aggregate<AggregationResult>([
@@ -87,3 +87,5 @@ export async function getHostDashboardStats(
         : 0,
   };
 }
+
+export { getHostDashboardStats };

@@ -1,11 +1,11 @@
 import type { QuestionSubdocument } from "@/modules/quiz/question.model.js";
 import { Quiz } from "@/modules/quiz/quiz.model.js";
 import { QUESTION_TYPE } from "@/types/quiz.types.js";
-import { Answer } from "./answer.model.js";
-import { SessionParticipant } from "./participant.model.js";
-import { Session, type SessionDocument } from "./session.model.js";
+import { Answer } from "../answer/answer.model.js";
+import { SessionParticipant } from "../participant/participant.model.js";
+import { Session, type SessionDocument } from "../session.model.js";
 
-export async function scoreMcqQuestion(
+async function scoreMcqQuestion(
   sessionId: string,
   questionIndex: number,
 ): Promise<number> {
@@ -50,3 +50,5 @@ export async function scoreMcqQuestion(
 
   return points;
 }
+
+export { scoreMcqQuestion };

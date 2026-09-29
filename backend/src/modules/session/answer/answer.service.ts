@@ -6,12 +6,12 @@ import type { QuestionType } from "@/types/quiz.types.js";
 import { SESSION_STATUS } from "@/types/session.types.js";
 import { ApiError } from "@/shared/utils/api-error.js";
 import { Answer } from "./answer.model.js";
-import { SessionParticipant } from "./participant.model.js";
-import { isWithinAnswerWindow } from "./session.constants.js";
-import { Session, type SessionDocument } from "./session.model.js";
+import { SessionParticipant } from "../participant/participant.model.js";
+import { isWithinAnswerWindow } from "../session.constants.js";
+import { Session, type SessionDocument } from "../session.model.js";
 import { normalizeAnswerValue } from "./answer.normalize.js";
 
-export type SubmittedAnswer = {
+type SubmittedAnswer = {
   index: number;
   value: string;
   questionId: string;
@@ -89,7 +89,7 @@ function isDuplicateKeyError(error: unknown) {
   );
 }
 
-export async function submitAnswer(
+async function submitAnswer(
   userId: string,
   sessionId: string,
   rawValue: string,
@@ -135,7 +135,7 @@ export async function submitAnswer(
   };
 }
 
-export async function getUserAnswerForQuestion(
+async function getUserAnswerForQuestion(
   sessionId: string,
   userId: string,
   questionIndex: number,
@@ -158,7 +158,7 @@ export async function getUserAnswerForQuestion(
   };
 }
 
-export async function getUserAnswerForActiveQuestion(
+async function getUserAnswerForActiveQuestion(
   sessionId: string,
   userId: string,
 ): Promise<SubmittedAnswer | null> {
@@ -174,14 +174,14 @@ export async function getUserAnswerForActiveQuestion(
   );
 }
 
-export async function countUserAnswersForSession(
+async function countUserAnswersForSession(
   userId: string,
   sessionId: string,
 ): Promise<number> {
   return Answer.countDocuments({ sessionId, userId }).exec();
 }
 
-export async function countUserAnswersBySession(
+async function countUserAnswersBySession(
   userId: string,
   sessionIds: string[],
 ): Promise<Map<string, number>> {
@@ -203,3 +203,13 @@ export async function countUserAnswersBySession(
 
   return new Map(rows.map((row) => [row._id.toString(), row.count]));
 }
+
+export {
+  submitAnswer,
+  getUserAnswerForQuestion,
+  getUserAnswerForActiveQuestion,
+  countUserAnswersForSession,
+  countUserAnswersBySession,
+};
+export type { SubmittedAnswer };
+

@@ -1,6 +1,6 @@
 import { PARTICIPANT_STATUS } from "@/types/quiz.types.js";
-import { SessionParticipant } from "./participant.model.js";
-import type { LeaderboardEntry, LeaderboardUpdatedPayload } from "./session.types.js";
+import { SessionParticipant } from "../participant/participant.model.js";
+import type { LeaderboardEntry, LeaderboardUpdatedPayload } from "../session.types.js";
 
 const leaderboards = new Map<string, LeaderboardEntry[]>();
 
@@ -38,20 +38,20 @@ function assignRanks(participants: RankableParticipant[]): LeaderboardEntry[] {
   });
 }
 
-export function rankParticipants(
+function rankParticipants(
   participants: RankableParticipant[],
 ): LeaderboardEntry[] {
   return assignRanks(participants);
 }
 
-export function getRankForUser(
+function getRankForUser(
   entries: LeaderboardEntry[],
   userId: string,
 ): number | null {
   return entries.find((entry) => entry.userId === userId)?.rank ?? null;
 }
 
-export async function rebuildLeaderboard(
+async function rebuildLeaderboard(
   sessionId: string,
 ): Promise<LeaderboardEntry[]> {
   const participants = await SessionParticipant.find({
@@ -74,7 +74,7 @@ export async function rebuildLeaderboard(
   return entries;
 }
 
-export async function getLeaderboardPayload(
+async function getLeaderboardPayload(
   sessionId: string,
   final = false,
 ): Promise<LeaderboardUpdatedPayload | null> {
@@ -92,7 +92,7 @@ export async function getLeaderboardPayload(
   };
 }
 
-export async function finalizeLeaderboard(
+async function finalizeLeaderboard(
   sessionId: string,
 ): Promise<LeaderboardUpdatedPayload | null> {
   const entries = await rebuildLeaderboard(sessionId);
@@ -118,6 +118,15 @@ export async function finalizeLeaderboard(
   };
 }
 
-export function clearLeaderboard(sessionId: string) {
+function clearLeaderboard(sessionId: string) {
   leaderboards.delete(sessionId);
 }
+
+export {
+  rankParticipants,
+  getRankForUser,
+  rebuildLeaderboard,
+  getLeaderboardPayload,
+  finalizeLeaderboard,
+  clearLeaderboard,
+};

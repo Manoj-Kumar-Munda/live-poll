@@ -1,26 +1,26 @@
 import type { Socket } from "socket.io";
 import { ApiError } from "@/shared/utils/api-error.js";
-import { submitAnswerSchema } from "@/modules/session/answer.schema.js";
-import { getUserAnswerForActiveQuestion, submitAnswer } from "@/modules/session/answer.service.js";
-import { buildQuestionResults } from "@/modules/session/question.results.service.js";
+import { submitAnswerSchema } from "@/modules/session/answer/answer.schema.js";
+import { getUserAnswerForActiveQuestion, submitAnswer } from "@/modules/session/answer/answer.service.js";
+import { buildQuestionResults } from "@/modules/session/scoring/question.results.service.js";
 import {
   getLeaderboardPayload,
   rebuildLeaderboard,
-} from "@/modules/session/leaderboard.service.js";
-import { scoreMcqQuestion } from "@/modules/session/score.service.js";
+} from "@/modules/session/scoring/leaderboard.service.js";
+import { scoreMcqQuestion } from "@/modules/session/scoring/score.service.js";
 import { Session } from "@/modules/session/session.model.js";
 import { QUESTION_TYPE } from "@/types/quiz.types.js";
 import { SESSION_STATUS } from "@/types/session.types.js";
 import {
   endCurrentQuestion,
   launchNextQuestion,
-} from "@/modules/session/session.question.service.js";
+} from "@/modules/session/live/session.question.service.js";
 import { getSessionById } from "@/modules/session/session.service.js";
 import {
   clearWordCloud,
   getWordCloudSnapshot,
   recordWordCloudAnswer,
-} from "@/modules/session/wordcloud.service.js";
+} from "@/modules/session/scoring/wordcloud.service.js";
 import { broadcastSessionState } from "./session.handlers.js";
 import { sessionRoomName } from "./session.room.js";
 import { getSocketServer } from "./socket.server.js";
@@ -136,7 +136,7 @@ export async function emitActiveQuestionToSocket(
   sessionId: string,
 ) {
   const { getActiveQuestionPayload } = await import(
-    "@/modules/session/session.question.service.js"
+    "@/modules/session/live/session.question.service.js"
   );
   const payload = await getActiveQuestionPayload(sessionId);
   if (payload) {

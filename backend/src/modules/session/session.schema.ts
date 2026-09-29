@@ -20,30 +20,44 @@ const roomCodeSchema = z
     "Room code contains invalid characters",
   );
 
-export const createSessionSchema = z.object({
+const createSessionSchema = z.object({
   quizId: objectIdSchema,
 });
 
-export const listSessionsQuerySchema = z.object({
+const listSessionsQuerySchema = z.object({
   quizId: objectIdSchema.optional(),
   status: z.enum(SESSION_STATUSES).optional(),
 });
 
-export const sessionIdParamsSchema = z.object({
+const sessionIdParamsSchema = z.object({
   sessionId: objectIdSchema,
 });
 
-export const joinSessionSchema = z.object({
+const joinSessionSchema = z.object({
   roomCode: roomCodeSchema,
 });
 
-export const guestJoinSessionSchema = z.object({
+const guestJoinSessionSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
   email: z.string().trim().email("Enter a valid email").max(254),
   roomCode: roomCodeSchema,
 });
 
-export type CreateSessionInput = z.infer<typeof createSessionSchema>;
-export type ListSessionsQuery = z.infer<typeof listSessionsQuerySchema>;
-export type JoinSessionInput = z.infer<typeof joinSessionSchema>;
-export type GuestJoinSessionInput = z.infer<typeof guestJoinSessionSchema>;
+type CreateSessionInput = z.infer<typeof createSessionSchema>;
+type ListSessionsQuery = z.infer<typeof listSessionsQuerySchema>;
+type JoinSessionInput = z.infer<typeof joinSessionSchema>;
+type GuestJoinSessionInput = z.infer<typeof guestJoinSessionSchema>;
+
+export {
+  createSessionSchema,
+  listSessionsQuerySchema,
+  sessionIdParamsSchema,
+  joinSessionSchema,
+  guestJoinSessionSchema,
+};
+export type {
+  CreateSessionInput,
+  ListSessionsQuery,
+  JoinSessionInput,
+  GuestJoinSessionInput,
+};

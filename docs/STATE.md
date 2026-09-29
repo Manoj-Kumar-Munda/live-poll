@@ -99,7 +99,7 @@ Living record of what exists in the codebase. Update this file when a feature sh
 
 **Answer model:** `sessionId`, `userId`, `questionId`, `questionIndex`, `questionType`, `value` (normalized lowercase). Unique per user per question.
 
-**Files:** `backend/src/modules/session/session.{model,schema,service,controller,route,types,constants}.ts`, `participant.model.ts`, `answer.{model,schema,service}.ts`
+**Files:** `backend/src/modules/session/session.{model,schema,service,controller,route,types,constants}.ts`, `answer/answer.{model,schema,service,normalize}.ts`, `participant/{participant.model,guest-cleanup.service}.ts`, `scoring/{score.service,leaderboard.service,question.results.service,wordcloud.service}.ts`, `live/session.question.service.ts`, `stats/{host-dashboard-stats.service,participant-home-stats.service}.ts`
 
 ### Realtime (Socket.IO)
 
@@ -178,6 +178,7 @@ Legend: ✅ complete · 🔶 placeholder UI · ❌ missing
 
 | Date | Change |
 |------|--------|
+| 2026-09-29 | Refactored session module into domain sub-folders (`answer/`, `participant/`, `scoring/`, `live/`, `stats/`) and standardized export statements at bottom |
 | 2026-09-29 | Docs synced with the live app: Socket.IO flow, guest auth, stats, and backend deploy |
 | 2026-09-02 | Backend deploy workflow: SSH clone on the VPS, `npm run build`, PM2 reload |
 | 2026-08-28 | Participant home stats (`GET /api/sessions/mine/stats`, stat cards on `/home`) |

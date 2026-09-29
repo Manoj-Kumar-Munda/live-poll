@@ -13,12 +13,12 @@ import {
   ROOM_CODE_CHARS,
   SESSION_LIMITS,
 } from "./session.constants.js";
-import { SessionParticipant, type SessionParticipantDocument } from "./participant.model.js";
-import { countUserAnswersBySession, countUserAnswersForSession } from "./answer.service.js";
+import { SessionParticipant, type SessionParticipantDocument } from "./participant/participant.model.js";
+import { countUserAnswersBySession, countUserAnswersForSession } from "./answer/answer.service.js";
 import {
   getRankForUser,
   rankParticipants,
-} from "./leaderboard.service.js";
+} from "./scoring/leaderboard.service.js";
 import { Session, type SessionDocument } from "./session.model.js";
 import type {
   CreateSessionInput,
@@ -155,7 +155,7 @@ async function emitSessionRoomUpdate(sessionId: string) {
   }
 }
 
-export async function getSessionRoomState(
+async function getSessionRoomState(
   sessionId: string,
 ): Promise<SessionRoomState> {
   const session = await requireSession(sessionId);
@@ -217,7 +217,7 @@ async function buildSessionDetail(
   return detail;
 }
 
-export async function createSession(
+async function createSession(
   hostId: string,
   input: CreateSessionInput,
 ): Promise<SessionDetailResponse> {
@@ -267,7 +267,7 @@ export async function createSession(
   return buildSessionDetail(session, "host");
 }
 
-export async function listSessions(
+async function listSessions(
   hostId: string,
   query: ListSessionsQuery,
 ): Promise<SessionResponse[]> {
@@ -304,7 +304,7 @@ export async function listSessions(
   );
 }
 
-export async function listParticipantSessions(
+async function listParticipantSessions(
   userId: string,
 ): Promise<ParticipantSessionItem[]> {
   const memberships = await SessionParticipant.find({ userId })
@@ -359,7 +359,7 @@ export async function listParticipantSessions(
   return results;
 }
 
-export async function getSessionById(
+async function getSessionById(
   userId: string,
   sessionId: string,
 ): Promise<SessionDetailResponse> {
@@ -381,7 +381,7 @@ export async function getSessionById(
   return buildSessionDetail(session, "participant", userId);
 }
 
-export async function joinSession(
+async function joinSession(
   userId: string,
   displayName: string,
   input: JoinSessionInput,
@@ -394,7 +394,7 @@ export async function joinSession(
   });
 }
 
-export async function guestJoinSession(
+async function guestJoinSession(
   input: GuestJoinSessionInput,
 ): Promise<{
   session: SessionDetailResponse;
@@ -487,7 +487,7 @@ async function joinSessionAsParticipant(options: {
   return buildSessionDetail(session as SessionDocument, "participant", options.userId);
 }
 
-export async function startSession(
+async function startSession(
   hostId: string,
   sessionId: string,
 ): Promise<SessionDetailResponse> {
@@ -518,7 +518,7 @@ export async function startSession(
   return buildSessionDetail(updated as SessionDocument, "host");
 }
 
-export async function endSession(
+async function endSession(
   hostId: string,
   sessionId: string,
 ): Promise<SessionDetailResponse> {
@@ -556,7 +556,7 @@ export async function endSession(
   ).exec();
 
   try {
-    const { finalizeLeaderboard } = await import("./leaderboard.service.js");
+    const { finalizeLeaderboard } = await import("./scoring/leaderboard.service.js");
     const { broadcastLeaderboardUpdated } = await import(
       "@/realtime/question.handlers.js"
     );
@@ -569,7 +569,7 @@ export async function endSession(
   }
 
   try {
-    const { purgeGuestSessionData } = await import("./guest-cleanup.service.js");
+    const { purgeGuestSessionData } = await import("./participant/guest-cleanup.service.js");
     await purgeGuestSessionData(sessionId);
   } catch {
     // Cleanup is best-effort when persistence layer is unavailable in tests.
@@ -586,7 +586,7 @@ export async function endSession(
   return buildSessionDetail(updated as SessionDocument, "host");
 }
 
-export async function leaveSession(
+async function leaveSession(
   userId: string,
   sessionId: string,
 ): Promise<SessionDetailResponse> {
@@ -612,5 +612,17 @@ export async function leaveSession(
   return buildSessionDetail(session, "participant", userId);
 }
 
-export { getHostDashboardStats } from "./host-dashboard-stats.service.js";
-export { getParticipantHomeStats } from "./participant-home-stats.service.js";
+export {
+  getSessionRoomState,
+  createSession,
+  listSessions,
+  listParticipantSessions,
+  getSessionById,
+  joinSession,
+  guestJoinSession,
+  startSession,
+  endSession,
+  leaveSession,
+};
+export { getHostDashboardStats } from "./stats/host-dashboard-stats.service.js";
+export { getParticipantHomeStats } from "./stats/participant-home-stats.service.js";

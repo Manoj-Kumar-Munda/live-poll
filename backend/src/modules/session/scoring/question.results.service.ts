@@ -2,14 +2,14 @@ import type { QuestionSubdocument } from "@/modules/quiz/question.model.js";
 import { Quiz } from "@/modules/quiz/quiz.model.js";
 import { QUESTION_TYPE } from "@/types/quiz.types.js";
 import { ApiError } from "@/shared/utils/api-error.js";
-import { Answer } from "./answer.model.js";
-import { Session, type SessionDocument } from "./session.model.js";
+import { Answer } from "../answer/answer.model.js";
+import { Session, type SessionDocument } from "../session.model.js";
 import type {
   LiveQuestion,
   OptionResult,
   QuestionResultsPayload,
   WordResult,
-} from "./session.types.js";
+} from "../session.types.js";
 import {
   aggregateOpenTextResultsFromDb,
   getWordCloudSnapshot,
@@ -117,7 +117,7 @@ async function buildChoiceResults(
   return payload;
 }
 
-export async function buildQuestionResults(
+async function buildQuestionResults(
   sessionId: string,
   questionIndex: number,
 ): Promise<QuestionResultsPayload | null> {
@@ -154,3 +154,5 @@ export async function buildQuestionResults(
 
   return buildChoiceResults(sessionId, questionIndex, question);
 }
+
+export { buildQuestionResults };

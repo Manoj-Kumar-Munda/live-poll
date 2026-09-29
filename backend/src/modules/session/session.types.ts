@@ -2,7 +2,7 @@ import type { ParticipantStatus } from "@/types/quiz.types.js";
 import type { QuestionType } from "@/types/quiz.types.js";
 import type { SessionStatus } from "@/types/session.types.js";
 
-export type SessionParticipantResponse = {
+type SessionParticipantResponse = {
   id: string;
   userId: string;
   displayName: string;
@@ -12,7 +12,7 @@ export type SessionParticipantResponse = {
   joinedAt: string;
 };
 
-export type SessionResponse = {
+type SessionResponse = {
   id: string;
   quizId: string;
   quizTitle: string;
@@ -29,7 +29,7 @@ export type SessionResponse = {
   updatedAt: string;
 };
 
-export type SessionDetailResponse = SessionResponse & {
+type SessionDetailResponse = SessionResponse & {
   role: "host" | "participant";
   participants: SessionParticipantResponse[];
   myScore?: number;
@@ -39,18 +39,18 @@ export type SessionDetailResponse = SessionResponse & {
 };
 
 /** Broadcast to everyone in a session socket room (no per-user role). */
-export type SessionRoomState = SessionResponse & {
+type SessionRoomState = SessionResponse & {
   participants: SessionParticipantResponse[];
 };
 
-export type ParticipantSessionItem = SessionResponse & {
+type ParticipantSessionItem = SessionResponse & {
   participantStatus: ParticipantStatus;
   score: number;
   rank: number | null;
   questionsAnswered: number;
 };
 
-export type LiveQuestion = {
+type LiveQuestion = {
   id: string;
   type: QuestionType;
   prompt: string;
@@ -59,7 +59,7 @@ export type LiveQuestion = {
   maxLength?: number;
 };
 
-export type QuestionStartedPayload = {
+type QuestionStartedPayload = {
   sessionId: string;
   index: number;
   question: LiveQuestion;
@@ -68,50 +68,50 @@ export type QuestionStartedPayload = {
   serverNow: string;
 };
 
-export type QuestionEndedPayload = {
+type QuestionEndedPayload = {
   sessionId: string;
   index: number;
   reason: "timer" | "host";
 };
 
-export type QuestionAnsweredPayload = {
+type QuestionAnsweredPayload = {
   sessionId: string;
   index: number;
   value: string;
 };
 
-export type OptionResult = {
+type OptionResult = {
   option: string;
   count: number;
   percent: number;
 };
 
-export type WordCloudTerm = {
+type WordCloudTerm = {
   key: string;
   label: string;
   count: number;
 };
 
-export type WordResult = {
+type WordResult = {
   key: string;
   label: string;
   count: number;
 };
 
-export type WordCloudUpdatedPayload = {
+type WordCloudUpdatedPayload = {
   sessionId: string;
   index: number;
   term: WordCloudTerm;
   isNew: boolean;
 };
 
-export type WordCloudSnapshotPayload = {
+type WordCloudSnapshotPayload = {
   sessionId: string;
   index: number;
   terms: WordCloudTerm[];
 };
 
-export type QuestionResultsPayload = {
+type QuestionResultsPayload = {
   sessionId: string;
   index: number;
   question: LiveQuestion;
@@ -121,28 +121,50 @@ export type QuestionResultsPayload = {
   totalAnswers: number;
 };
 
-export type LeaderboardEntry = {
+type LeaderboardEntry = {
   userId: string;
   displayName: string;
   score: number;
   rank: number;
 };
 
-export type LeaderboardUpdatedPayload = {
+type LeaderboardUpdatedPayload = {
   sessionId: string;
   entries: LeaderboardEntry[];
   final: boolean;
 };
 
-export type HostDashboardStats = {
+type HostDashboardStats = {
   totalEventsHosted: number;
   totalParticipants: number;
   avgParticipantsPerEvent: number;
 };
 
-export type ParticipantHomeStats = {
+type ParticipantHomeStats = {
   totalQuizzesPlayed: number;
   totalScore: number;
   bestRank: number | null;
   totalQuestionsAnswered: number;
+};
+
+export type {
+  SessionParticipantResponse,
+  SessionResponse,
+  SessionDetailResponse,
+  SessionRoomState,
+  ParticipantSessionItem,
+  LiveQuestion,
+  QuestionStartedPayload,
+  QuestionEndedPayload,
+  QuestionAnsweredPayload,
+  OptionResult,
+  WordCloudTerm,
+  WordResult,
+  WordCloudUpdatedPayload,
+  WordCloudSnapshotPayload,
+  QuestionResultsPayload,
+  LeaderboardEntry,
+  LeaderboardUpdatedPayload,
+  HostDashboardStats,
+  ParticipantHomeStats,
 };
