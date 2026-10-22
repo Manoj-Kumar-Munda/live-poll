@@ -21,46 +21,18 @@ jobs:
           username: ${{ secrets.REMOTE_USERNAME }}
           password: ${{ secrets.REMOTE_PASSWORD }}
           port: ${{ secrets.REMOTE_PORT }}
-          command_timeout: 30m
-          request_pty: true
-          script_stop: true
           script: |
-            set -e
-
-            # ── Verify required tools ──
-            for cmd in git node npm; do
-              command -v "$cmd" >/dev/null 2>&1 || { echo "ERROR: $cmd not found"; exit 1; }
-            done
-            command -v pm2 >/dev/null 2>&1 || npm install -g pm2
-
-            # ── Pull or clone repo ──
-            REPO_DIR="$HOME/live-poll"
-            if [ -d "$REPO_DIR/.git" ]; then
-              git -C "$REPO_DIR" pull origin master
+            cd /root
+            if [ -d "live-poll" ]
+            then
+              cd "live-poll"
+              git pull origin master
             else
-              rm -rf "$REPO_DIR"
-              git clone "https://github.com/${{ github.repository }}.git" "$REPO_DIR"
+              git clone https://github.com/${{ github.repository }}.git live-poll
+              cd live-poll
             fi
-
-            # ── Write .env ──
-            cd "$REPO_DIR/backend"
-            {
-              echo "NODE_ENV=production"
-              echo "PORT=${{ secrets.PORT }}"
-              echo "MONGODB_URI=${{ secrets.MONGODB_URI }}"
-              echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}"
-              echo "BETTER_AUTH_URL=${{ secrets.BETTER_AUTH_URL }}"
-              echo "CLIENT_URL=${{ secrets.CLIENT_URL }}"
-              echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}"
-              echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}"
-              echo "RESEND_FROM_EMAIL=${{ secrets.RESEND_FROM_EMAIL }}"
-            } > .env
-
-            chmod 600 .env
-
-            # ── Build & restart ──
-            npm ci
+            cd backend
+            npm install --legacy-peer-deps
             npm run build
             pm2 startOrReload ecosystem.config.cjs --env production
             pm2 save
-
