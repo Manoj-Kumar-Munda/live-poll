@@ -32,6 +32,14 @@ jobs:
               cd live-poll
             fi
             cd backend
+            echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" > .env
+            echo "BETTER_AUTH_URL=${{ secrets.BETTER_AUTH_URL }}" >> .env
+            echo "CLIENT_URL=${{ secrets.CLIENT_URL }}" >> .env
+            echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
+            echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> .env
+            echo "PORT=${{ secrets.PORT }}" >> .env
+            echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" >> .env
+            echo "RESEND_FROM_EMAIL=${{ secrets.RESEND_FROM_EMAIL }}" >> .env
             npm install --legacy-peer-deps
             npm run build
             pm2 startOrReload ecosystem.config.cjs --env production
