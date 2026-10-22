@@ -27,12 +27,6 @@ jobs:
           script: |
             set -e
 
-            # ── Load Node via nvm (non-interactive SSH skips .bashrc) ──
-            . "$HOME/.profile" 2>/dev/null || true
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-            export PATH="$HOME/.volta/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
-
             # ── Verify required tools ──
             for cmd in git node npm; do
               command -v "$cmd" >/dev/null 2>&1 || { echo "ERROR: $cmd not found"; exit 1; }
