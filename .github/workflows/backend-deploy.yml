@@ -14,37 +14,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Test SSH connection
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USERNAME }}
-          password: ${{ secrets.REMOTE_PASSWORD }}
-          port: ${{ secrets.REMOTE_PORT }}
-          script_stop: true
-          request_pty: true
-          script: |
-            set -x
-            . "$HOME/.profile" 2>/dev/null || true
-            export NVM_DIR="$HOME/.nvm"
-            if [ -s "$NVM_DIR/nvm.sh" ]; then
-              set +e
-              . "$NVM_DIR/nvm.sh"
-              nvm use default >/dev/null 2>&1 || nvm use node >/dev/null 2>&1
-              set -e
-            fi
-            if ! command -v node >/dev/null 2>&1 && [ -d "$NVM_DIR/versions/node" ]; then
-              NODE_VERSION="$(ls -1 "$NVM_DIR/versions/node" 2>/dev/null | sort -V | tail -n 1 || true)"
-              if [ -n "$NODE_VERSION" ]; then
-                export PATH="$NVM_DIR/versions/node/$NODE_VERSION/bin:$PATH"
-              fi
-            fi
-            echo "user=$(whoami) PATH=$PATH"
-            command -v git || echo "WARN: git missing"
-            command -v node || echo "WARN: node missing"
-            command -v npm || echo "WARN: npm missing"
-            command -v pm2 || echo "WARN: pm2 missing"
-
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -53,62 +22,34 @@ jobs:
           password: ${{ secrets.REMOTE_PASSWORD }}
           port: ${{ secrets.REMOTE_PORT }}
           command_timeout: 30m
-          debug: true
           request_pty: true
           script_stop: true
           script: |
-            set -ex
-            echo "=== Deploy started ==="
+            set -e
 
-            REPO_DIR="$HOME/live-poll"
-            REPO_URL="https://github.com/${{ github.repository }}.git"
-            echo "repo_dir=$REPO_DIR repo_url=$REPO_URL"
-
-            # Non-interactive SSH does not load .bashrc, so nvm's node
-            # binary is missing from PATH unless we activate it here.
+            # ── Load Node via nvm (non-interactive SSH skips .bashrc) ──
             . "$HOME/.profile" 2>/dev/null || true
             export NVM_DIR="$HOME/.nvm"
-            if [ -s "$NVM_DIR/nvm.sh" ]; then
-              set +e
-              . "$NVM_DIR/nvm.sh"
-              nvm use default >/dev/null 2>&1 || nvm use node >/dev/null 2>&1
-              set -ex
-            fi
-            if ! command -v node >/dev/null 2>&1 && [ -d "$NVM_DIR/versions/node" ]; then
-              NODE_VERSION="$(ls -1 "$NVM_DIR/versions/node" 2>/dev/null | sort -V | tail -n 1 || true)"
-              if [ -n "$NODE_VERSION" ]; then
-                export PATH="$NVM_DIR/versions/node/$NODE_VERSION/bin:$PATH"
-              fi
-            fi
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
             export PATH="$HOME/.volta/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
 
-            command -v git >/dev/null 2>&1 || { echo "ERROR: git is not installed"; exit 1; }
-            command -v node >/dev/null 2>&1 || {
-              echo "ERROR: node is not installed for user $(whoami)"
-              echo "PATH=$PATH"
-              echo "nvm.sh=$([ -s "$NVM_DIR/nvm.sh" ] && echo present || echo missing)"
-              ls -1 "$NVM_DIR/versions/node" 2>/dev/null || echo "no nvm node versions in $NVM_DIR"
-              exit 1
-            }
-            command -v npm >/dev/null 2>&1 || { echo "ERROR: npm is not installed"; exit 1; }
-            if ! command -v pm2 >/dev/null 2>&1; then
-              echo "pm2 is not installed, installing..."
-              npm install -g pm2
-            fi
-            command -v pm2 >/dev/null 2>&1 || { echo "ERROR: pm2 install failed"; exit 1; }
+            # ── Verify required tools ──
+            for cmd in git node npm; do
+              command -v "$cmd" >/dev/null 2>&1 || { echo "ERROR: $cmd not found"; exit 1; }
+            done
+            command -v pm2 >/dev/null 2>&1 || npm install -g pm2
 
-
+            # ── Pull or clone repo ──
+            REPO_DIR="$HOME/live-poll"
             if [ -d "$REPO_DIR/.git" ]; then
-              echo "Pulling latest changes..."
               git -C "$REPO_DIR" pull origin master
             else
-              echo "Cloning repository..."
               rm -rf "$REPO_DIR"
-              git clone "$REPO_URL" "$REPO_DIR"
+              git clone "https://github.com/${{ github.repository }}.git" "$REPO_DIR"
             fi
 
+            # ── Write .env ──
             cd "$REPO_DIR/backend"
-
             {
               echo "NODE_ENV=production"
               echo "PORT=${{ secrets.PORT }}"
@@ -120,16 +61,12 @@ jobs:
               echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}"
               echo "RESEND_FROM_EMAIL=${{ secrets.RESEND_FROM_EMAIL }}"
             } > .env
+
             chmod 600 .env
 
-            echo "Installing dependencies..."
+            # ── Build & restart ──
             npm ci
-
-            echo "Building..."
             npm run build
-
-            echo "Restarting PM2..."
             pm2 startOrReload ecosystem.config.cjs --env production
             pm2 save
 
-            echo "=== Deploy finished ==="
